@@ -10,7 +10,7 @@
 #include <time.h>
 #include <stdint.h>
 #include <stdlib.h>
-
+#include "ttycolours.h"
 
 // for whitespace
 #include <wctype.h>
@@ -32,18 +32,9 @@ inline int bitweight32( int v ) {
 	return c;
 }
 
-time_t get_mtime(const char *path);
-time_t get_ctime(const char *path);
+time_t get_mtime(const char *path, time_t def );
+time_t get_ctime(const char *path, time_t def );
 int is_redirected();
-
-#define RED "\033[0;31m"
-#define GREEN "\033[0;32m"
-#define BLUE "\033[0;34m"
-#define WHITEONBLACK "\033[0;37;40m"
-#define GREENONBLACK "\033[1;32;40m"
-#define YELLOWONBLACK "\033[1;33;40m"
-#define REDONBLACK "\033[1;31;40m"
-#define CLEAR "\033[0m"
 
 inline int eprintf( const char *format, ... ) {
 	va_list ap;

@@ -8,9 +8,10 @@ C11FLAGS= -fno-strict-aliasing -DUNIV_LINUX \
 	-std=c++0x -std=gnu++0x \
 	-Werror -Wall -Wextra $(OPTIMISE) $(DEBUG)
 LIBS=-Wl,-Bsymbolic-functions \
-	-rdynamic -lrt -lpthread -lsqlite3 -lcurl
+	-rdynamic -lrt -lpthread -lsqlite3 -lcurl \
+	-lGL -lglfw -lXrandr
 
-RAW_COMMONOBJECTS=util.o
+RAW_COMMONOBJECTS=util.o graphics.o BadMesh.o Shader.o Thing.o assetloader.o FontRender.o stbi_image.o core.o
 RAW_TARGETOBJECTS=$(TARGETS:%=%.o)
 
 COMMONOBJECTS=$(RAW_COMMONOBJECTS:%=build/%)

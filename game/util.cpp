@@ -75,20 +75,20 @@ void SetupCrashdump() {
 #include <sys/types.h>
 #include <sys/stat.h>
 
-time_t get_mtime(const char *path)
+time_t get_mtime(const char *path, time_t def )
 {
 	struct stat statbuf;
 	if (stat(path, &statbuf) == -1) {
-		return -1;
+		return def;
 	}
 	return statbuf.st_mtime;
 }
 
-time_t get_ctime(const char *path)
+time_t get_ctime(const char *path, time_t def )
 {
 	struct stat statbuf;
 	if (stat(path, &statbuf) == -1) {
-		return -1;
+		return def;
 	}
 	return statbuf.st_ctime;
 }
