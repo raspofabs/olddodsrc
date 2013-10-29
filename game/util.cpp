@@ -63,12 +63,12 @@ void SetupCrashdump() {
 	static struct sigaction action;
 	memset(&action, 0, sizeof( action ) );
 	action.sa_handler = BailTrace;
-	sigaction(SIGSEGV, &action, nullptr );
+	sigaction(SIGSEGV, &action, 0 );
 	action.sa_handler = BasicCtrlCHandler;
-	sigaction(SIGINT, &action, nullptr );
-	sigaction(SIGTERM, &action, nullptr );
+	sigaction(SIGINT, &action, 0 );
+	sigaction(SIGTERM, &action, 0 );
 	//action.sa_handler = NullHandler;
-	//sigaction(SIGPIPE, &action, nullptr );
+	//sigaction(SIGPIPE, &action, 0 );
 	signal(SIGPIPE, SIG_IGN);
 }
 
