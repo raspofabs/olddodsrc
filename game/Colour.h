@@ -4,8 +4,8 @@
 #include <inttypes.h>
 
 struct Colour {
-	uint32_t val = 0;
-	Colour() {}
+	uint32_t val;
+	Colour() : val(0) {}
 	Colour(const Colour &c) :val(c.val) {}
 	Colour( unsigned int r, unsigned int g, unsigned int b, unsigned int a = 255 );
 	Colour( float r, float g, float b, float a = 1.0f );
