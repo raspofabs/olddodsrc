@@ -10,6 +10,7 @@
 #include "Shader.h"
 
 #include "Thing.h"
+#include "util.h"
 
 bool gWireframeMode = false;
 Vec3 gCamPos( 0, 1, 2 );
@@ -218,6 +219,7 @@ void game_on_draw( double gameTime ) {
 	if( true ) {
 		for( ThingList::iterator i = gWorldThings.begin(); i != gWorldThings.end(); ++i ) {
 			if( i->texture.c_str()[0] ) {
+				//Log(1,"Rendering a Thing\n" );
 				SetTexture(i->texture.c_str(),0);
 				Mat44 modelMat = Translation(i->position);
 				modelMat.Rotation(i->angle, Vec3(0,0,1));
@@ -397,6 +399,27 @@ void DefaultOrtho() {
 	glUniformMatrix4fv(GLShader::Current()->projLocation, 1, false, projectionMat );
 }
 
+void UpdateCamProj() {
+	GLShader *current = GLShader::Current();
+	gCamProj = gCameraMat * gProjectionMat;
+	if( current ) {
+		glUniformMatrix4fv(GLShader::Current()->projLocation, 1, false, gCamProj);
+		CATCH_GL_ERROR("UploadProj");
+	}
+}
+void DefaultProjection() {
+	DefaultShaderProgram.Use(true);
+	const float fov = 1.0f;
+	gCamProj = Mat44Perspective( fov, (float)win_width / (float)win_height, 0.1f, 100.0f);
+	UpdateCamProj();
+}
+void SetCamera(const Vec3 &pos, const Vec3 &target) {
+	gCamPos = pos;
+	gCamAim = target;
+	Vec3 camUp = Vec3(0,1,0);
+	gCameraMat = Mat44LookAt( gCamPos, gCamAim, camUp);
+	UpdateCamProj();
+}
 void DrawSquare( float x, float y, float width, float height, uint32_t colour ) {
 #if 0
 	uint32_t abgr = 0xFFFFFFFF;

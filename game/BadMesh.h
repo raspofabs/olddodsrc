@@ -11,6 +11,7 @@ struct BadMesh {
 	std::vector<Vec2> uvs;
 	std::vector<Colour> colours;
 
+	void SetAsCube();
 	void PushV( Vec3 v );
 	void PushVNUC( Vec3 v, Vec3 n, Vec2 u = Vec2(0,0), Colour c = 0xFFFFFFFF );
 	void UVsFromBB();

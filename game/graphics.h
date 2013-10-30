@@ -36,8 +36,11 @@ void InitDrawing();
 void game_on_draw( double gameTime );
 
 // tools for drawing from other drawing update functions
+struct Vec3;
 void ClearScreen( float r, float g, float b );
 void DefaultOrtho();
+void DefaultProjection();
+void SetCamera(const Vec3 &pos, const Vec3 &target);
 void DrawSquare( float x, float y, float width, float height, uint32_t colour );
 void SetTexture(GLuint textureID, int slotID);
 void SetTexture(const char* pName, int slotID);

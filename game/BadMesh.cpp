@@ -117,6 +117,27 @@ section_start:
 	}
 }
 
+void BadMesh::SetAsCube() {
+	float axes[6] = { 1.0f, -1.0f, 0.0f, 0.0f, 0.0f, 0.0f };
+	for( int face = 0; face < 6; ++face ) {
+		Vec3 out( axes[face], axes[(4+face)%6], axes[(2+face)%6] );
+		Vec3 a( axes[(4+face)%6], axes[(2+face)%6], axes[face] );
+		Vec3 b( axes[(2+face)%6], axes[face], axes[(4+face)%6] );
+		Vec3 c[4] = {
+			out + a + b,
+			out + a - b,
+			out - a + b,
+			out - a - b
+		};
+		PushVNUC( c[0], out );
+		PushVNUC( c[1], out );
+		PushVNUC( c[2], out );
+		PushVNUC( c[2], out );
+		PushVNUC( c[1], out );
+		PushVNUC( c[3], out );
+	}
+}
+
 void BadMesh::PushV( Vec3 v ) {
 	vertices.push_back(v);
 	normals.push_back(Vec3(0,0,1));

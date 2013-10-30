@@ -55,7 +55,7 @@ inline int eprintf( const char *format, ... ) {
 
 void stripcolours( char *str );
 
-inline int logf( int level, const char *format, ... ) {
+inline int Log( int level, const char *format, ... ) {
 	extern int loggingLevel;
 	if( level > loggingLevel )
 		return 0;

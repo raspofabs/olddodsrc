@@ -10,6 +10,7 @@
 #include "Shader.h"
 #include <map>
 #include <string>
+#include "util.h"
 
 #define SIMPLE_PROFILING 0
 
@@ -50,32 +51,18 @@ bool TextureExists(const char* name)
 }
 
 Image get_sub_icon( Image asset, int x, int y, int w = 16, int h = 16 ) {
-	const bool outputImages = false;
 	Image icon;
 	icon.w = w;
 	icon.h = h;
 	icon.p = new C32[ w * h ];
-	if( outputImages ) printf( "making asset at %i,%i\n",x,y);
+	Log( 3, "making asset at %i,%i\n",x,y);
 	for( int j = 0; j < h; ++j ) {
 		C32 *outrow = icon.p + j*h;
 		for( int i = 0; i < w; ++i ) {
 			C32 colour = asset.p[(x*w+i)+(y*h+j)*asset.w];
 			outrow[i] = colour;
-			if( outputImages ) {
-				int ansiCol = 30;
-				if( (colour&0xFF) > 0x7F )
-					ansiCol += 1;
-				if( (colour&0xFF00) > 0x7F00 )
-					ansiCol += 2;
-				if( (colour&0xFF0000) > 0x7F0000 )
-					ansiCol += 4;
-				if( (colour&0xFF000000) >0x7F000000 )
-					printf( "\e[%i;%im#\e[m", ansiCol, ansiCol+10 );
-				else
-					printf( "\e[%im#\e[m", ansiCol);
-			}
 		}
-		if( outputImages ) printf( " %08x %08x %08x %08x\n", outrow[0], outrow[1], outrow[14], outrow[15] );
+		Log( 3, " %08x %08x %08x %08x\n", outrow[0], outrow[1], outrow[14], outrow[15] );
 	}
 	return icon;
 }
@@ -86,15 +73,17 @@ void AddAsset( const std::string &name, Image *source ) {
 	asset.glTextureID = -1;
 	gTextures.insert( TextureDic::value_type(name, &asset ) );
 	gTextures[name] = &asset;
-	//printf( "AddAsset - %s: %p == %p\n", name.c_str(), &asset, gTextures[name] );
+	//Log( 3, "AddAsset - %s: %p == %p\n", name.c_str(), &asset, gTextures[name] );
 }
 
 void AddSubAsset( const std::string &name, Image source, int x, int y ) {
 	TextureAsset &asset = icons[ name ];
 	asset.im = new Image;
+	Log( 3, "Sub Asset %s\n", name.c_str() );
 	*(asset.im) = get_sub_icon( source, x,y, 16, 16 );
 	asset.glTextureID = -1;
 	gTextures.insert( TextureDic::value_type(name, &asset ) );
+	gTextures[name] = &asset;
 }
 
 void AddTileAsset( const std::string &name, Image source, int x, int y ) {
@@ -108,18 +97,18 @@ void AddTileAsset( const std::string &name, Image source, int x, int y ) {
 void LoadAssets() {
 	Image *core;
 
-	//printf( "loading images\n" );
+	Log( 1, "loading images\n" );
 	core = LoadImageG("data/core.png");
 
-	AddSubAsset( "cursor", *core, 0,0 );
-	AddSubAsset( "white", *core, 0,1 );
+	AddSubAsset( "pointer", *core, 0,7 );
+	AddSubAsset( "white", *core, 2,0 );
 
 	AddAsset( "cursor", LoadImageG("data/cursor.png") );
 	AddAsset( "core", core );
 }
 
 void NotSetMode( int menumode ) {
-	printf( "Setting to menu[%i]\n", menumode );
+	Log( 3, "Setting to menu[%i]\n", menumode );
 	if( menumode == 1 ) {
 		glfwEnable( GLFW_MOUSE_CURSOR );
 	} else {
@@ -135,19 +124,19 @@ int gFrameNumber = 0;
 void MakeGLTexture( TextureAsset *a ) {
 	if( a && a->im ) {
 		if( int error = glGetError() ) {
-			printf( "before MakeGLTexture (%i,%x)\n", error, error );
+			Log( 3, "before MakeGLTexture (%i,%x)\n", error, error );
 		}
-		//printf( "MakeGLTexture:\ntextureID = %i => ", a->glTextureID );
+		//Log( 3, "MakeGLTexture:\ntextureID = %i => ", a->glTextureID );
 		glGenTextures( 1, &a->glTextureID );
 		if( int error = glGetError() ) {
-			printf( "glGenTextures (%i,%x)\n", error, error );
-			printf( "glGenTextures : (%i)\n", a->glTextureID );
+			Log( 3, "glGenTextures (%i,%x)\n", error, error );
+			Log( 3, "glGenTextures : (%i)\n", a->glTextureID );
 		}
-		//printf( "%i (%i)\n", a->glTextureID, glGetError() );
+		//Log( 3, "%i (%i)\n", a->glTextureID, glGetError() );
 		glBindTexture( GL_TEXTURE_2D, a->glTextureID );
 		//glUniform1i(textureLocation, a->glTextureID);
 		if( int error = glGetError() ) {
-			printf( "glBindTexture (%i,%x)\n", error, error );
+			Log( 3, "glBindTexture (%i,%x)\n", error, error );
 		}
 		int nGLFmt = GL_RGBA;
 		glShadeModel( GL_SMOOTH );
@@ -162,17 +151,17 @@ void MakeGLTexture( TextureAsset *a ) {
 				0, GL_RGBA,
 				GL_UNSIGNED_BYTE, a->im->p);
 		if( int error = glGetError() ) {
-			printf( "glTexImage2D (%i,%x)\n", error, error );
-			printf( "glTexImage2D : (%i) (%i,%i : %x)\n",
+			Log( 3, "glTexImage2D (%i,%x)\n", error, error );
+			Log( 3, "glTexImage2D : (%i) (%i,%i : %x)\n",
 					a->glTextureID,
 					a->im->w, a->im->h,
 					(unsigned int)((char*)a->im->p-(char*)0) );
 		}
 	} else {
 		if( a ) {
-			printf( "cannot make much with a null image\n" );
+			Log( 3, "cannot make much with a null image\n" );
 		} else {
-			printf( "cannot make much with a null TextureAsset\n" );
+			Log( 3, "cannot make much with a null TextureAsset\n" );
 		}
 	}
 }
@@ -220,15 +209,15 @@ void MainInit()
 	LoadAssets();
 	InitDrawing();
 	FontRenderInit();
-	//extern void GameInit();
-	//GameInit();
+	extern void GameInit();
+	GameInit();
 
 	for( TextureDic::iterator i = gTextures.begin(); i != gTextures.end(); ++i ) {
 		TextureAsset *a = i->second;
 		if( a ) {
 			MakeGLTexture( a );
 		} else {
-			printf( "Texture asset is null for %s\n", i->first.c_str() );
+			Log( 3, "Texture asset is null for %s\n", i->first.c_str() );
 		}
 	}
 
@@ -258,8 +247,8 @@ void MainUpdate(float fUpdates)
 {
 	UpdateShaders();
 	MousePositionUpdate();
-	//extern void GameUpdate();
-	//GameUpdate();
+	extern void GameUpdate();
+	GameUpdate();
 
 	g_fGameTime += fUpdates;
 
@@ -272,6 +261,9 @@ const char* c_szBuildTime = __TIME__;
 
 void MainShutdown()
 {
+	extern void GameShutdown();
+	GameShutdown();
+
 	glfwEnable( GLFW_MOUSE_CURSOR );
 
 	if (!( glfwGetKey( GLFW_KEY_LSHIFT ) == GLFW_PRESS || glfwGetKey( GLFW_KEY_RSHIFT ) == GLFW_PRESS ))
@@ -280,10 +272,16 @@ void MainShutdown()
 }
 
 float g_fScreenW, g_fScreenH;
-int core() {
+int main( int argc, char *argv[] ) {
+	for( int i = 0; i < argc; ++ i ) {
+		Log( 3, "Arg %i: [%s]\n", i, argv[i] );
+	}
+
+	SetupCrashdump();
+
 	int result = glfwInit();
 	if( result != 1 ) {
-		printf( "Init failed: glfwInit() => %i\n", result );
+		Log( 3, "Init failed: glfwInit() => %i\n", result );
 		exit(1);
 	}
 
@@ -299,7 +297,7 @@ int core() {
 	win_width = screen_width * 3 / 5;
 	win_height = screen_height * 3 / 5;
 #endif
-	printf( "Screen:Win %i,%i : %i,%i\n", screen_width, screen_height, win_width, win_height );
+	Log( 3, "Screen:Win %i,%i : %i,%i\n", screen_width, screen_height, win_width, win_height );
 
 	int bitsRGBA[] = { 8,8,8, 8 };
 	int depthbits = 32;
@@ -309,12 +307,12 @@ int core() {
 	glfwOpenWindowHint(GLFW_FSAA_SAMPLES, 4);
 	result = glfwOpenWindow( win_width, win_height, bitsRGBA[0], bitsRGBA[1], bitsRGBA[2], bitsRGBA[3], depthbits, stencilbits, mode );
 	if( result != 1 ) {
-		printf( "glfwopenwindow() => %i\n", result );
+		Log( 3, "glfwopenwindow() => %i\n", result );
 		exit(1);
 	}
 	glfwSetWindowTitle("game");
 
-	printf( "GLSL Version %s\n", glGetString( GL_SHADING_LANGUAGE_VERSION ) );
+	Log( 3, "GLSL Version %s\n", glGetString( GL_SHADING_LANGUAGE_VERSION ) );
 
 	//glfwSetWindowPos(0,0);
 	//glfwSetWindowPos(800,400);
