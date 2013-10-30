@@ -4,8 +4,7 @@ CC=g++
 #OPTIMISE=-O2
 OPTIMISE=-O0
 DEBUG=-ggdb3
-C11FLAGS= -fno-strict-aliasing -DUNIV_LINUX \
-	-std=c++0x -std=gnu++0x \
+CFLAGS= -fno-strict-aliasing -DUNIV_LINUX \
 	-Werror -Wall -Wextra $(OPTIMISE) $(DEBUG)
 LIBS=-Wl,-Bsymbolic-functions \
 	-rdynamic -lrt -lpthread \
@@ -35,8 +34,8 @@ clean:
 	rm -f build/*
 
 build/%.o: %.cpp | build
-	$(CC) $(C11FLAGS) -c $*.cpp -o build/$*.o
-	$(CC) $(C11FLAGS) -MM $*.cpp > build/$*.d
+	$(CC) $(CFLAGS) -c $*.cpp -o build/$*.o
+	$(CC) $(CFLAGS) -MM $*.cpp > build/$*.d
 	sed -i '1s/^/build\//' build/$*.d
 
 # testing
