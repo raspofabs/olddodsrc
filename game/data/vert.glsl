@@ -17,8 +17,13 @@ varying vec2 Tex;
 void main() {
 	Pos = in_Vertex.xyz;
 	Tex = vec2(in_MultiTexCoord0);
-	gl_Position = in_ProjectionMatrix * in_ModelViewMatrix * in_Vertex;
-	gl_Position.x += gTime * 0.0001;
+	vec4 v = in_Vertex;
+	//v.z *= 0.01;
+	//v.x += 2.0;
+	gl_Position = in_ProjectionMatrix * in_ModelViewMatrix * v;
+	//gl_Position.x += gTime * 0.0001;
+	gl_Position.x += 0.3;
+	gl_Position.z *= 0.001;
 	Color = in_Color;
 	Normal = ( in_ModelViewMatrix * vec4(in_Normal,0.0) ).xyz;
 }

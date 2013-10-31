@@ -29,13 +29,21 @@ void GameUpdate() {
 	thing->mesh->DrawTriangles();
 
 	DefaultProjection();
-	from = Vec3( -1.0f, 10.0f, -20.0f );
 	to = Vec3( 0.0f, 0.0f, 0.0f );
 
 	SetCamera( from, to );
+	//extern Mat44 gProjectionMat; Mat44 &mat = gProjectionMat;
+	//extern Mat44 gCameraMat; Mat44 &mat = gCameraMat;
+	extern Mat44 gCamProj; Mat44 &mat = gCamProj;
+	Log(1,
+	"Mat44\n%+0.2f,%+0.2f,%+0.2f,%+0.2f\n%+0.2f,%+0.2f,%+0.2f,%+0.2f\n%+0.2f,%+0.2f,%+0.2f,%+0.2f\n%+0.2f,%+0.2f,%+0.2f,%+0.2f\n",
+	mat.x.x, mat.x.y, mat.x.z, mat.x.w,
+	mat.y.x, mat.y.y, mat.y.z, mat.y.w,
+	mat.z.x, mat.z.y, mat.z.z, mat.z.w,
+	mat.w.x, mat.w.y, mat.w.z, mat.w.w );
 
 	modelMat = Translation(Vec3( 0.0f, 0.0f, 0.0f));
-	modelMat.Scale(3.0f);
+	modelMat.Scale(30.0f);
 	glUniformMatrix4fv(GLShader::Current()->mvLocation, 1, false, modelMat );
 	thing->mesh->DrawTriangles();
 }
