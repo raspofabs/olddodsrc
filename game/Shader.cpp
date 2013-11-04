@@ -149,13 +149,10 @@ void InitShaders() {
 	strcpy( DefaultShaderProgram.fshad, "data/Default.frag" );
 	LoadShader(DefaultShaderProgram);
 
-	strcpy( Shader_SingleLight.vshad, "data/SingleLight.vert" );
-	strcpy( Shader_SingleLight.fshad, "data/SingleLight.frag" );
-	LoadShader(Shader_SingleLight, false);
-
-	strcpy( Shader_Prelit.vshad, "data/SingleLight.vert" );
-	strcpy( Shader_Prelit.fshad, "data/SingleLight.frag" );
+	strcpy( Shader_Prelit.vshad, "data/PreLit.vert" );
+	strcpy( Shader_Prelit.fshad, "data/PreLit.frag" );
 	LoadShader(Shader_Prelit, false);
+	AddShader( "prelit", "data/PreLit.vert", "data/PreLit.frag" );
 }
 
 void UpdateShaders() {

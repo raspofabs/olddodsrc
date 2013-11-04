@@ -108,7 +108,6 @@ section_start:
 			PushVNUC( pos[c], norm[c] );
 			PushVNUC( pos[a], norm[a] );
 			PushVNUC( pos[c], norm[c] );
-			//PushVNUC( pos[b], norm[b] );
 			PushVNUC( pos[d], norm[d] );
 		} else {
 			printf( "got a %i element face...\n", n );

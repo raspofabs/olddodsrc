@@ -1,4 +1,4 @@
-TARGETS=game
+TARGETS=test
 
 CC=g++
 #OPTIMISE=-O2
@@ -10,7 +10,7 @@ LIBS=-Wl,-Bsymbolic-functions \
 	-rdynamic -lrt -lpthread \
 	-lGL -lglfw -lXrandr
 
-RAW_COMMONOBJECTS=util.o graphics.o BadMesh.o Shader.o Thing.o assetloader.o FontRender.o stbi_image.o core.o
+RAW_COMMONOBJECTS=util.o graphics.o BadMesh.o Shader.o assetloader.o FontRender.o stbi_image.o core.o
 RAW_TARGETOBJECTS=$(TARGETS:%=%.o)
 
 COMMONOBJECTS=$(RAW_COMMONOBJECTS:%=build/%)
@@ -39,8 +39,12 @@ build/%.o: %.cpp | build
 	sed -i '1s/^/build\//' build/$*.d
 
 # testing
-game: build/game.o $(COMMONOBJECTS)
-	$(CC) build/game.o $(COMMONOBJECTS) -o game $(LIBS)
+test: build/test.o $(COMMONOBJECTS)
+	$(CC) build/test.o $(COMMONOBJECTS) -o test $(LIBS)
+oopgame: build/oopgame.o $(COMMONOBJECTS)
+	$(CC) build/oopgame.o $(COMMONOBJECTS) -o oopgame $(LIBS)
+dodgame: build/dodgame.o $(COMMONOBJECTS)
+	$(CC) build/dodgame.o $(COMMONOBJECTS) -o dodgame $(LIBS)
 
 compilers: basepackages
 
@@ -50,4 +54,4 @@ basepackages:
 	sudo apt-get -y install g++ libglfw-dev xorg-dev libglu1-mesa-dev
 
 run:
-	./game
+	./test

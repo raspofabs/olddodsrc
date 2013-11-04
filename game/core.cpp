@@ -199,8 +199,6 @@ void controlCB( int symbol, int state ) {
 	}
 }
 
-#include "Thing.h"
-
 void MainInit()
 {
 	//RunTests();

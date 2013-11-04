@@ -4,6 +4,6 @@
 
 void FontRenderInit();
 void FontRenderShutdown();
-void FontPrint( const char *string );
+void FontPrint( const Mat44 &basis, const char *string );
 
 #endif

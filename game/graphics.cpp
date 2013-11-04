@@ -9,7 +9,6 @@
 #include "BadMesh.h"
 #include "Shader.h"
 
-#include "Thing.h"
 #include "util.h"
 
 bool gWireframeMode = false;
@@ -218,33 +217,6 @@ void game_on_draw( double gameTime ) {
 	glEnable(GL_ALPHA_TEST);
 	glEnable(GL_TEXTURE_2D);
 	glMatrixMode(GL_MODELVIEW);
-	if( true ) {
-		for( ThingList::iterator i = gWorldThings.begin(); i != gWorldThings.end(); ++i ) {
-			if( i->texture.c_str()[0] ) {
-				//Log(1,"Rendering a Thing\n" );
-				SetTexture(i->texture.c_str(),0);
-				Mat44 modelMat = Translation(i->position);
-				modelMat.Rotation(i->angle, Vec3(0,0,1));
-				modelMat.Scale(i->scale);
-				glUniformMatrix4fv(GLShader::Current()->modelLocation, 1, false, modelMat );
-				i->mesh->DrawTriangles();
-			}
-		}
-
-		// do cursor
-		extern Vec2 mouseScreenPos;
-		Vec3 mouseRay = RayFromCam( gCameraMat, mouseScreenPos, GLPerspectiveFactorX(), GLPerspectiveFactorY() );
-		Vec3 rayHit = RayHitsPlaneAt( gCamPos, mouseRay, Vec4( 0, 0, 1, 0 ) );
-
-		Vec3 mpos = Vec3( rayHit.x, rayHit.y, 0.001f );
-		ClearTexture();
-
-		glUniformMatrix4fv(GLShader::Current()->modelLocation, 1, false, Translation(mpos) );
-		//extern BadMesh *gMonkeyMesh;
-		//if( gMonkeyMesh ) {
-			//gMonkeyMesh->DrawTriangles();
-		//}
-	}
 
 	//glDisable(GL_DEPTH_TEST);
 	glMatrixMode(GL_PROJECTION);
@@ -265,7 +237,7 @@ void game_on_draw( double gameTime ) {
 
 		char buffer[128];
 		sprintf( buffer, "%ims", (int)(gameTime * 1000) );
-		FontPrint( buffer );
+		FontPrint( gIdentityMat, buffer );
 	}
 
 	glMatrixMode(GL_MODELVIEW);
@@ -397,34 +369,51 @@ void ClearScreen( float r, float g, float b ) {
 	glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT);
 }
 
-void DefaultOrtho() {
-	DefaultShaderProgram.Use(true);
-	Mat44 projectionMat = Mat44Orthographic( 0, win_width, win_height, 0, -1, 1 );
-	glUniformMatrix4fv(GLShader::Current()->projLocation, 1, false, projectionMat );
-}
-
-void UpdateCamProj() {
-	GLShader *current = GLShader::Current();
-	//gCamProj = gCameraMat * gProjectionMat;
-	if( current ) {
-		glUniformMatrix4fv(GLShader::Current()->projLocation, 1, false, gProjectionMat);
-		glUniformMatrix4fv(GLShader::Current()->viewLocation, 1, false, gCameraMat);
+void Ortho( const char * shader ) {
+	ActivateShader( shader );
+	gProjectionMat = Mat44Orthographic( 0, win_width, win_height, 0, -1, 1 );
+	if( GLShader *current = GLShader::Current() ) {
+		glUniformMatrix4fv(current->projLocation, 1, false, gProjectionMat);
 		CATCH_GL_ERROR("UploadProj");
 	}
 }
+void DefaultOrtho() {
+	DefaultShaderProgram.Use(true);
+	gProjectionMat = Mat44Orthographic( 0, win_width, win_height, 0, -1, 1 );
+	if( GLShader *current = GLShader::Current() ) {
+		glUniformMatrix4fv(current->projLocation, 1, false, gProjectionMat);
+		CATCH_GL_ERROR("UploadProj");
+	}
+}
+
 void DefaultProjection() {
 	DefaultShaderProgram.Use(true);
 	const float fov = 1.0f;
 	//Log( 3, "Proj %i,%i\n", win_width, win_height );
 	gProjectionMat = Mat44Perspective( fov, (float)win_width / (float)win_height, 0.1f, 100.0f);
-	UpdateCamProj();
+	if( GLShader *current = GLShader::Current() ) {
+		glUniformMatrix4fv(current->projLocation, 1, false, gProjectionMat);
+		CATCH_GL_ERROR("UploadProj");
+	}
+}
+void SetCamera(const Mat44 &camTransform) {
+	gCamPos = camTransform.w;
+	gCamAim = camTransform.z + gCamPos;
+	gCameraMat = camTransform;
+	if( GLShader *current = GLShader::Current() ) {
+		glUniformMatrix4fv(current->viewLocation, 1, false, gCameraMat);
+		CATCH_GL_ERROR("UploadView");
+	}
 }
 void SetCamera(const Vec3 &pos, const Vec3 &target) {
 	gCamPos = pos;
 	gCamAim = target;
 	Vec3 camUp = Vec3(0,1,0);
 	gCameraMat = Mat44LookAt( gCamPos, gCamAim, camUp);
-	UpdateCamProj();
+	if( GLShader *current = GLShader::Current() ) {
+		glUniformMatrix4fv(current->viewLocation, 1, false, gCameraMat);
+		CATCH_GL_ERROR("UploadView");
+	}
 }
 void DrawSquare( float x, float y, float width, float height, uint32_t colour ) {
 #if 0

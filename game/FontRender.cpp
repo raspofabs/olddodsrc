@@ -92,18 +92,17 @@ void FontRenderInit() {
 void FontRenderShutdown() {
 }
 
-void RenderSimpleQuad() {
-	GLfloat mvmat[16];
-	glGetFloatv(GL_MODELVIEW_MATRIX,mvmat);
-	glUniformMatrix4fv(GLShader::Current()->modelLocation, 1, false, mvmat );
+void RenderSimpleQuad( const Mat44 & transform ) {
+	glUniformMatrix4fv(GLShader::Current()->modelLocation, 1, false, transform );
 	gGlyphMesh.DrawTriangles();
 }
 
-void FontPrint( const char *string ) {
+void FontPrint( const Mat44 & basis, const char *string ) {
+	Mat44 transform = basis;
 	while( *string ) {
 		SetFontTexture( *string );
-		RenderSimpleQuad();
-		glTranslatef( 1,0,0 );
+		RenderSimpleQuad( transform );
+		transform.Translate( Vec3( 1.0f, 0.0f, 0.0f ) );
 		++string;
 	}
 }

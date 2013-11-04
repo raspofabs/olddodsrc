@@ -80,6 +80,7 @@ struct Mat44 {
 		z *= scale;
 	}
 	operator float*() { return &x.x; }
+	operator const float*() const { return &x.x; }
 };
 
 // Vec2 operations
