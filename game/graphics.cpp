@@ -115,7 +115,8 @@ char* Mtx2Str(float* p) {
 	return s_szTemp;
 }
 BadMesh gMagnetMesh;
-Mat44 gProjectionMat, gCameraMat, gCamProj;
+Mat44 gProjectionMat, gCameraMat;//, gCamProj;
+Mat44 gIdentityMat;
 
 void InitDrawing() {
 	gMagnetMesh.Clear();
@@ -161,13 +162,14 @@ void game_on_draw( double gameTime ) {
 	g_fLastPerspectiveValues[0] = gProjectionMat.x.x;
 	g_fLastPerspectiveValues[1] = gProjectionMat.y.y;
 	gCameraMat = Mat44LookAt( gCamPos, gCamAim, camUp);
-	gCamProj = gCameraMat * gProjectionMat;// * gCameraMat;
+	//gCamProj = gCameraMat * gProjectionMat;// * gCameraMat;
 	memset(mvmat, 0, sizeof(mvmat)); mvmat[0*4+0] = mvmat[1*4+1] = mvmat[2*4+2] = mvmat[3*4+3] = 1;
 	CATCH_GL_ERROR("miscPreDraw");
 
 	GLShader *current = GLShader::Current();
 	if( current ) {
-		glUniformMatrix4fv(GLShader::Current()->projLocation, 1, false, gCamProj);
+		glUniformMatrix4fv(GLShader::Current()->projLocation, 1, false, gProjectionMat);
+		glUniformMatrix4fv(GLShader::Current()->viewLocation, 1, false, gCameraMat);
 		CATCH_GL_ERROR("UploadProj");
 	} else {
 		printf( "No current shader!\n" );
@@ -186,7 +188,7 @@ void game_on_draw( double gameTime ) {
 	current = GLShader::Current();
 	if( current ) {
 		mvmat[3*4+0] = 0.0f; mvmat[3*4+2] = 0.0f;
-		glUniformMatrix4fv(GLShader::Current()->mvLocation, 1, false, mvmat );
+		glUniformMatrix4fv(GLShader::Current()->modelLocation, 1, false, mvmat );
 		CATCH_GL_ERROR("ModelMatrix");
 	} else {
 		printf( "No current shader\n" );
@@ -224,7 +226,7 @@ void game_on_draw( double gameTime ) {
 				Mat44 modelMat = Translation(i->position);
 				modelMat.Rotation(i->angle, Vec3(0,0,1));
 				modelMat.Scale(i->scale);
-				glUniformMatrix4fv(GLShader::Current()->mvLocation, 1, false, modelMat );
+				glUniformMatrix4fv(GLShader::Current()->modelLocation, 1, false, modelMat );
 				i->mesh->DrawTriangles();
 			}
 		}
@@ -237,7 +239,7 @@ void game_on_draw( double gameTime ) {
 		Vec3 mpos = Vec3( rayHit.x, rayHit.y, 0.001f );
 		ClearTexture();
 
-		glUniformMatrix4fv(GLShader::Current()->mvLocation, 1, false, Translation(mpos) );
+		glUniformMatrix4fv(GLShader::Current()->modelLocation, 1, false, Translation(mpos) );
 		//extern BadMesh *gMonkeyMesh;
 		//if( gMonkeyMesh ) {
 			//gMonkeyMesh->DrawTriangles();
@@ -251,6 +253,8 @@ void game_on_draw( double gameTime ) {
 	float h = float(win_height / 2);
 	gProjectionMat = Mat44Orthographic( 0, win_width, win_height, 0, -1, 1 );
 	glUniformMatrix4fv(GLShader::Current()->projLocation, 1, false, gProjectionMat );
+	gIdentityMat.SetIdentity();
+	glUniformMatrix4fv(GLShader::Current()->viewLocation, 1, false, gIdentityMat );
 	CATCH_GL_ERROR("Proj");
 
 	if( 1 ) {
@@ -271,7 +275,7 @@ void game_on_draw( double gameTime ) {
 	glRotatef(drawStart*45.0f, 0.0f,1.0f,0.0f );
 	glGetFloatv(GL_MODELVIEW_MATRIX,mvmat);
 	//glUniformMatrix4fv(mvLocation, 1, false, mvmat );
-	glUniformMatrix4fv(GLShader::Current()->mvLocation, 1, false, mvmat );
+	glUniformMatrix4fv(GLShader::Current()->modelLocation, 1, false, mvmat );
 	CATCH_GL_ERROR("ModelMatrix");
 	SetTexture( "cursor", 0 );
 
@@ -401,16 +405,18 @@ void DefaultOrtho() {
 
 void UpdateCamProj() {
 	GLShader *current = GLShader::Current();
-	gCamProj = gCameraMat * gProjectionMat;
+	//gCamProj = gCameraMat * gProjectionMat;
 	if( current ) {
-		glUniformMatrix4fv(GLShader::Current()->projLocation, 1, false, gCamProj);
+		glUniformMatrix4fv(GLShader::Current()->projLocation, 1, false, gProjectionMat);
+		glUniformMatrix4fv(GLShader::Current()->viewLocation, 1, false, gCameraMat);
 		CATCH_GL_ERROR("UploadProj");
 	}
 }
 void DefaultProjection() {
 	DefaultShaderProgram.Use(true);
 	const float fov = 1.0f;
-	gCamProj = Mat44Perspective( fov, (float)win_width / (float)win_height, 0.1f, 100.0f);
+	//Log( 3, "Proj %i,%i\n", win_width, win_height );
+	gProjectionMat = Mat44Perspective( fov, (float)win_width / (float)win_height, 0.1f, 100.0f);
 	UpdateCamProj();
 }
 void SetCamera(const Vec3 &pos, const Vec3 &target) {

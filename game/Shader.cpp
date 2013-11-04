@@ -5,6 +5,9 @@
 #include <string.h>
 
 GLShader DefaultShaderProgram;
+GLShader Shader_SingleLight;
+GLShader Shader_Prelit;
+
 bool ReadAndCompileShader(GLuint &prog, const char *filename, GLuint &shader, GLuint shaderType ) {
 	char pShaderText[8192];
 	memset( pShaderText, 0, sizeof( pShaderText ) );
@@ -106,8 +109,9 @@ void FindUniforms(GLShader &shader) {
 	shader.timeLocation = GetUniformLocation(shader, "gTime");
 	shader.textureLocation = GetUniformLocation(shader, "gSampler");
 
-	shader.projLocation = GetUniformLocation(shader, "in_ProjectionMatrix");
-	shader.mvLocation = GetUniformLocation(shader, "in_ModelViewMatrix");
+	shader.projLocation = GetUniformLocation(shader, "in_Pmat");
+	shader.viewLocation = GetUniformLocation(shader, "in_Vmat");
+	shader.modelLocation = GetUniformLocation(shader, "in_Mmat");
 	//shader.worldSpaceLightPos = GetUniformLocation(shader, "worldSpaceLightPos");
 	//shader.objectSpaceLightDirDiffuse = GetUniformLocation(shader, "ObjectSpaceLightDir");
 	//shader.lightColour = GetUniformLocation(shader, "LightColour");
@@ -141,9 +145,17 @@ void ActivateShader( const char *name ) {
 }
 
 void InitShaders() {
-	strcpy( DefaultShaderProgram.vshad, "data/vert.glsl" );
-	strcpy( DefaultShaderProgram.fshad, "data/frag.glsl" );
+	strcpy( DefaultShaderProgram.vshad, "data/Default.vert" );
+	strcpy( DefaultShaderProgram.fshad, "data/Default.frag" );
 	LoadShader(DefaultShaderProgram);
+
+	strcpy( Shader_SingleLight.vshad, "data/SingleLight.vert" );
+	strcpy( Shader_SingleLight.fshad, "data/SingleLight.frag" );
+	LoadShader(Shader_SingleLight, false);
+
+	strcpy( Shader_Prelit.vshad, "data/SingleLight.vert" );
+	strcpy( Shader_Prelit.fshad, "data/SingleLight.frag" );
+	LoadShader(Shader_Prelit, false);
 }
 
 void UpdateShaders() {

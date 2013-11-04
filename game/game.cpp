@@ -3,6 +3,7 @@
 #include "Thing.h"
 #include "Shader.h"
 
+BadMesh *torus, *bunny;
 Thing *thing;
 Vec3 from, to;
 
@@ -24,25 +25,35 @@ void GameUpdate() {
 	DrawSquare( 16, 16, 32, 32, 0xFFFFFFFF );
 
 	Mat44 modelMat = Translation(Vec3( 30.0f + from.x, 30.0f + from.z, 0.0f));
-	modelMat.Scale(1.0f);
-	glUniformMatrix4fv(GLShader::Current()->mvLocation, 1, false, modelMat );
-	thing->mesh->DrawTriangles();
+	//modelMat.Scale(1.0f);
+	//glUniformMatrix4fv(GLShader::Current()->mvLocation, 1, false, modelMat );
+	//thing->mesh->DrawTriangles();
 
 	DefaultProjection();
-	from = Vec3( -1.0f, 10.0f, -20.0f );
+	from = Vec3( sy * 20.0f, 5.0f, cy * 20.0f );
 	to = Vec3( 0.0f, 0.0f, 0.0f );
 
 	SetCamera( from, to );
 
 	modelMat = Translation(Vec3( 0.0f, 0.0f, 0.0f));
-	modelMat.Scale(3.0f);
-	glUniformMatrix4fv(GLShader::Current()->mvLocation, 1, false, modelMat );
-	thing->mesh->DrawTriangles();
+	modelMat.Scale(0.1f);
+	SetTexture( "pointer", 0 );
+	glUniformMatrix4fv(GLShader::Current()->modelLocation, 1, false, modelMat );
+	//thing->mesh->DrawTriangles();
+	//torus->DrawTriangles();
+	bunny->DrawTriangles();
 }
 void GameInit() {
+	torus = new BadMesh();
+	torus->Load( "data/torus.ply" );
+	torus->UVsFromBB();
+	bunny = new BadMesh();
+	bunny->Load( "data/bunny.ply" );
+	bunny->UVsFromBB();
 	thing = new Thing();
 	thing->mesh = new BadMesh();
 	thing->mesh->SetAsCube();
+	thing->mesh->UVsFromBB();
 	thing->texture = "white";
 	thing->position.x = 100.0f;
 	thing->position.y = 100.0f;

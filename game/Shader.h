@@ -10,9 +10,11 @@ class GLShader
 {
 public:
 	GLuint m_program;
-	GLuint projLocation, mvLocation;
+	GLuint projLocation;
+	GLuint viewLocation;
+	GLuint modelLocation;
 	GLuint worldSpaceLightPos;
-	GLuint objectSpaceLightDirDiffuse;
+	//GLuint objectSpaceLightDirDiffuse;
 	GLuint lightColour;
 	GLuint ambientColour;
 	GLuint textureLocation;

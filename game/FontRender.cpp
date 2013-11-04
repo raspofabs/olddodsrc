@@ -95,7 +95,7 @@ void FontRenderShutdown() {
 void RenderSimpleQuad() {
 	GLfloat mvmat[16];
 	glGetFloatv(GL_MODELVIEW_MATRIX,mvmat);
-	glUniformMatrix4fv(GLShader::Current()->mvLocation, 1, false, mvmat );
+	glUniformMatrix4fv(GLShader::Current()->modelLocation, 1, false, mvmat );
 	gGlyphMesh.DrawTriangles();
 }
 

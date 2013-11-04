@@ -55,14 +55,14 @@ Image get_sub_icon( Image asset, int x, int y, int w = 16, int h = 16 ) {
 	icon.w = w;
 	icon.h = h;
 	icon.p = new C32[ w * h ];
-	Log( 3, "making asset at %i,%i\n",x,y);
+	//Log( 3, "making asset at %i,%i\n",x,y);
 	for( int j = 0; j < h; ++j ) {
 		C32 *outrow = icon.p + j*h;
 		for( int i = 0; i < w; ++i ) {
 			C32 colour = asset.p[(x*w+i)+(y*h+j)*asset.w];
 			outrow[i] = colour;
 		}
-		Log( 3, " %08x %08x %08x %08x\n", outrow[0], outrow[1], outrow[14], outrow[15] );
+		//Log( 3, " %08x %08x %08x %08x\n", outrow[0], outrow[1], outrow[14], outrow[15] );
 	}
 	return icon;
 }
