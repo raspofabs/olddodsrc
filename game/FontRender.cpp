@@ -102,7 +102,7 @@ void FontPrint( const Mat44 & basis, const char *string ) {
 	while( *string ) {
 		SetFontTexture( *string );
 		RenderSimpleQuad( transform );
-		transform.Translate( Vec3( 1.0f, 0.0f, 0.0f ) );
+		transform.Translate( Vec3( 8.0f, 0.0f, 0.0f ) );
 		++string;
 	}
 }

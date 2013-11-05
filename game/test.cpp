@@ -64,6 +64,7 @@ void GameUpdate() {
 	glUniformMatrix4fv(GLShader::Current()->modelLocation, 1, false, gIdentityMat );
 
 	SetTexture( "pointer", 0 );
+	SetFontTexture( 'B' );
 	DrawSquare( 64, 16, 32, 32, 0xFFFFFFFF );
 
 	glUniformMatrix4fv(GLShader::Current()->viewLocation, 1, false, gIdentityMat );
