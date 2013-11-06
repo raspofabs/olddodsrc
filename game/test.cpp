@@ -74,13 +74,14 @@ void GameUpdate() {
 	SetTexture( "pointer", 0 );
 	DrawSquare( 128, 16, 32, 32, 0xFFFFFFFF );
 	SetFontTexture( 'B' );
+	SetFontTexture( -1 );
 	DrawSquare( 160, 16, 32, 32, 0xFFFFFFFF );
 
 	glUniformMatrix4fv(GLShader::Current()->viewLocation, 1, false, gIdentityMat );
 
 	modelMat = Translation(Vec3( 0.0f,0.0f,0.0f ));
-	modelMat.Scale(16.0f);
-	FontPrint( modelMat, "Testing" );
+	modelMat.Scale(1.0f);
+	FontPrint( modelMat, "Testing No VAR Water Kerning MMennwwWW" );
 }
 void GameInit() {
 	torus = new BadMesh();
