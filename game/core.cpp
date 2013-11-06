@@ -242,8 +242,21 @@ void MousePositionUpdate()
 
 F32 c_fBaseScale = 1.0f;
 
-void MainUpdate(float fUpdates)
-{
+void MainUpdate(float fUpdates) {
+	static bool bPressing1 = false;
+	if ( glfwGetKey( '1' ) == GLFW_PRESS ) {
+		if( !bPressing1 ) {
+			extern bool gWireframeMode;
+			printf( "changing wireframe mode from %i ", gWireframeMode );
+			gWireframeMode = !gWireframeMode;
+			printf( " to %i\n", gWireframeMode );
+			fflush(stdout);
+		}
+		bPressing1 = true;
+	} else {
+		bPressing1 = false;
+	}
+
 	UpdateShaders();
 	MousePositionUpdate();
 	extern void GameUpdate();
@@ -265,8 +278,7 @@ void MainShutdown()
 
 	glfwEnable( GLFW_MOUSE_CURSOR );
 
-	if (!( glfwGetKey( GLFW_KEY_LSHIFT ) == GLFW_PRESS || glfwGetKey( GLFW_KEY_RSHIFT ) == GLFW_PRESS ))
-	{
+	if (!( glfwGetKey( GLFW_KEY_LSHIFT ) == GLFW_PRESS || glfwGetKey( GLFW_KEY_RSHIFT ) == GLFW_PRESS )) {
 	}
 }
 

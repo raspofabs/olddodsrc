@@ -26,15 +26,6 @@ extern F32 c_fBaseScale;
 
 float o = 1.0f;
 float O = 1.01f;
-void draw_ZNEG() {
-	glBegin(GL_QUADS);
-	glNormal3f(0,0,-1);
-	glTexCoord2f( 0, 0); glVertex3f( -o, -o, -O);
-	glTexCoord2f( 1, 0); glVertex3f(  o, -o, -O);
-	glTexCoord2f( 1, 1); glVertex3f(  o,  o, -O);
-	glTexCoord2f( 0, 1); glVertex3f( -o,  o, -O);
-	glEnd();
-}
 
 #include "assetloader.h"
 extern int win_width;
@@ -118,21 +109,10 @@ char* Mtx2Str(float* p) {
 			p[0],p[1],p[2],p[3], p[4],p[5],p[6],p[7], p[8],p[9],p[10],p[11], p[12],p[13],p[14],p[15]);
 	return s_szTemp;
 }
-BadMesh gMagnetMesh;
 Mat44 gProjectionMat, gCameraMat;//, gCamProj;
 Mat44 gIdentityMat;
 
 void InitDrawing() {
-	gMagnetMesh.Clear();
-	int xpos[] = { 0,1,0, 0,1,1 };
-	int ypos[] = { 0,0,1, 1,0,1 };
-	for(int i = 0; i < 6; ++i ) {
-		Vec3 v = Vec3(0.1*(xpos[i]-0.5f),0,0.1*(ypos[i]-0.5f));
-		Vec3 n = Vec3(0,1,0);
-		Colour c( ypos[i] ? 0xFFFFFFFF : 0xFF000000 );
-		Vec2 u = Vec2(ypos[i],1.0f-xpos[i]);
-		gMagnetMesh.PushVNUC( v, n, u, c.val );
-	}
 }
 
 void game_on_draw( double gameTime ) {
@@ -200,6 +180,8 @@ void game_on_draw( double gameTime ) {
 
 	if( gWireframeMode ) {
 		glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+	} else {
+		glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 	}
 
 	glDisable(GL_BLEND);
@@ -256,9 +238,6 @@ void game_on_draw( double gameTime ) {
 	CATCH_GL_ERROR("ModelMatrix");
 	SetTexture( "cursor", 0 );
 
-	//printf( "Bound the shader to 0, not %i\n", textureID );
-	draw_ZNEG();
-	CATCH_GL_ERROR("DrawZNeg");
 
 	glLoadIdentity();
 	glTranslatef(8+16-w,8+16-h,0);
@@ -266,7 +245,6 @@ void game_on_draw( double gameTime ) {
 	glGetFloatv(GL_MODELVIEW_MATRIX,mvmat);
 	//glUniformMatrix4fv(mvLocation, 1, false, mvmat );
 	CATCH_GL_ERROR("ModelView");
-	//draw_ZNEG();
 
 	CATCH_GL_ERROR("EndOfDisplay");
 }

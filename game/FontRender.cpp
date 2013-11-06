@@ -32,7 +32,6 @@ BadMesh gGlyphMesh;
 
 void SetFontTexture( int character ) {
 	SetTexture(g8X8FontTexture[ character ],0);
-	//glBindTexture( GL_TEXTURE_2D, g8X8FontTexture[ character ] );
 }
 
 void PrepareFontCharacterTexture( int character ) {
@@ -79,11 +78,11 @@ void FontRenderInit() {
 		for( int v = 0; v < h; ++v ) {
 			for( int u = 0; u < w; ++u ) {
 				int paletteEntry = imageData[ lSprite * w + u + ( h - 1 - v ) * header->width ];
-				int colour = 0xFF000000;
+				int colour = 0;
 				if( paletteEntry == 0 )
 					colour = 0xFFFFFFFF;
 				else
-					colour = 0x00000000;
+					colour = 0xFFFFFF00;
 
 				imageBuffer[ ( u + v * 8 ) * depth + 0 ] = 255;
 				imageBuffer[ ( u + v * 8 ) * depth + 1 ] = 255;
