@@ -3,6 +3,7 @@ varying vec3 Normal;
 varying vec3 Pos;
 varying vec2 Tex;
 uniform sampler2D gSampler;
+//uniform float gTime;
 
 varying vec3 diffuse;
 
@@ -21,6 +22,7 @@ void main() {
 	//lightEffect = ( 1.0 + (lightEffect) ) / 2.0;
 	//vec3 diffuse = Color.xyz * lightEffect;
 	gl_FragColor = textureColor * vec4(diffuse,1.0);
+	gl_FragColor = textureColor;
 	//gl_FragColor.rgb = vec3(0.5) + Normal * 0.0625;
 	//gl_FragColor = textureColor * vec4(Color.xyz,1.0);
 	//gl_FragColor = vec4( noise( Pos.xyz ), gl_FragColor.w );

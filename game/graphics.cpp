@@ -104,6 +104,11 @@ void SetTexture(GLuint textureID, int slotID) {
 }
 
 void SetTexture(const char* pName, int slotID) {
+	GLuint tid = gTextures[pName]->glTextureID;
+	if( tid == 0 || tid == 0xFFFFFFFF ) {
+		printf( "failed to find texture %s\n", pName );
+		return;
+	}
 	SetTexture(gTextures[pName]->glTextureID, slotID);
 }
 

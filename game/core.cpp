@@ -26,6 +26,7 @@ int win_height = 500;
 int centre_x = win_width / 2;
 int centre_y = win_height / 2;
 
+float gTime;
 bool gEscapeIsQuit = true;
 float g_fGameTime = 0.0f;
 int g_nUpdateTimeHead = 0;

@@ -6,6 +6,8 @@
 // uses 8x8 font from http://overcode.yak.net/12
 // converted to header file with bin2h from http://deadnode.org/sw/bin2h/
 
+#include <string.h>
+
 #pragma pack( push, 1 )
 struct TGAHeader {
 	unsigned char identSize;
@@ -63,8 +65,9 @@ void FontRenderInit() {
 	const int w = 8, h = 8;
 	const int depth = 4;
 	unsigned char imageBuffer[ w * h * depth ];
+	memset( imageBuffer, 0x66, sizeof( imageBuffer ) );
 
-	for( int lSprite = 0; lSprite < 1; ++lSprite ) {
+	for( int lSprite = 0; lSprite < 127; ++lSprite ) {
 		PrepareFontCharacterTexture( lSprite );
 		for( int v = 0; v < h; ++v ) {
 			for( int u = 0; u < w; ++u ) {

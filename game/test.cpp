@@ -9,8 +9,10 @@ BadMesh *cube, *monkey;
 BadMesh *torus, *bunny;
 Vec3 from, to;
 extern Mat44 gIdentityMat;
+extern float g_fGameTime;
 
 void GameUpdate() {
+	glUniform1f(DefaultShaderProgram.timeLocation, g_fGameTime);
 	double drawStart = glfwGetTime();
 	const float yAngle = drawStart;
 	const float xAngle = 0.2f;
@@ -58,14 +60,21 @@ void GameUpdate() {
 	}
 
 	Ortho( "prelit" );
+	glUniform1f(GLShader::Current()->timeLocation, g_fGameTime);
 	//DefaultOrtho();
 	SetCamera( gIdentityMat );
 	glDepthFunc(GL_LEQUAL);
 	glUniformMatrix4fv(GLShader::Current()->modelLocation, 1, false, gIdentityMat );
 
 	SetTexture( "pointer", 0 );
-	SetFontTexture( 'B' );
 	DrawSquare( 64, 16, 32, 32, 0xFFFFFFFF );
+	SetFontTexture( 'B' );
+	DrawSquare( 96, 16, 32, 32, 0xFFFFFFFF );
+	DefaultOrtho();
+	SetTexture( "pointer", 0 );
+	DrawSquare( 128, 16, 32, 32, 0xFFFFFFFF );
+	SetFontTexture( 'B' );
+	DrawSquare( 160, 16, 32, 32, 0xFFFFFFFF );
 
 	glUniformMatrix4fv(GLShader::Current()->viewLocation, 1, false, gIdentityMat );
 
