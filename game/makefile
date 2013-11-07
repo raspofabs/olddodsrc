@@ -10,7 +10,7 @@ LIBS=-Wl,-Bsymbolic-functions \
 	-rdynamic -lrt -lpthread \
 	-lGL -lglfw -lXrandr
 
-RAW_COMMONOBJECTS=util.o graphics.o BadMesh.o Shader.o assetloader.o FontRender.o stbi_image.o core.o
+RAW_COMMONOBJECTS=util.o graphics.o BadMesh.o Shader.o assetloader.o FontRender.o stbi_image.o core.o geom.o
 RAW_TARGETOBJECTS=$(TARGETS:%=%.o)
 
 COMMONOBJECTS=$(RAW_COMMONOBJECTS:%=build/%)

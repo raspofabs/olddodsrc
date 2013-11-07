@@ -19,6 +19,7 @@ struct BadMesh {
 	void DrawTriangles();
 	void Clear();
 	void Load( const char *filename );
+	void Load( const char *filename, const Mat44 &correction );
 };
 
 #endif

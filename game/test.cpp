@@ -24,9 +24,10 @@ void GameUpdate() {
 	from = Vec3( cx * sy * dist, sx * dist, cx * cy * dist );
 
 	DefaultOrtho();
+	SetCamera(gIdentityMat);
 	glDepthFunc(GL_LEQUAL);
 	ClearScreen( 0.3f, 0.3f, 0.3f );
-	SetTexture( "pointer", 0 );
+	SetTexture( "sword", 0 );
 	DrawSquare( 16, 16, 32, 32, 0xFFFFFFFF );
 
 	Mat44 modelMat = Translation(Vec3( 30.0f + from.x, 30.0f + from.z, 0.0f));
@@ -34,44 +35,55 @@ void GameUpdate() {
 	//glUniformMatrix4fv(GLShader::Current()->mvLocation, 1, false, modelMat );
 
 	DefaultProjection();
-	if( 0 ) {
+	float f = fmodf( g_fGameTime, 4.0f );
+	if( f > 1.0f ) {
 		from = Vec3( sy * 20.0f, 5.0f, cy * 20.0f );
 		to = Vec3( 0.0f, 0.0f, 0.0f );
 
-		SetCamera( from, to );
+		if( f > 2.0f ) {
+			Mat44 look = Mat44LookAt( from, to, Vec4(0.0f,1.0f,0.0f,0.0f));
+			SetCamera(look);
 
-		modelMat = Translation(Vec3( 0.0f, 0.0f, 0.0f));
-		SetTexture( "white", 0 );
-		modelMat.Scale(3.0f);
-		glUniformMatrix4fv(GLShader::Current()->modelLocation, 1, false, modelMat );
+			if( f > 3.0f ) {
+				modelMat = Translation(Vec3( 0.0f, 0.0f, 0.0f));
+				SetTexture( "owl", 0 );
+				modelMat.Scale(2.0f);
+				SetModel( modelMat );
+				cube->DrawTriangles();
 
-		cube->DrawTriangles();
-		//torus->DrawTriangles();
+				modelMat = Translation(Vec3( 6.0f, 0.0f, 0.0f));
+				SetModel( modelMat );
+				torus->DrawTriangles();
 
-		modelMat = Translation(Vec3( 0.0f, 0.0f, 0.0f));
-		modelMat.Scale(3.0f);
-		glUniformMatrix4fv(GLShader::Current()->modelLocation, 1, false, modelMat );
-		monkey->DrawTriangles();
+				modelMat = Translation(Vec3( -6.0f, 0.0f, 0.0f));
+				SetModel( modelMat );
+				monkey->DrawTriangles();
 
-		modelMat = Translation(Vec3( 0.0f, 0.0f, 0.0f));
-		modelMat.Scale(0.1f);
-		glUniformMatrix4fv(GLShader::Current()->modelLocation, 1, false, modelMat );
-		//bunny->DrawTriangles();
+				SetTexture( "pointer", 0 );
+				modelMat = Translation(Vec3( 0.0f, 0.0f, 6.0f));
+				SetModel( modelMat );
+				bunny->DrawTriangles();
+			}
+		}
 	}
+
+	modelMat = Translation(Vec3( 30.0f + from.x, 30.0f + from.z, 0.0f));
 
 	Ortho( "prelit" );
 	glUniform1f(GLShader::Current()->timeLocation, g_fGameTime);
 	//DefaultOrtho();
-	SetCamera( gIdentityMat );
 	glDepthFunc(GL_LEQUAL);
-	glUniformMatrix4fv(GLShader::Current()->modelLocation, 1, false, gIdentityMat );
+	SetCamera( gIdentityMat );
+	SetModel( gIdentityMat );
 
-	SetTexture( "pointer", 0 );
+	SetTexture( "sword", 0 );
 	DrawSquare( 64, 16, 32, 32, 0xFFFFFFFF );
 	SetFontTexture( 'B' );
 	DrawSquare( 96, 16, 32, 32, 0xFFFFFFFF );
 	DefaultOrtho();
-	SetTexture( "pointer", 0 );
+	SetCamera( gIdentityMat );
+	SetModel( gIdentityMat );
+	SetTexture( "sword", 0 );
 	DrawSquare( 128, 16, 32, 32, 0xFFFFFFFF );
 	SetFontTexture( 'B' );
 	SetFontTexture( -1 );
@@ -84,15 +96,32 @@ void GameUpdate() {
 	FontPrint( modelMat, "Testing No VAR Water Kerning MMennwwWW" );
 }
 void GameInit() {
+	Image *sheet;
+	Log( 1, "loading images\n" );
+	sheet = LoadImageG("data/sprite1.png");
+	AddSubAsset( "sword", *sheet, 2,11 );
+	AddSubAsset( "owl", *sheet, 5,7 );
+	AddAsset( "cursor", LoadImageG("data/cursor.png") );
+	AddAsset( "sheet", sheet );
+
+	Mat44 correction;
+
 	torus = new BadMesh();
 	torus->Load( "data/torus.ply" );
 	torus->UVsFromBB();
+
 	bunny = new BadMesh();
-	bunny->Load( "data/bunny.ply" );
+	correction.RotX( -M_PI_2 );
+	correction.Scale(0.1f);
+	bunny->Load( "data/bunny.ply", correction );
 	bunny->UVsFromBB();
 	monkey = new BadMesh();
-	monkey->Load( "data/monkey.ply" );
+
+	correction = gIdentityMat;
+	correction.Scale(3.0f);
+	monkey->Load( "data/monkey.ply", correction );
 	monkey->UVsFromBB();
+
 	cube = new BadMesh();
 	cube->SetAsCube();
 	cube->UVsFromBB();

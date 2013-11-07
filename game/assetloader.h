@@ -7,4 +7,10 @@ struct Image {
 	void Clear() { delete[] p; }
 };
 Image *LoadImageG( const char *filename, int bUseImageLoader = 0 );
+
+#include <GL/glfw.h>
+struct TextureAsset {
+	Image *im;
+	GLuint glTextureID;
+};
 #endif

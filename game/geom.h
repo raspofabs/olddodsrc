@@ -74,6 +74,24 @@ struct Mat44 {
 		y = Vec4( X*Y*(1-c)-Z*s, Y*Y+(1-Y*Y)*c, Y*Z*(1-c)+X*s, 0 );
 		z = Vec4( X*Z*(1-c)+Y*s, Y*Z*(1-c)-X*s, Z*Z+(1-Z*Z)*c, 0 );
 	}
+	void RotX(float rotation) {
+		const float c = cos(rotation), s = sin(rotation);
+		x = Vec4( 1, 0, 0, 0 );
+		y = Vec4( 0, c, s, 0 );
+		z = Vec4( 0, -s, c, 0 );
+	}
+	void RotY(float rotation) {
+		const float c = cos(rotation), s = sin(rotation);
+		x = Vec4( c, 0, -s, 0 );
+		y = Vec4( 0, 1, 0, 0 );
+		z = Vec4( s, 0, c, 0 );
+	}
+	void RotZ(float rotation) {
+		const float c = cos(rotation), s = sin(rotation);
+		x = Vec4( c, s, 0, 0 );
+		y = Vec4( -s, c, 0, 0 );
+		z = Vec4( 0, 0, 1, 0 );
+	}
 	void Scale(float scale) {
 		x *= scale;
 		y *= scale;
@@ -160,6 +178,14 @@ inline Mat44 operator *( const Mat44 &lhs, const Mat44 &rhs )
 				lhs.w.x * rhs.x.w + lhs.w.y * rhs.y.w + lhs.w.z * rhs.z.w + lhs.w.w * rhs.w.w )
 			);
 }
+inline Vec4 operator *( const Mat44 &lhs, const Vec4 &rhs )
+{
+	return
+		rhs.x * lhs.x +
+		rhs.y * lhs.y +
+		rhs.z * lhs.z +
+		rhs.w * lhs.w;
+}
 
 inline Vec3 RayFromCam( const Mat44 &mat, Vec2 screenPos, float xscale, float yscale ) {
 	return
@@ -173,5 +199,7 @@ inline Vec3 RayFromCam( const Mat44 &mat, Vec2 screenPos, float xscale, float ys
 inline Mat44 Translation( Vec3 v ) {
 	return Mat44( Vec4(1,0,0,0), Vec4(0,1,0,0), Vec4(0,0,1,0), Vec4(v) );
 }
+
+extern Mat44 gIdentityMat;
 
 #endif

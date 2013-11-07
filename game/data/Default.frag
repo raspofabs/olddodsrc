@@ -21,7 +21,7 @@ void main() {
 	//float lightEffect = dot( normalize( Normal ), lightFrom );
 	//lightEffect = ( 1.0 + (lightEffect) ) / 2.0;
 	//vec3 diffuse = Color.xyz * lightEffect;
-	gl_FragColor = textureColor * vec4(diffuse,1.0);
+	//gl_FragColor = textureColor * vec4(diffuse,1.0);
 	gl_FragColor = textureColor;
 	//gl_FragColor.rgb = vec3(0.5) + Normal * 0.0625;
 	//gl_FragColor = textureColor * vec4(Color.xyz,1.0);

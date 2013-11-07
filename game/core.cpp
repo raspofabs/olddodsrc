@@ -4,7 +4,6 @@
 #include <stdio.h>
 #include "geom.h"
 #include <limits>
-#include "assetloader.h"
 #include "BadMesh.h"
 #include "FontRender.h"
 #include "Shader.h"
@@ -33,80 +32,6 @@ int g_nUpdateTimeHead = 0;
 bool fingerReleased = false;
 double raiseReleaseTime;
 
-
-typedef std::string Key;
-struct TextureAsset {
-	Image *im;
-	GLuint glTextureID;
-};
-
-typedef std::map<Key, TextureAsset*> TextureDic;
-typedef std::map<int, TextureAsset*> MaterialToTexture;
-TextureDic gTextures;
-std::map<std::string,int> reverselookup;
-std::map<std::string, TextureAsset> icons;
-
-bool TextureExists(const char* name)
-{
-	return icons.count(name);
-}
-
-Image get_sub_icon( Image asset, int x, int y, int w = 16, int h = 16 ) {
-	Image icon;
-	icon.w = w;
-	icon.h = h;
-	icon.p = new C32[ w * h ];
-	//Log( 3, "making asset at %i,%i\n",x,y);
-	for( int j = 0; j < h; ++j ) {
-		C32 *outrow = icon.p + j*h;
-		for( int i = 0; i < w; ++i ) {
-			C32 colour = asset.p[(x*w+i)+(y*h+j)*asset.w];
-			outrow[i] = colour;
-		}
-		//Log( 3, " %08x %08x %08x %08x\n", outrow[0], outrow[1], outrow[14], outrow[15] );
-	}
-	return icon;
-}
-
-void AddAsset( const std::string &name, Image *source ) {
-	TextureAsset &asset = icons[ name ];
-	asset.im = source;
-	asset.glTextureID = -1;
-	gTextures.insert( TextureDic::value_type(name, &asset ) );
-	gTextures[name] = &asset;
-	//Log( 3, "AddAsset - %s: %p == %p\n", name.c_str(), &asset, gTextures[name] );
-}
-
-void AddSubAsset( const std::string &name, Image source, int x, int y ) {
-	TextureAsset &asset = icons[ name ];
-	asset.im = new Image;
-	Log( 3, "Sub Asset %s\n", name.c_str() );
-	*(asset.im) = get_sub_icon( source, x,y, 16, 16 );
-	asset.glTextureID = -1;
-	gTextures.insert( TextureDic::value_type(name, &asset ) );
-	gTextures[name] = &asset;
-}
-
-void AddTileAsset( const std::string &name, Image source, int x, int y ) {
-	TextureAsset &asset = icons[ name ];
-	asset.im = new Image;
-	*(asset.im) = get_sub_icon( source, x,y, 64, 64 );
-	asset.glTextureID = -1;
-	gTextures.insert( TextureDic::value_type(name, &asset ) );
-}
-
-void LoadAssets() {
-	Image *core;
-
-	Log( 1, "loading images\n" );
-	core = LoadImageG("data/core.png");
-
-	AddSubAsset( "pointer", *core, 0,7 );
-	AddSubAsset( "white", *core, 2,0 );
-
-	AddAsset( "cursor", LoadImageG("data/cursor.png") );
-	AddAsset( "core", core );
-}
 
 void NotSetMode( int menumode ) {
 	Log( 3, "Setting to menu[%i]\n", menumode );
@@ -205,23 +130,11 @@ void MainInit()
 	//RunTests();
 
 	InitShaders();
-	LoadAssets();
-	InitDrawing();
 	FontRenderInit();
 	extern void GameInit();
 	GameInit();
+	PostInitGraphics();
 
-	for( TextureDic::iterator i = gTextures.begin(); i != gTextures.end(); ++i ) {
-		TextureAsset *a = i->second;
-		if( a ) {
-			MakeGLTexture( a );
-		} else {
-			Log( 3, "Texture asset is null for %s\n", i->first.c_str() );
-		}
-	}
-
-	void GLMakeSmallWhite();
-	GLMakeSmallWhite();
 }
 
 int initialmousex;

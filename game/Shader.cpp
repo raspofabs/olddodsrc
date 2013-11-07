@@ -141,6 +141,8 @@ void ActivateShader( const char *name ) {
 	ShaderMap::iterator shaderEntry = customShaders.find( name );
 	if( shaderEntry != customShaders.end() ) {
 		shaderEntry->second->Use();
+	} else {
+		eprintf("Cannot activate shader %s\n", name );
 	}
 }
 

@@ -13,6 +13,9 @@ inline bool isWhitespace( char c ) {
 }
 
 void BadMesh::Load( const char *filename ) {
+	Load( filename, gIdentityMat );
+}
+void BadMesh::Load( const char *filename, const Mat44 &correction ) {
 	FILE *fp = fopen( filename, "r" );
 	std::vector<std::string> lines;
 	char line[128];
@@ -86,8 +89,8 @@ section_start:
 		strcpy( line, i->c_str() );
 		Vec3 p,n;
 		sscanf( line, "%f %f %f %f %f %f", &p.x, &p.y, &p.z, &n.x, &n.y, &n.z );
-		pos.push_back( p );
-		norm.push_back( p );
+		pos.push_back( correction * p );
+		norm.push_back( correction * p );
 		++i;
 	}
 	while( i != lines.end() ) {

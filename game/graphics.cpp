@@ -21,6 +21,7 @@ extern int win_width, win_height;
 #include <math.h>
 
 GLShader* GLShader::m_pCurrent = NULL;
+GLuint g_nSmallWhiteTexture;
 
 extern F32 c_fBaseScale;
 
@@ -33,10 +34,6 @@ extern int win_height;
 
 GLuint textureLocation;
 typedef std::string Key;
-struct TextureAsset {
-	Image *im;
-	GLuint glTextureID;
-};
 #include <map>
 typedef std::map<Key, TextureAsset*> TextureDic;
 extern TextureDic gTextures;
@@ -70,20 +67,17 @@ GLuint GLReadTexture(const char* pFilename) {
 }
 
 void SetTextureForLocation(GLuint textureID, int nSlot, int nLocation) {
-	extern GLuint g_nSmallWhiteTexture;
 	if( (unsigned int)nLocation != 0xFFFFFFFF) {
 		if (textureID == 0xFFFFFFFF ) {
 			textureID = g_nSmallWhiteTexture;
-		} else {
-			glActiveTexture(GL_TEXTURE0 + nSlot);
-			glBindTexture(GL_TEXTURE_2D, textureID);
-			glUniform1i(nLocation, nSlot);
 		}
+		glActiveTexture(GL_TEXTURE0 + nSlot);
+		glBindTexture(GL_TEXTURE_2D, textureID);
+		glUniform1i(nLocation, nSlot);
 	}
 }
 
 void SetTexture(GLuint textureID, int slotID) {
-	extern GLuint g_nSmallWhiteTexture;
 	if( UniformExists(textureLocation) ) {
 		if (textureID == 0xFFFFFFFF ) {
 			textureID = g_nSmallWhiteTexture;
@@ -95,12 +89,12 @@ void SetTexture(GLuint textureID, int slotID) {
 }
 
 void SetTexture(const char* pName, int slotID) {
-	GLuint tid = gTextures[pName]->glTextureID;
-	if( tid == 0 || tid == 0xFFFFFFFF ) {
-		printf( "failed to find texture %s\n", pName );
-		return;
+	if( gTextures.count( pName ) ) {
+		GLuint tid = gTextures[pName]->glTextureID;
+		SetTexture(tid, slotID);
+	} else {
+		SetTexture(g_nSmallWhiteTexture, slotID);
 	}
-	SetTexture(gTextures[pName]->glTextureID, slotID);
 }
 
 static char s_szTemp[1024];
@@ -109,11 +103,7 @@ char* Mtx2Str(float* p) {
 			p[0],p[1],p[2],p[3], p[4],p[5],p[6],p[7], p[8],p[9],p[10],p[11], p[12],p[13],p[14],p[15]);
 	return s_szTemp;
 }
-Mat44 gProjectionMat, gCameraMat;//, gCamProj;
-Mat44 gIdentityMat;
-
-void InitDrawing() {
-}
+Mat44 gProjectionMat, gCameraMat, gModel;
 
 void game_on_draw( double gameTime ) {
 	CATCH_GL_ERROR("OnEntry to game_on_draw()");
@@ -339,7 +329,6 @@ GLuint MemoryTexture(S32 nW, S32 nH, U32* pnImage)
 	return nTex;
 }
 
-GLuint g_nSmallWhiteTexture;
 void GLMakeSmallWhite()
 {
 	U32 nWhite[8*8];
@@ -347,36 +336,67 @@ void GLMakeSmallWhite()
 	g_nSmallWhiteTexture = MemoryTexture(8, 8, nWhite );
 }
 
+void PostInitGraphics() {
+	for( TextureDic::iterator i = gTextures.begin(); i != gTextures.end(); ++i ) {
+		TextureAsset *a = i->second;
+		if( a ) {
+			MakeGLTexture( a );
+		} else {
+			Log( 3, "Texture asset is null for %s\n", i->first.c_str() );
+		}
+	}
+
+	GLMakeSmallWhite();
+	AddAsset( "white", g_nSmallWhiteTexture );
+}
+
 void ClearScreen( float r, float g, float b ) {
 	glClearColor( r, g, b, 1.0f );
 	glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT);
 }
 
+void UploadAllMatrices() {
+	if( GLShader *current = GLShader::Current() ) {
+		glUniformMatrix4fv(current->projLocation, 1, false, gProjectionMat);
+		glUniformMatrix4fv(current->viewLocation, 1, false, gCameraMat);
+		glUniformMatrix4fv(current->modelLocation, 1, false, gModel);
+	}
+}
+
 void Ortho( const char * shader ) {
 	ActivateShader( shader );
+	UploadAllMatrices();
 	gProjectionMat = Mat44Orthographic( 0, win_width, win_height, 0, -1, 1 );
 	if( GLShader *current = GLShader::Current() ) {
 		glUniformMatrix4fv(current->projLocation, 1, false, gProjectionMat);
 		CATCH_GL_ERROR("UploadProj");
+	} else {
+		eprintf( "cannot upload projection\n" );
 	}
 }
 void DefaultOrtho() {
 	DefaultShaderProgram.Use(true);
+	UploadAllMatrices();
 	gProjectionMat = Mat44Orthographic( 0, win_width, win_height, 0, -1, 1 );
 	if( GLShader *current = GLShader::Current() ) {
 		glUniformMatrix4fv(current->projLocation, 1, false, gProjectionMat);
 		CATCH_GL_ERROR("UploadProj");
+	} else {
+		eprintf( "cannot upload projection\n" );
 	}
 }
 
 void DefaultProjection() {
 	DefaultShaderProgram.Use(true);
+	UploadAllMatrices();
 	const float fov = 1.0f;
 	//Log( 3, "Proj %i,%i\n", win_width, win_height );
 	gProjectionMat = Mat44Perspective( fov, (float)win_width / (float)win_height, 0.1f, 100.0f);
 	if( GLShader *current = GLShader::Current() ) {
 		glUniformMatrix4fv(current->projLocation, 1, false, gProjectionMat);
 		CATCH_GL_ERROR("UploadProj");
+	} else {
+		eprintf( "cannot upload projection\n" );
 	}
 }
 void SetCamera(const Mat44 &camTransform) {
@@ -386,6 +406,8 @@ void SetCamera(const Mat44 &camTransform) {
 	if( GLShader *current = GLShader::Current() ) {
 		glUniformMatrix4fv(current->viewLocation, 1, false, gCameraMat);
 		CATCH_GL_ERROR("UploadView");
+	} else {
+		eprintf( "cannot upload camera(matrix) to dead shader\n" );
 	}
 }
 void SetCamera(const Vec3 &pos, const Vec3 &target) {
@@ -396,6 +418,17 @@ void SetCamera(const Vec3 &pos, const Vec3 &target) {
 	if( GLShader *current = GLShader::Current() ) {
 		glUniformMatrix4fv(current->viewLocation, 1, false, gCameraMat);
 		CATCH_GL_ERROR("UploadView");
+	} else {
+		eprintf( "cannot upload camera(to/from) to dead shader\n" );
+	}
+}
+void SetModel(const Mat44 &modelTransform) {
+	gModel = modelTransform;
+	if( GLShader *current = GLShader::Current() ) {
+		glUniformMatrix4fv(current->modelLocation, 1, false, gModel);
+		CATCH_GL_ERROR("UploadModel");
+	} else {
+		eprintf( "cannot upload model(matrix) to dead shader\n" );
 	}
 }
 void DrawSquare( float x, float y, float width, float height, uint32_t colour ) {
@@ -456,3 +489,58 @@ void DrawSquare( float x, float y, float width, float height, uint32_t colour ) 
 void ClearTexture() {
 	SetTexture(-1,0);
 }
+
+Image get_sub_icon( Image asset, int x, int y, int w = 16, int h = 16 ) {
+	Image icon;
+	icon.w = w;
+	icon.h = h;
+	icon.p = new C32[ w * h ];
+	//Log( 3, "making asset at %i,%i\n",x,y);
+	for( int j = 0; j < h; ++j ) {
+		C32 *outrow = icon.p + j*h;
+		for( int i = 0; i < w; ++i ) {
+			C32 colour = asset.p[(x*w+i)+(y*h+j)*asset.w];
+			outrow[i] = colour;
+		}
+		//Log( 3, " %08x %08x %08x %08x\n", outrow[0], outrow[1], outrow[14], outrow[15] );
+	}
+	return icon;
+}
+
+typedef std::map<int, TextureAsset*> MaterialToTexture;
+TextureDic gTextures;
+std::map<std::string,int> reverselookup;
+std::map<std::string, TextureAsset> icons;
+
+bool TextureExists(const char* name)
+{
+	return icons.count(name);
+}
+
+void AddAsset( const std::string &name, GLuint id ) {
+	TextureAsset &asset = icons[ name ];
+	asset.im = 0;
+	asset.glTextureID = id;
+	gTextures.insert( TextureDic::value_type(name, &asset ) );
+	gTextures[name] = &asset;
+	//Log( 3, "AddAsset - %s: %p == %p\n", name.c_str(), &asset, gTextures[name] );
+}
+void AddAsset( const std::string &name, Image *source ) {
+	TextureAsset &asset = icons[ name ];
+	asset.im = source;
+	asset.glTextureID = -1;
+	gTextures.insert( TextureDic::value_type(name, &asset ) );
+	gTextures[name] = &asset;
+	//Log( 3, "AddAsset - %s: %p == %p\n", name.c_str(), &asset, gTextures[name] );
+}
+
+void AddSubAsset( const std::string &name, Image source, int x, int y ) {
+	TextureAsset &asset = icons[ name ];
+	asset.im = new Image;
+	Log( 3, "Sub Asset %s\n", name.c_str() );
+	*(asset.im) = get_sub_icon( source, x,y, 16, 16 );
+	asset.glTextureID = -1;
+	gTextures.insert( TextureDic::value_type(name, &asset ) );
+	gTextures[name] = &asset;
+}
+
