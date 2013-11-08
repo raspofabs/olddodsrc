@@ -1,6 +1,7 @@
 TARGETS=core.a
 
 CC=g++
+#CC=clang++
 #OPTIMISE=-O2
 OPTIMISE=-O0
 DEBUG=-ggdb3

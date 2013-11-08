@@ -1,4 +1,5 @@
 CC=g++
+#CC=clang++
 CFLAGS=-c -g -Wall -rdynamic -D_DEBUG
 LDFLAGS=-g -rdynamic
 

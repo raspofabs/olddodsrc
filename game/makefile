@@ -1,6 +1,7 @@
 TARGETS=test
 
 CC=g++
+#CC=clang++
 #OPTIMISE=-O2
 OPTIMISE=-O0
 DEBUG=-ggdb3
