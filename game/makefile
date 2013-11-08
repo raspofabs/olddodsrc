@@ -17,6 +17,7 @@ TARGETOBJECTS=$(RAW_TARGETOBJECTS:%=build/%)
 ALLOBJECTS=$(COMMONOBJECTS) $(TARGETOBJECTS)
 OBJSRC=$(COMMONOBJECTS:.o=.cpp)
 CORE=core/core.a
+TINYJS=TinyJS/TinyJS.a
 
 recurse:
 	@make -j$(shell getconf _NPROCESSORS_ONLN) -C core all
@@ -43,11 +44,11 @@ build/%.o: %.cpp | build
 
 # testing
 test: build/test.o $(COMMONOBJECTS)
-	$(CC) build/test.o $(COMMONOBJECTS) $(CORE) TinyJS/TinyJS.a -o test $(LIBS)
+	$(CC) build/test.o $(COMMONOBJECTS) $(CORE) $(TINYJS) -o test $(LIBS)
 oopgame: build/oopgame.o $(COMMONOBJECTS)
-	$(CC) build/oopgame.o $(COMMONOBJECTS) $(CORE) -o oopgame $(LIBS)
+	$(CC) build/oopgame.o $(COMMONOBJECTS) $(CORE) $(TINYJS) -o oopgame $(LIBS)
 dodgame: build/dodgame.o $(COMMONOBJECTS)
-	$(CC) build/dodgame.o $(COMMONOBJECTS) $(CORE) -o dodgame $(LIBS)
+	$(CC) build/dodgame.o $(COMMONOBJECTS) $(CORE) $(TINYJS) -o dodgame $(LIBS)
 
 compilers: basepackages
 
