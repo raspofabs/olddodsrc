@@ -1,0 +1,4 @@
+TinyJS.a
+*.o
+.svn
+tests
