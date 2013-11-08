@@ -43,7 +43,7 @@ build/%.o: %.cpp | build
 
 # testing
 test: build/test.o $(COMMONOBJECTS)
-	$(CC) build/test.o $(COMMONOBJECTS) $(CORE) -o test $(LIBS)
+	$(CC) build/test.o $(COMMONOBJECTS) $(CORE) TinyJS/TinyJS.a -o test $(LIBS)
 oopgame: build/oopgame.o $(COMMONOBJECTS)
 	$(CC) build/oopgame.o $(COMMONOBJECTS) $(CORE) -o oopgame $(LIBS)
 dodgame: build/dodgame.o $(COMMONOBJECTS)
