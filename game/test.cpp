@@ -1,8 +1,8 @@
-#include "util.h"
-#include "graphics.h"
-#include "Shader.h"
-#include "BadMesh.h"
-#include "FontRender.h"
+#include "core/util.h"
+#include "core/graphics.h"
+#include "core/Shader.h"
+#include "core/BadMesh.h"
+#include "core/FontRender.h"
 
 extern GLShader Shader_Prelit;
 BadMesh *cube, *monkey;
