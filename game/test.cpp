@@ -35,37 +35,31 @@ void GameUpdate() {
 	//glUniformMatrix4fv(GLShader::Current()->mvLocation, 1, false, modelMat );
 
 	DefaultProjection();
-	float f = fmodf( g_fGameTime, 4.0f );
-	if( f > 1.0f ) {
-		from = Vec3( sy * 20.0f, 5.0f, cy * 20.0f );
-		to = Vec3( 0.0f, 0.0f, 0.0f );
 
-		if( f > 2.0f ) {
-			Mat44 look = Mat44LookAt( from, to, Vec4(0.0f,1.0f,0.0f,0.0f));
-			SetCamera(look);
+	from = Vec3( sy * 20.0f, 5.0f, cy * 20.0f );
+	to = Vec3( 0.0f, 0.0f, 0.0f );
 
-			if( f > 3.0f ) {
-				modelMat = Translation(Vec3( 0.0f, 0.0f, 0.0f));
-				SetTexture( "owl", 0 );
-				modelMat.Scale(2.0f);
-				SetModel( modelMat );
-				cube->DrawTriangles();
+	Mat44 look = Mat44LookAt( from, to, Vec4(0.0f,1.0f,0.0f,0.0f));
+	SetCamera(look);
 
-				modelMat = Translation(Vec3( 6.0f, 0.0f, 0.0f));
-				SetModel( modelMat );
-				torus->DrawTriangles();
+	modelMat = Translation(Vec3( 0.0f, 0.0f, 0.0f));
+	SetTexture( "owl", 0 );
+	modelMat.Scale(2.0f);
+	SetModel( modelMat );
+	cube->DrawTriangles();
 
-				modelMat = Translation(Vec3( -6.0f, 0.0f, 0.0f));
-				SetModel( modelMat );
-				monkey->DrawTriangles();
+	modelMat = Translation(Vec3( 6.0f, 0.0f, 0.0f));
+	SetModel( modelMat );
+	torus->DrawTriangles();
 
-				SetTexture( "pointer", 0 );
-				modelMat = Translation(Vec3( 0.0f, 0.0f, 6.0f));
-				SetModel( modelMat );
-				bunny->DrawTriangles();
-			}
-		}
-	}
+	modelMat = Translation(Vec3( -6.0f, 0.0f, 0.0f));
+	SetModel( modelMat );
+	monkey->DrawTriangles();
+
+	SetTexture( "pointer", 0 );
+	modelMat = Translation(Vec3( 0.0f, 0.0f, 6.0f));
+	SetModel( modelMat );
+	bunny->DrawTriangles();
 
 	modelMat = Translation(Vec3( 30.0f + from.x, 30.0f + from.z, 0.0f));
 
@@ -104,15 +98,15 @@ void GameInit() {
 	AddAsset( "cursor", LoadImageG("data/cursor.png") );
 	AddAsset( "sheet", sheet );
 
-	Mat44 correction;
+	Mat44 correction = Translation(Vec3(0.0f,0.0f,0.0f));
 
 	torus = new BadMesh();
-	torus->Load( "data/torus.ply" );
+	torus->Load( "data/torus.ply", correction );
 	torus->UVsFromBB();
 
 	bunny = new BadMesh();
 	correction.RotX( -M_PI_2 );
-	correction.Scale(0.1f);
+	correction.Scale(0.03f);
 	bunny->Load( "data/bunny.ply", correction );
 	bunny->UVsFromBB();
 	monkey = new BadMesh();

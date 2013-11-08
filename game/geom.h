@@ -200,6 +200,13 @@ inline Mat44 Translation( Vec3 v ) {
 	return Mat44( Vec4(1,0,0,0), Vec4(0,1,0,0), Vec4(0,0,1,0), Vec4(v) );
 }
 
+extern Vec3 gXVec3;
+extern Vec3 gYVec3;
+extern Vec3 gZVec3;
+extern Vec4 gXVec4;
+extern Vec4 gYVec4;
+extern Vec4 gZVec4;
+extern Vec4 gWVec4;
 extern Mat44 gIdentityMat;
 
 #endif
