@@ -44,11 +44,11 @@ build/%.o: %.cpp | build
 	sed -i '1s/^/build\//' build/$*.d
 
 # testing
-test: build/test.o $(COMMONOBJECTS)
+test: build/test.o $(COMMONOBJECTS) $(CORE) $(TINYJS)
 	$(CC) build/test.o $(COMMONOBJECTS) $(CORE) $(TINYJS) -o test $(LIBS)
-oopgame: build/oopgame.o $(COMMONOBJECTS)
+oopgame: build/oopgame.o $(COMMONOBJECTS) $(CORE) $(TINYJS)
 	$(CC) build/oopgame.o $(COMMONOBJECTS) $(CORE) $(TINYJS) -o oopgame $(LIBS)
-dodgame: build/dodgame.o $(COMMONOBJECTS)
+dodgame: build/dodgame.o $(COMMONOBJECTS) $(CORE) $(TINYJS)
 	$(CC) build/dodgame.o $(COMMONOBJECTS) $(CORE) $(TINYJS) -o dodgame $(LIBS)
 
 compilers: basepackages

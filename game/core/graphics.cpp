@@ -105,10 +105,8 @@ char* Mtx2Str(float* p) {
 }
 Mat44 gProjectionMat, gCameraMat, gModel;
 
-void game_on_draw( double gameTime ) {
+void game_on_draw( double ) {
 	CATCH_GL_ERROR("OnEntry to game_on_draw()");
-	double drawStart = glfwGetTime();
-	drawStart = 0.0f;
 	const float yAngle = 0.0f;
 	const float xAngle = 0.2f;
 
@@ -158,16 +156,6 @@ void game_on_draw( double gameTime ) {
 	point.z = 0.26;
 	point.w = 1.0f;
 
-	// the elements of space
-	current = GLShader::Current();
-	if( current ) {
-		mvmat[3*4+0] = 0.0f; mvmat[3*4+2] = 0.0f;
-		glUniformMatrix4fv(GLShader::Current()->modelLocation, 1, false, mvmat );
-		CATCH_GL_ERROR("ModelMatrix");
-	} else {
-		printf( "No current shader\n" );
-	}
-
 	if( gWireframeMode ) {
 		glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 	} else {
@@ -193,48 +181,6 @@ void game_on_draw( double gameTime ) {
 
 	glEnable(GL_ALPHA_TEST);
 	glEnable(GL_TEXTURE_2D);
-	glMatrixMode(GL_MODELVIEW);
-
-	//glDisable(GL_DEPTH_TEST);
-	glMatrixMode(GL_PROJECTION);
-	glLoadIdentity();
-	float w = float(win_width / 2);
-	float h = float(win_height / 2);
-	gProjectionMat = Mat44Orthographic( 0, win_width, win_height, 0, -1, 1 );
-	glUniformMatrix4fv(GLShader::Current()->projLocation, 1, false, gProjectionMat );
-	gIdentityMat.SetIdentity();
-	glUniformMatrix4fv(GLShader::Current()->viewLocation, 1, false, gIdentityMat );
-	CATCH_GL_ERROR("Proj");
-
-	if( 1 ) {
-		glMatrixMode(GL_MODELVIEW);
-		glLoadIdentity();
-		glTranslatef(0.0f, 0.0f, 0.1f);
-		glScalef( 8.0f, 8.0f, 1.0f );
-
-		char buffer[128];
-		sprintf( buffer, "%ims", (int)(gameTime * 1000) );
-		FontPrint( gIdentityMat, buffer );
-	}
-
-	glMatrixMode(GL_MODELVIEW);
-	glLoadIdentity();
-	glColor4f(1.0f,1.0f,1.0f,0.9f);
-	glScalef(1.0f,1.0f,0.1f);
-	glRotatef(drawStart*45.0f, 0.0f,1.0f,0.0f );
-	glGetFloatv(GL_MODELVIEW_MATRIX,mvmat);
-	//glUniformMatrix4fv(mvLocation, 1, false, mvmat );
-	glUniformMatrix4fv(GLShader::Current()->modelLocation, 1, false, mvmat );
-	CATCH_GL_ERROR("ModelMatrix");
-	SetTexture( "cursor", 0 );
-
-
-	glLoadIdentity();
-	glTranslatef(8+16-w,8+16-h,0);
-	glScalef(16.0f,16.0f,0.1f);
-	glGetFloatv(GL_MODELVIEW_MATRIX,mvmat);
-	//glUniformMatrix4fv(mvLocation, 1, false, mvmat );
-	CATCH_GL_ERROR("ModelView");
 
 	CATCH_GL_ERROR("EndOfDisplay");
 }
