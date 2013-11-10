@@ -15,6 +15,8 @@ struct BadMesh {
 	void PushV( Vec3 v );
 	void PushVNUC( Vec3 v, Vec3 n, Vec2 u = Vec2(0,0), Colour c = 0xFFFFFFFF );
 	void UVsFromBB();
+	void UVsFromBB( const Vec3 &uaxis, const Vec3 &vaxis );
+	void ApplyTransform( const Mat44 &t );
 
 	void DrawTriangles();
 	void Clear();

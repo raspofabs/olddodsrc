@@ -33,6 +33,7 @@ BadMesh *cube, *monkey;
 BadMesh *torus, *bunny;
 BadMesh *well, *sword;
 BadMesh *rocks,*wall;
+BadMesh *floortile;
 Vec3 from, to;
 extern Mat44 gIdentityMat;
 extern float g_fGameTime;
@@ -74,16 +75,6 @@ void GameUpdate() {
 	SetModel( modelMat );
 	cube->DrawTriangles();
 
-	SetTexture( "wall", 0 );
-	modelMat = Translation(Vec3( 6.0f, 0.0f, 0.0f));
-	SetModel( modelMat );
-	torus->DrawTriangles();
-
-	SetTexture( "potion-blue", 0 );
-	modelMat = Translation(Vec3( -6.0f, 0.0f, 0.0f));
-	SetModel( modelMat );
-	monkey->DrawTriangles();
-
 	SetTexture( "dragon", 0 );
 	modelMat = Translation(Vec3( 0.0f, 0.0f, 6.0f));
 	SetModel( modelMat );
@@ -94,20 +85,42 @@ void GameUpdate() {
 	SetModel( modelMat );
 	rocks->DrawTriangles();
 
+	SetTexture( "toughguy", 0 );
+	modelMat = Translation(Vec3( 0.0f, 3.0f, 0.0f));
+	SetModel( modelMat );
+	GameMeshes::Get("quadpeep")->DrawTriangles();
+
+
+	SetTexture( "wall", 0 );
+	modelMat = Translation(Vec3( 6.0f, 0.0f, 0.0f));
+	SetModel( modelMat );
+	torus->DrawTriangles();
+
 	SetTexture( "chest", 0 );
 	modelMat = Translation(Vec3( 6.0f, 0.0f, 6.0f));
 	SetModel( modelMat );
 	wall->DrawTriangles();
 
+	SetTexture( "door-closed", 0 );
+	modelMat = Translation(Vec3( 6.0f, 0.0f, -6.0f));
+	SetModel( modelMat );
+	well->DrawTriangles();
+
+
+	SetTexture( "earth", 0 );
+	modelMat = Translation(Vec3( -6.0f, 0.0f, 6.0f));
+	SetModel( modelMat );
+	floortile->DrawTriangles();
+
+	SetTexture( "potion-blue", 0 );
+	modelMat = Translation(Vec3( -6.0f, 0.0f, 0.0f));
+	SetModel( modelMat );
+	monkey->DrawTriangles();
+
 	SetTexture( "ring-yellow", 0 );
 	modelMat = Translation(Vec3( -6.0f, 0.0f, -6.0f));
 	SetModel( modelMat );
 	sword->DrawTriangles();
-
-	SetTexture( "door", 0 );
-	modelMat = Translation(Vec3( 6.0f, 0.0f, -6.0f));
-	SetModel( modelMat );
-	well->DrawTriangles();
 
 	modelMat = Translation(Vec3( 30.0f + from.x, 30.0f + from.z, 0.0f));
 
@@ -148,6 +161,7 @@ void GameInit() {
 	wall = GameMeshes::Get( "wall" );
 	well = GameMeshes::Get( "well" );
 	sword = GameMeshes::Get( "sword" );
+	floortile = GameMeshes::Get( "floor" );
 
 	cube = new BadMesh();
 	cube->SetAsCube();

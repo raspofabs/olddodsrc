@@ -31,6 +31,25 @@ namespace GameMeshes {
 		LoadOne( "sword", "data/meshes/sword.ply", 1.0f );
 		LoadOne( "well", "data/meshes/well.coveredopen.ply", 1.0f, true );
 		LoadOne( "wall", "data/meshes/wall.ply", 0.03f );
+
+		// simple flat quad thing for making people with sprites
+		BadMesh *quadpeep = new BadMesh();
+		quadpeep->SetAsCube();
+		quadpeep->UVsFromBB( gXVec3, gYVec3 );
+		Mat44 flatten = gIdentityMat;
+		flatten.z.z = 0.1f;
+		quadpeep->ApplyTransform( flatten );
+		meshes["quadpeep"] = quadpeep;
+
+		// simple flat quad for making floors with
+		BadMesh *floorTile = new BadMesh();
+		floorTile->SetAsCube();
+		floorTile->UVsFromBB( gXVec3, gZVec3 );
+		flatten = gIdentityMat;
+		flatten.y.y = 0.1f;
+		flatten.w.y = -0.1f;
+		floorTile->ApplyTransform( flatten );
+		meshes["floor"] = floorTile;
 	}
 	void Shutdown() {
 	}

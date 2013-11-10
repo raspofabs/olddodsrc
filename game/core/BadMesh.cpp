@@ -157,6 +157,36 @@ void BadMesh::PushVNUC( Vec3 v, Vec3 n, Vec2 u, Colour c ) {
 	colours.push_back(c);
 }
 
+void BadMesh::ApplyTransform( const Mat44 &t ) {
+	int count = vertices.size();
+	for( int v = 0; v < count; ++v ) {
+		Vec3 &current = vertices[v];
+		current = t * current;
+	}
+}
+void BadMesh::UVsFromBB( const Vec3 &uaxis, const Vec3 &vaxis ) {
+	Vec3 low, high;
+	low = vertices[0];
+	high = low;
+	int count = vertices.size();
+	for( int v = 1; v < count; ++v ) {
+		Vec3 &current = vertices[v];
+		if( current.x < low.x ) low.x = current.x;
+		if( current.x > high.x ) high.x = current.x;
+		if( current.y < low.y ) low.y = current.y;
+		if( current.y > high.y ) high.y = current.y;
+		if( current.z < low.z ) low.z = current.z;
+		if( current.z > high.z ) high.z = current.z;
+	}
+	high.x = 1.0f / ( high.x - low.x );
+	high.y = 1.0f / ( high.y - low.y );
+	high.z = 1.0f / ( high.z - low.z );
+	for( int v = 0; v < count; ++v ) {
+		Vec3 &current = vertices[v];
+		Vec3 local( (current.x - low.x) * high.x, (current.y - low.y) * high.y, (current.z - low.z) * high.z );
+		uvs[v] = Vec2( uaxis.dot( local ), vaxis.dot( local ) );
+	}
+}
 void BadMesh::UVsFromBB() {
 	Vec2 low, high;
 	low = Vec2( vertices[0].x, vertices[0].y );
