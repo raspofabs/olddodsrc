@@ -11,7 +11,7 @@ LIBS=-Wl,-Bsymbolic-functions \
 	-rdynamic -lrt -lpthread \
 	-lGL -lglfw -lXrandr
 
-RAW_COMMONOBJECTS=
+RAW_COMMONOBJECTS=GameTextures.o GameMeshes.o
 RAW_TARGETOBJECTS=$(TARGETS:%=%.o)
 COMMONOBJECTS=$(RAW_COMMONOBJECTS:%=build/%)
 TARGETOBJECTS=$(RAW_TARGETOBJECTS:%=build/%)

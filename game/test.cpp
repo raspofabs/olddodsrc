@@ -6,6 +6,10 @@
 
 #include "TinyJS/TinyJS.h"
 #include "TinyJS/TinyJS_Functions.h"
+
+#include "GameTextures.h"
+#include "GameMeshes.h"
+
 void js_print(CScriptVar *v, void *) { Log( 1, "> %s\n", v->getParameter("text")->getString().c_str()); }
 CTinyJS *js;
 char * fileread( const char *filename ) {
@@ -27,6 +31,8 @@ char * fileread( const char *filename ) {
 extern GLShader Shader_Prelit;
 BadMesh *cube, *monkey;
 BadMesh *torus, *bunny;
+BadMesh *well, *sword;
+BadMesh *rocks,*wall;
 Vec3 from, to;
 extern Mat44 gIdentityMat;
 extern float g_fGameTime;
@@ -81,6 +87,22 @@ void GameUpdate() {
 	SetModel( modelMat );
 	bunny->DrawTriangles();
 
+	modelMat = Translation(Vec3( 0.0f, 0.0f, -6.0f));
+	SetModel( modelMat );
+	rocks->DrawTriangles();
+
+	modelMat = Translation(Vec3( 6.0f, 0.0f, 6.0f));
+	SetModel( modelMat );
+	wall->DrawTriangles();
+
+	modelMat = Translation(Vec3( -6.0f, 0.0f, -6.0f));
+	SetModel( modelMat );
+	sword->DrawTriangles();
+
+	modelMat = Translation(Vec3( 6.0f, 0.0f, -6.0f));
+	SetModel( modelMat );
+	well->DrawTriangles();
+
 	modelMat = Translation(Vec3( 30.0f + from.x, 30.0f + from.z, 0.0f));
 
 	Ortho( "prelit" );
@@ -110,31 +132,16 @@ void GameUpdate() {
 	FontPrint( modelMat, "Testing No VAR Water Kerning MMennwwWW" );
 }
 void GameInit() {
-	Image *sheet;
-	Log( 1, "loading images\n" );
-	sheet = LoadImageG("data/sprite1.png");
-	AddSubAsset( "sword", *sheet, 2,11 );
-	AddSubAsset( "owl", *sheet, 5,7 );
-	AddAsset( "cursor", LoadImageG("data/cursor.png") );
-	AddAsset( "sheet", sheet );
+	GameTextures::Init();
+	GameMeshes::Init();
 
-	Mat44 correction = Translation(Vec3(0.0f,0.0f,0.0f));
-
-	torus = new BadMesh();
-	torus->Load( "data/torus.ply", correction );
-	torus->UVsFromBB();
-
-	bunny = new BadMesh();
-	correction.RotX( -M_PI_2 );
-	correction.Scale(0.03f);
-	bunny->Load( "data/bunny.ply", correction );
-	bunny->UVsFromBB();
-	monkey = new BadMesh();
-
-	correction = gIdentityMat;
-	correction.Scale(3.0f);
-	monkey->Load( "data/monkey.ply", correction );
-	monkey->UVsFromBB();
+	torus = GameMeshes::Get( "torus" );
+	bunny = GameMeshes::Get( "bunny" );
+	monkey = GameMeshes::Get( "monkey" );
+	rocks = GameMeshes::Get( "rocks" );
+	wall = GameMeshes::Get( "wall" );
+	well = GameMeshes::Get( "well" );
+	sword = GameMeshes::Get( "sword" );
 
 	cube = new BadMesh();
 	cube->SetAsCube();

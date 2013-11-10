@@ -16,106 +16,109 @@ void BadMesh::Load( const char *filename ) {
 	Load( filename, gIdentityMat );
 }
 void BadMesh::Load( const char *filename, const Mat44 &correction ) {
-	FILE *fp = fopen( filename, "r" );
-	std::vector<std::string> lines;
-	char line[128];
-	while( fgets( line, sizeof(line), fp ) ) {
-		while( isWhitespace( line[ strlen( line ) - 1 ] ) ) line[ strlen( line ) - 1 ] = 0;
-		lines.push_back( line );
-	}
-
-	std::vector<std::string>::iterator i = lines.begin();
-	int vertexPropertyCount = 0;
-	int facePropertyCount = 0;
-	int vertCount = 0;
-	//int faceCount = 0;
-	while( i != lines.end() ) {
-		if( *i == "end_header" ) {
-			++i;
-			break;
+	if( FILE *fp = fopen( filename, "r" ) ) {
+		std::vector<std::string> lines;
+		char line[128];
+		while( fgets( line, sizeof(line), fp ) ) {
+			while( isWhitespace( line[ strlen( line ) - 1 ] ) ) line[ strlen( line ) - 1 ] = 0;
+			lines.push_back( line );
 		}
-		strcpy( line, i->c_str() );
-		char *pch = strtok( line, " " );
-		if( pch ) {
-section_start:
-			if( strcmp( pch, "element" ) == 0 ) {
-				// in a new element:
-				pch = strtok( NULL, " " );
-				if( strcmp( pch, "vertex" ) == 0 ) {
-					// doing a vertex
-					pch = strtok( NULL, " " );
-					vertCount = atoi( pch );
-					
-					++i;
-					while( i != lines.end() ) {
-						// continue reading until we don't have properties
-						strcpy( line, i->c_str() );
-						char *pch = strtok( line, " " );
-						if( strcmp( pch, "property" ) ) {
-							goto section_start;
-						} else {
-							pch = strtok( NULL, " " );
-							vertexPropertyCount += 1;
-						}
-						++i;
-					}
-				}
-				if( strcmp( pch, "face" ) == 0 ) {
-					// doing a face
-					pch = strtok( NULL, " " );
-					//faceCount = atoi( pch );
 
-					++i;
-					while( i != lines.end() ) {
-						// continue reading until we don't have properties
-						strcpy( line, i->c_str() );
-						char *pch = strtok( line, " " );
-						if( strcmp( pch, "property" ) ) {
-							goto section_start;
-						} else {
-							pch = strtok( NULL, " " );
-							facePropertyCount += 1;
-						}
+		std::vector<std::string>::iterator i = lines.begin();
+		int vertexPropertyCount = 0;
+		int facePropertyCount = 0;
+		int vertCount = 0;
+		//int faceCount = 0;
+		while( i != lines.end() ) {
+			if( *i == "end_header" ) {
+				++i;
+				break;
+			}
+			strcpy( line, i->c_str() );
+			char *pch = strtok( line, " " );
+			if( pch ) {
+section_start:
+				if( strcmp( pch, "element" ) == 0 ) {
+					// in a new element:
+					pch = strtok( NULL, " " );
+					if( strcmp( pch, "vertex" ) == 0 ) {
+						// doing a vertex
+						pch = strtok( NULL, " " );
+						vertCount = atoi( pch );
+
 						++i;
+						while( i != lines.end() ) {
+							// continue reading until we don't have properties
+							strcpy( line, i->c_str() );
+							char *pch = strtok( line, " " );
+							if( strcmp( pch, "property" ) ) {
+								goto section_start;
+							} else {
+								pch = strtok( NULL, " " );
+								vertexPropertyCount += 1;
+							}
+							++i;
+						}
+					}
+					if( strcmp( pch, "face" ) == 0 ) {
+						// doing a face
+						pch = strtok( NULL, " " );
+						//faceCount = atoi( pch );
+
+						++i;
+						while( i != lines.end() ) {
+							// continue reading until we don't have properties
+							strcpy( line, i->c_str() );
+							char *pch = strtok( line, " " );
+							if( strcmp( pch, "property" ) ) {
+								goto section_start;
+							} else {
+								pch = strtok( NULL, " " );
+								facePropertyCount += 1;
+							}
+							++i;
+						}
 					}
 				}
 			}
+			++i;
 		}
-		++i;
-	}
-	std::vector<Vec3> pos, norm;
-	std::vector<std::string>::iterator faceData = i + vertCount;
-	while( i != faceData ) {
-		strcpy( line, i->c_str() );
-		Vec3 p,n;
-		sscanf( line, "%f %f %f %f %f %f", &p.x, &p.y, &p.z, &n.x, &n.y, &n.z );
-		pos.push_back( correction * p );
-		norm.push_back( correction * p );
-		++i;
-	}
-	while( i != lines.end() ) {
-		strcpy( line, i->c_str() );
-		int n;
-		sscanf( line, "%i", &n );
-		if( n == 3 ) {
-			int a,b,c;
-			sscanf( line, "%i %i %i %i", &n, &a, &b, &c );
-			PushVNUC( pos[a], norm[a] );
-			PushVNUC( pos[b], norm[b] );
-			PushVNUC( pos[c], norm[c] );
-		} else if( n == 4 ) {
-			int a,b,c,d;
-			sscanf( line, "%i %i %i %i %i", &n, &a, &b, &c, &d );
-			PushVNUC( pos[a], norm[a] );
-			PushVNUC( pos[b], norm[b] );
-			PushVNUC( pos[c], norm[c] );
-			PushVNUC( pos[a], norm[a] );
-			PushVNUC( pos[c], norm[c] );
-			PushVNUC( pos[d], norm[d] );
-		} else {
-			printf( "got a %i element face...\n", n );
+		std::vector<Vec3> pos, norm;
+		std::vector<std::string>::iterator faceData = i + vertCount;
+		while( i != faceData ) {
+			strcpy( line, i->c_str() );
+			Vec3 p,n;
+			sscanf( line, "%f %f %f %f %f %f", &p.x, &p.y, &p.z, &n.x, &n.y, &n.z );
+			pos.push_back( correction * p );
+			norm.push_back( correction * p );
+			++i;
 		}
-		++i;
+		while( i != lines.end() ) {
+			strcpy( line, i->c_str() );
+			int n;
+			sscanf( line, "%i", &n );
+			if( n == 3 ) {
+				int a,b,c;
+				sscanf( line, "%i %i %i %i", &n, &a, &b, &c );
+				PushVNUC( pos[a], norm[a] );
+				PushVNUC( pos[b], norm[b] );
+				PushVNUC( pos[c], norm[c] );
+			} else if( n == 4 ) {
+				int a,b,c,d;
+				sscanf( line, "%i %i %i %i %i", &n, &a, &b, &c, &d );
+				PushVNUC( pos[a], norm[a] );
+				PushVNUC( pos[b], norm[b] );
+				PushVNUC( pos[c], norm[c] );
+				PushVNUC( pos[a], norm[a] );
+				PushVNUC( pos[c], norm[c] );
+				PushVNUC( pos[d], norm[d] );
+			} else {
+				printf( "got a %i element face...\n", n );
+			}
+			++i;
+		}
+	} else {
+		SetAsCube();
 	}
 }
 
