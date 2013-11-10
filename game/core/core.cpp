@@ -308,3 +308,7 @@ int main( int argc, char *argv[] ) {
 	return 0;
 }
 
+void SetGameTitle( const char *newName ) {
+	glfwSetWindowTitle(newName);
+}
+

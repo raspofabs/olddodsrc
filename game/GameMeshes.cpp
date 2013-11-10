@@ -66,6 +66,12 @@ namespace GameMeshes {
 		}
 		return meshes["cube"];
 	}
-
+	void Add( const std::string &str, BadMesh *mesh ) {
+		if( meshes.count( str ) ) {
+			eprintf( "adding a mesh where there already is one [%s]\n", str.c_str() );
+		} else {
+			meshes[ str ] = mesh;
+		}
+	}
 };
 

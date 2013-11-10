@@ -3,6 +3,7 @@
 #include "core/Shader.h"
 #include "core/BadMesh.h"
 #include "core/FontRender.h"
+#include "core/core.h"
 
 #include "GameTextures.h"
 #include "GameMeshes.h"
@@ -42,6 +43,8 @@ void GameInit() {
 	cube = new BadMesh();
 	cube->SetAsCube();
 	cube->UVsFromBB();
+
+	SetGameTitle( "OOP game" );
 }
 void GameShutdown() {
 }

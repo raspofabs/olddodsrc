@@ -8,6 +8,7 @@ namespace GameMeshes {
 	void Init();
 	void Shutdown();
 	BadMesh *Get( const std::string &str );
+	void Add( const std::string &str, BadMesh *mesh );
 };
 
 #endif
