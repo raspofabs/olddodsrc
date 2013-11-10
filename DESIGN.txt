@@ -12,6 +12,7 @@ Update 1: OOPVDOD, the game Design document. Final version.
 6. That's it, the whole game.
 
 Woo, a game design document. I bet this never changes througout the whole game development.
+// completed in commit 0cc033eea6782f8b2a54bb6a35de75c539de33f9
 
 1. The player is in control of a character in the world.
 2. The world is a farm, 3 x 3 plots of earth.
