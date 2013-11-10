@@ -1,0 +1,8 @@
+during change 1 (when splitting into DOD and OOP):
+
+notice how we had to move to pointers as constructors caused us to lose control
+of when the dude and tiles were initialised, and if we let them own what they
+need to render, then they are trying to grab assets before they are ready to be
+grabbed.
+
+
