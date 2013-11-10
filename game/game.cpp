@@ -49,20 +49,33 @@ void GameShutdown() {
 // game state
 int gTileState[3*3];
 Vec2 gDudePos;
+int haveSeeds = 5;
 
 void UpdateLogic( double delta ) {
 	float mx=0.0f,my=0.0f;
-	bool plant = false;
+	static bool actionLast = false;
+	bool action = false;
 	if ( glfwGetKey( 'W' ) == GLFW_PRESS ) my += 1.0f;
 	if ( glfwGetKey( 'S' ) == GLFW_PRESS ) my -= 1.0f;
 	if ( glfwGetKey( 'A' ) == GLFW_PRESS ) mx += 1.0f;
 	if ( glfwGetKey( 'D' ) == GLFW_PRESS ) mx -= 1.0f;
-	if ( glfwGetKey( GLFW_KEY_SPACE ) == GLFW_PRESS ) plant = true;
+	if ( glfwGetKey( GLFW_KEY_UP ) == GLFW_PRESS ) my += 1.0f;
+	if ( glfwGetKey( GLFW_KEY_DOWN ) == GLFW_PRESS ) my -= 1.0f;
+	if ( glfwGetKey( GLFW_KEY_LEFT ) == GLFW_PRESS ) mx += 1.0f;
+	if ( glfwGetKey( GLFW_KEY_RIGHT ) == GLFW_PRESS ) mx -= 1.0f;
+	if ( glfwGetKey( GLFW_KEY_SPACE ) == GLFW_PRESS ) action = true;
+
+	if( actionLast ) {
+		actionLast = action;
+		action = false;
+	} else {
+		actionLast = action;
+	}
 
 	const float dudeSpeed = 1.5f;
 	gDudePos.x += delta * mx * dudeSpeed;
 	gDudePos.y += delta * my * dudeSpeed;
-	if( plant ) {
+	if( action ) {
 		Vec3 gDudeRelative = gDudePos - Vec2( -1.0f, -1.0f );
 		float x = floorf( gDudeRelative.x + 0.5f );
 		float y = floorf( gDudeRelative.y + 0.5f );
@@ -70,7 +83,11 @@ void UpdateLogic( double delta ) {
 			int cell = (int)x + 3 * (int)y;
 			if( gTileState[cell] == 0 ) {
 				gTileState[cell] = 1;
-				Log( 1, "planted a cobra at %i (%.2f,%.2f)\n", cell, x, y );
+				Log( 1, "ploughed the land at %i (%.2f,%.2f)\n", cell, x, y );
+			} else if( gTileState[cell] == 1 && haveSeeds ) {
+				gTileState[cell] = 2;
+				haveSeeds -= 1;
+				Log( 1, "planted an owl at %i (%.2f,%.2f)\n", cell, x, y );
 			}
 		}
 	}
@@ -79,6 +96,7 @@ void UpdateLogic( double delta ) {
 void DrawHUD() {
 	DefaultOrtho();
 	SetCamera(gIdentityMat);
+	SetModel(gIdentityMat);
 	glDepthFunc(GL_LEQUAL);
 	ClearScreen( 0.3f, 0.3f, 0.3f );
 	SetTexture( "sword", 0 );
@@ -115,7 +133,8 @@ void DrawWorld() {
 			SetModel( modelMat );
 			switch(gTileState[tile]) {
 				case 0: SetTexture( "earth", 0 ); break;
-				case 1: SetTexture( "cobra", 0 ); break;
+				case 1: SetTexture( "pick", 0 ); break;
+				case 2: SetTexture( "owl", 0 ); break;
 			}
 			smallertile->DrawTriangles();
 			tile += 1;
