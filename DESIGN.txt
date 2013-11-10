@@ -1,0 +1,20 @@
+Update 1: OOPVDOD, the game Design document. Final version.
+
+1. The player is in control of a character in the world.
+1.1. They move from square to square by pressing the wasd / arrow keys.
+1.1. Movement is a whole square at once (the dude animates from one space to another.)
+2. The world is a farm, 3 x 3 plots of earth.
+3. The earth can be ploughed. (pressing space does this)
+4. The ploughed earth can have owls planted in it.
+4.1 only while they have enough seeds. you start with 5
+4.2 you can harvest fully grown owls to get more owl seeds.
+5. The owls grow over time. Once fully grown, you can cut them down.
+6. That's it, the whole game.
+
+Woo, a game design document. I bet this never changes througout the whole game development.
+
+1. The player is in control of a character in the world.
+2. The world is a farm, 3 x 3 plots of earth.
+3. The earth can be ploughed. (pressing space does this)
+4. The ploughed earth can have owls planted in it. (only while they have enough seeds. you start with 5)
+5. That's it, the whole game.
