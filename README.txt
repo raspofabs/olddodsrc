@@ -18,3 +18,9 @@ start with, then do what normally happens in games and demand new exciting
 features that mean lots of refactoring, which should show up some of the
 differences in DOD vs OOP in daily use as a language that includes maintenance
 and bug fixing.
+
+To start with, the game was written in as basic a way as possible, but from the
+second design onwards, the game will be written out in two different ways.
+There will be refactoring of code in both branches, but both implementations
+will stick to the design in their own way. At each design checkpoint, the
+gameplay should be completely indistinguishable.

@@ -1,4 +1,4 @@
-TARGETS=test game
+TARGETS=test dodgame oopgame
 
 CC=g++
 #CC=clang++
@@ -46,8 +46,6 @@ build/%.o: %.cpp | build
 # testing
 test: build/test.o $(COMMONOBJECTS) $(CORE) $(TINYJS)
 	$(CC) build/test.o $(COMMONOBJECTS) $(CORE) $(TINYJS) -o test $(LIBS)
-game: build/game.o $(COMMONOBJECTS) $(CORE) $(TINYJS)
-	$(CC) build/game.o $(COMMONOBJECTS) $(CORE) $(TINYJS) -o game $(LIBS)
 oopgame: build/oopgame.o $(COMMONOBJECTS) $(CORE) $(TINYJS)
 	$(CC) build/oopgame.o $(COMMONOBJECTS) $(CORE) $(TINYJS) -o oopgame $(LIBS)
 dodgame: build/dodgame.o $(COMMONOBJECTS) $(CORE) $(TINYJS)
@@ -62,4 +60,5 @@ basepackages:
 
 run:
 	#./test
-	./game
+	./dodgame
+	./oopgame
