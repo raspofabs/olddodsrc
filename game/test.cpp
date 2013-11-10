@@ -74,31 +74,37 @@ void GameUpdate() {
 	SetModel( modelMat );
 	cube->DrawTriangles();
 
+	SetTexture( "wall", 0 );
 	modelMat = Translation(Vec3( 6.0f, 0.0f, 0.0f));
 	SetModel( modelMat );
 	torus->DrawTriangles();
 
+	SetTexture( "potion-blue", 0 );
 	modelMat = Translation(Vec3( -6.0f, 0.0f, 0.0f));
 	SetModel( modelMat );
 	monkey->DrawTriangles();
 
-	SetTexture( "pointer", 0 );
+	SetTexture( "dragon", 0 );
 	modelMat = Translation(Vec3( 0.0f, 0.0f, 6.0f));
 	SetModel( modelMat );
 	bunny->DrawTriangles();
 
+	SetTexture( "guy", 0 );
 	modelMat = Translation(Vec3( 0.0f, 0.0f, -6.0f));
 	SetModel( modelMat );
 	rocks->DrawTriangles();
 
+	SetTexture( "chest", 0 );
 	modelMat = Translation(Vec3( 6.0f, 0.0f, 6.0f));
 	SetModel( modelMat );
 	wall->DrawTriangles();
 
+	SetTexture( "ring-yellow", 0 );
 	modelMat = Translation(Vec3( -6.0f, 0.0f, -6.0f));
 	SetModel( modelMat );
 	sword->DrawTriangles();
 
+	SetTexture( "door", 0 );
 	modelMat = Translation(Vec3( 6.0f, 0.0f, -6.0f));
 	SetModel( modelMat );
 	well->DrawTriangles();
