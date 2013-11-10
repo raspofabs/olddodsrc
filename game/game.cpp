@@ -7,14 +7,9 @@
 #include "GameTextures.h"
 #include "GameMeshes.h"
 
+// asset handles
 BadMesh *cube, *dude;
 BadMesh *smallertile;
-Vec3 from, to;
-extern Mat44 gIdentityMat;
-extern float g_fGameTime;
-
-int gTileState[3*3];
-Vec2 gDudePos;
 
 void UpdateLogic( double delta );
 void DrawHUD();
@@ -50,6 +45,10 @@ void GameInit() {
 }
 void GameShutdown() {
 }
+
+// game state
+int gTileState[3*3];
+Vec2 gDudePos;
 
 void UpdateLogic( double delta ) {
 	float mx=0.0f,my=0.0f;
@@ -98,8 +97,10 @@ void DrawHUD() {
 }
 
 void DrawWorld() {
-	Mat44 modelMat = Translation(Vec3( 30.0f + from.x, 30.0f + from.z, 0.0f));
+	Mat44 modelMat;
+	Vec3 from, to;
 	DefaultProjection();
+	extern float g_fGameTime;
 	glUniform1f(GLShader::Current()->timeLocation, g_fGameTime);
 	from = Vec3( 0.1f, 4.0f, -10.0f );
 	to = Vec3( 0.0f, 0.0f, 0.0f );
