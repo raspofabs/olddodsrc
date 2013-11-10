@@ -32,12 +32,19 @@ namespace GameMeshes {
 		LoadOne( "well", "data/meshes/well.coveredopen.ply", 1.0f, true );
 		LoadOne( "wall", "data/meshes/wall.ply", 0.03f );
 
+		// default mesh if things go wrong
+		BadMesh *cube = new BadMesh();
+		cube->SetAsCube();
+		cube->UVsFromBB();
+		meshes["cube"] = cube;
+
 		// simple flat quad thing for making people with sprites
 		BadMesh *quadpeep = new BadMesh();
 		quadpeep->SetAsCube();
 		quadpeep->UVsFromBB( gXVec3, gYVec3 );
 		Mat44 flatten = gIdentityMat;
 		flatten.z.z = 0.1f;
+		flatten.w.y = 1.0f;
 		quadpeep->ApplyTransform( flatten );
 		meshes["quadpeep"] = quadpeep;
 
@@ -54,7 +61,10 @@ namespace GameMeshes {
 	void Shutdown() {
 	}
 	BadMesh *Get( const std::string &str ) {
-		return meshes[ str ];
+		if( meshes.count( str ) ) {
+			return meshes[ str ];
+		}
+		return meshes["cube"];
 	}
 
 };

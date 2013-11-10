@@ -86,7 +86,7 @@ void GameUpdate() {
 	rocks->DrawTriangles();
 
 	SetTexture( "toughguy", 0 );
-	modelMat = Translation(Vec3( 0.0f, 3.0f, 0.0f));
+	modelMat = Translation(Vec3( 0.0f, 2.0f, 0.0f));
 	SetModel( modelMat );
 	GameMeshes::Get("quadpeep")->DrawTriangles();
 

@@ -1,4 +1,4 @@
-TARGETS=test
+TARGETS=test game
 
 CC=g++
 #CC=clang++
@@ -46,6 +46,8 @@ build/%.o: %.cpp | build
 # testing
 test: build/test.o $(COMMONOBJECTS) $(CORE) $(TINYJS)
 	$(CC) build/test.o $(COMMONOBJECTS) $(CORE) $(TINYJS) -o test $(LIBS)
+game: build/game.o $(COMMONOBJECTS) $(CORE) $(TINYJS)
+	$(CC) build/game.o $(COMMONOBJECTS) $(CORE) $(TINYJS) -o game $(LIBS)
 oopgame: build/oopgame.o $(COMMONOBJECTS) $(CORE) $(TINYJS)
 	$(CC) build/oopgame.o $(COMMONOBJECTS) $(CORE) $(TINYJS) -o oopgame $(LIBS)
 dodgame: build/dodgame.o $(COMMONOBJECTS) $(CORE) $(TINYJS)
@@ -59,4 +61,5 @@ basepackages:
 	sudo apt-get -y install g++ libglfw-dev xorg-dev libglu1-mesa-dev
 
 run:
-	./test
+	#./test
+	./game
