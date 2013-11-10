@@ -42,8 +42,10 @@ void GameUpdate() {
 		float y = floorf( gDudeRelative.y + 0.5f );
 		if( x >= 0 && x < 3 && y >= 0 && y < 3 ) {
 			int cell = (int)x + 3 * (int)y;
-			gTileState[cell] = 1;
-			Log( 1, "planted a cobra at %i (%.2f,%.2f)\n", cell, x, y );
+			if( gTileState[cell] == 0 ) {
+				gTileState[cell] = 1;
+				Log( 1, "planted a cobra at %i (%.2f,%.2f)\n", cell, x, y );
+			}
 		}
 	}
 
