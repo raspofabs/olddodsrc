@@ -24,9 +24,9 @@ namespace GameMeshes {
 	void Init() {
 		Log( 1, "loading meshes\n" );
 
-		LoadOne( "torus", "data/torus.ply" );
-		LoadOne( "bunny", "data/bunny.ply", 0.03f, true );
-		LoadOne( "monkey", "data/monkey.ply", 3.0f );
+		LoadOne( "torus", "data/meshes/torus.ply" );
+		LoadOne( "bunny", "data/meshes/bunny.ply", 0.03f, true );
+		LoadOne( "monkey", "data/meshes/monkey.ply", 3.0f );
 		LoadOne( "rocks", "data/meshes/rocks.ply", 0.03f );
 		LoadOne( "sword", "data/meshes/sword.ply", 1.0f );
 		LoadOne( "well", "data/meshes/well.coveredopen.ply", 1.0f, true );
