@@ -16,15 +16,42 @@ extern float g_fGameTime;
 int gTileState[3*3];
 Vec2 gDudePos;
 
+void UpdateLogic( double delta );
+void DrawHUD();
+void DrawWorld();
+
 void GameUpdate() {
-	glUniform1f(DefaultShaderProgram.timeLocation, g_fGameTime);
 	static double previousTime = glfwGetTime();
 	double drawStart = glfwGetTime();
 	double delta = drawStart - previousTime;
 	previousTime = drawStart;
-
 	if( delta > 0.2f ) delta = 0.2f;
 
+	UpdateLogic( delta );
+	DrawHUD();
+	DrawWorld();
+}
+void GameInit() {
+	GameTextures::Init();
+	GameMeshes::Init();
+
+	smallertile = new BadMesh();
+	*smallertile = *GameMeshes::Get( "floor" );
+	Mat44 scaleDown = gIdentityMat;
+	scaleDown.x.x = 0.9f;
+	scaleDown.z.z = 0.9f;
+	smallertile->ApplyTransform( scaleDown );
+
+	dude = GameMeshes::Get( "quadpeep" );
+
+	cube = new BadMesh();
+	cube->SetAsCube();
+	cube->UVsFromBB();
+}
+void GameShutdown() {
+}
+
+void UpdateLogic( double delta ) {
 	float mx=0.0f,my=0.0f;
 	bool plant = false;
 	if ( glfwGetKey( 'W' ) == GLFW_PRESS ) my += 1.0f;
@@ -48,7 +75,9 @@ void GameUpdate() {
 			}
 		}
 	}
+}
 
+void DrawHUD() {
 	DefaultOrtho();
 	SetCamera(gIdentityMat);
 	glDepthFunc(GL_LEQUAL);
@@ -56,9 +85,22 @@ void GameUpdate() {
 	SetTexture( "sword", 0 );
 	DrawSquare( 16, 16, 32, 32, 0xFFFFFFFF );
 
-	Mat44 modelMat = Translation(Vec3( 30.0f + from.x, 30.0f + from.z, 0.0f));
 
+	DefaultOrtho();
+	SetCamera( gIdentityMat );
+	SetModel( gIdentityMat );
+	glDepthFunc(GL_LEQUAL);
+
+	Mat44 modelMat;
+	modelMat = Translation(Vec3( 0.0f,0.0f,0.0f ));
+	modelMat.Scale(1.0f);
+	FontPrint( modelMat, "Your Farm" );
+}
+
+void DrawWorld() {
+	Mat44 modelMat = Translation(Vec3( 30.0f + from.x, 30.0f + from.z, 0.0f));
 	DefaultProjection();
+	glUniform1f(GLShader::Current()->timeLocation, g_fGameTime);
 	from = Vec3( 0.1f, 4.0f, -10.0f );
 	to = Vec3( 0.0f, 0.0f, 0.0f );
 
@@ -83,33 +125,4 @@ void GameUpdate() {
 	modelMat = Translation( Vec3( gDudePos.x * 2.0f, 0.0f, gDudePos.y * 2.0f ) );
 	SetModel( modelMat );
 	dude->DrawTriangles();
-
-	DefaultOrtho();
-	SetCamera( gIdentityMat );
-	SetModel( gIdentityMat );
-	glDepthFunc(GL_LEQUAL);
-
-	modelMat = Translation(Vec3( 0.0f,0.0f,0.0f ));
-	modelMat.Scale(1.0f);
-	FontPrint( modelMat, "Your Farm" );
 }
-void GameInit() {
-	GameTextures::Init();
-	GameMeshes::Init();
-
-	smallertile = new BadMesh();
-	*smallertile = *GameMeshes::Get( "floor" );
-	Mat44 scaleDown = gIdentityMat;
-	scaleDown.x.x = 0.9f;
-	scaleDown.z.z = 0.9f;
-	smallertile->ApplyTransform( scaleDown );
-
-	dude = GameMeshes::Get( "quadpeep" );
-
-	cube = new BadMesh();
-	cube->SetAsCube();
-	cube->UVsFromBB();
-}
-void GameShutdown() {
-}
-
