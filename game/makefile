@@ -9,7 +9,7 @@ CFLAGS= -fno-strict-aliasing -DUNIV_LINUX \
 	-Werror -Wall -Wextra $(OPTIMISE) $(DEBUG)
 LIBS=-Wl,-Bsymbolic-functions \
 	-rdynamic -lrt -lpthread \
-	-lGL -lglfw -lXrandr
+	-lGL -lglfw
 
 RAW_COMMONOBJECTS=GameTextures.o GameMeshes.o
 RAW_TARGETOBJECTS=$(TARGETS:%=%.o)
