@@ -104,6 +104,8 @@ struct Mat44 {
 // Vec2 operations
 inline float dot( const Vec2 a, const Vec2 b ) { return a.dot(b); }
 inline Vec2 operator*( float a, const Vec2 b ) { return b*a; }
+inline bool operator==( const Vec2 a, const Vec2 b ) { return a.x == b.x && a.y == b.y; }
+inline bool operator!=( const Vec2 a, const Vec2 b ) { return a.x != b.x || a.y != b.y; }
 
 // Vec3 operations
 inline float dot( const Vec3 a, const Vec3 b ) { return a.dot(b); }

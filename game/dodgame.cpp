@@ -44,7 +44,7 @@ void GameInit() {
 	cube->SetAsCube();
 	cube->UVsFromBB();
 
-	SetGameTitle( "OOP game" );
+	SetGameTitle( "DOD game" );
 }
 void GameShutdown() {
 }
@@ -52,22 +52,49 @@ void GameShutdown() {
 // game state
 int gTileState[3*3];
 Vec2 gDudePos;
+Vec2 gDudeDest;
 int haveSeeds = 5;
 
+float clamp( float val, float low, float high ) {
+	return val > low ? val < high ? val : high : low;
+}
+
 void UpdateLogic( double delta ) {
-	float mx=0.0f,my=0.0f;
-	static bool actionLast = false;
+
+	bool moving = gDudePos != gDudeDest;
+	if( moving ) {
+		const float dudeSpeed = 1.5f * delta;
+		Vec2 d = gDudeDest - gDudePos;
+		d.x = clamp( d.x, -dudeSpeed, dudeSpeed );
+		d.y = clamp( d.y, -dudeSpeed, dudeSpeed );
+		gDudePos.x += d.x;
+		gDudePos.y += d.y;
+	} else {
+		float mx=0.0f,my=0.0f;
+		if ( glfwGetKey( 'W' ) == GLFW_PRESS ) my += 1.0f;
+		if ( glfwGetKey( 'S' ) == GLFW_PRESS ) my -= 1.0f;
+		if ( glfwGetKey( 'A' ) == GLFW_PRESS ) mx += 1.0f;
+		if ( glfwGetKey( 'D' ) == GLFW_PRESS ) mx -= 1.0f;
+		if ( glfwGetKey( GLFW_KEY_UP ) == GLFW_PRESS ) my += 1.0f;
+		if ( glfwGetKey( GLFW_KEY_DOWN ) == GLFW_PRESS ) my -= 1.0f;
+		if ( glfwGetKey( GLFW_KEY_LEFT ) == GLFW_PRESS ) mx += 1.0f;
+		if ( glfwGetKey( GLFW_KEY_RIGHT ) == GLFW_PRESS ) mx -= 1.0f;
+
+		if( mx != 0.0f || my != 0.0f ) {
+			if( mx != 0.0f && my != 0.0f ) {
+			} else {
+				if( mx > 0.0f ) { gDudeDest = gDudePos + Vec2(1.0f,0.0f); }
+				if( mx < 0.0f ) { gDudeDest = gDudePos - Vec2(1.0f,0.0f); }
+				if( my > 0.0f ) { gDudeDest = gDudePos + Vec2(0.0f,1.0f); }
+				if( my < 0.0f ) { gDudeDest = gDudePos - Vec2(0.0f,1.0f); }
+			}
+		}
+	}
+
 	bool action = false;
-	if ( glfwGetKey( 'W' ) == GLFW_PRESS ) my += 1.0f;
-	if ( glfwGetKey( 'S' ) == GLFW_PRESS ) my -= 1.0f;
-	if ( glfwGetKey( 'A' ) == GLFW_PRESS ) mx += 1.0f;
-	if ( glfwGetKey( 'D' ) == GLFW_PRESS ) mx -= 1.0f;
-	if ( glfwGetKey( GLFW_KEY_UP ) == GLFW_PRESS ) my += 1.0f;
-	if ( glfwGetKey( GLFW_KEY_DOWN ) == GLFW_PRESS ) my -= 1.0f;
-	if ( glfwGetKey( GLFW_KEY_LEFT ) == GLFW_PRESS ) mx += 1.0f;
-	if ( glfwGetKey( GLFW_KEY_RIGHT ) == GLFW_PRESS ) mx -= 1.0f;
 	if ( glfwGetKey( GLFW_KEY_SPACE ) == GLFW_PRESS ) action = true;
 
+	static bool actionLast = false;
 	if( actionLast ) {
 		actionLast = action;
 		action = false;
@@ -75,9 +102,6 @@ void UpdateLogic( double delta ) {
 		actionLast = action;
 	}
 
-	const float dudeSpeed = 1.5f;
-	gDudePos.x += delta * mx * dudeSpeed;
-	gDudePos.y += delta * my * dudeSpeed;
 	if( action ) {
 		Vec3 gDudeRelative = gDudePos - Vec2( -1.0f, -1.0f );
 		float x = floorf( gDudeRelative.x + 0.5f );
