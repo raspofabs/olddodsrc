@@ -74,7 +74,7 @@ Tile *gpTiles;
 
 class Dude {
 	public:
-		Dude() : m_Pos(0,0), m_Control(0,0), m_DoAction(0), m_SeedCount(5) {
+		Dude() : m_Pos(0,0), m_Dest(0,0), m_Control(0,0), m_DoAction(0), m_SeedCount(5) {
 			m_Mesh = GameMeshes::Get("quadpeep");
 		}
 
@@ -85,8 +85,24 @@ class Dude {
 			m_DoAction = true;
 		}
 		void Update( double delta ) {
-			const float dudeSpeed = 1.5f;
-			m_Pos += delta * m_Control * dudeSpeed;
+			bool moving = m_Pos != m_Dest;
+			if( moving ) {
+				const float dudeSpeed = 1.5f * delta;
+				Vec2 d = m_Dest - m_Pos;
+				d.x = clamp( d.x, -dudeSpeed, dudeSpeed );
+				d.y = clamp( d.y, -dudeSpeed, dudeSpeed );
+				m_Pos += d;
+			} else {
+				if( m_Control != Vec2(0,0) ) {
+					if( m_Control.x != 0.0f && m_Control.y != 0.0f ) {
+					} else {
+						if( m_Control.x > 0.0f ) { m_Dest = m_Pos + Vec2(1.0f,0.0f); }
+						if( m_Control.x < 0.0f ) { m_Dest = m_Pos - Vec2(1.0f,0.0f); }
+						if( m_Control.y > 0.0f ) { m_Dest = m_Pos + Vec2(0.0f,1.0f); }
+						if( m_Control.y < 0.0f ) { m_Dest = m_Pos - Vec2(0.0f,1.0f); }
+					}
+				}
+			}
 			if( m_DoAction ) {
 				m_DoAction = false;
 				Vec3 rel = m_Pos - Vec2( -1.0f, -1.0f );
@@ -113,7 +129,7 @@ class Dude {
 		}
 
 	private:
-		Vec2 m_Pos;
+		Vec2 m_Pos, m_Dest;
 		Vec2 m_Control;
 		bool m_DoAction;
 		int m_SeedCount;

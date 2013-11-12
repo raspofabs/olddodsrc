@@ -55,10 +55,6 @@ Vec2 gDudePos;
 Vec2 gDudeDest;
 int haveSeeds = 5;
 
-float clamp( float val, float low, float high ) {
-	return val > low ? val < high ? val : high : low;
-}
-
 void UpdateLogic( double delta ) {
 
 	bool moving = gDudePos != gDudeDest;
@@ -67,8 +63,7 @@ void UpdateLogic( double delta ) {
 		Vec2 d = gDudeDest - gDudePos;
 		d.x = clamp( d.x, -dudeSpeed, dudeSpeed );
 		d.y = clamp( d.y, -dudeSpeed, dudeSpeed );
-		gDudePos.x += d.x;
-		gDudePos.y += d.y;
+		gDudePos += d;
 	} else {
 		float mx=0.0f,my=0.0f;
 		if ( glfwGetKey( 'W' ) == GLFW_PRESS ) my += 1.0f;
