@@ -13,6 +13,8 @@ void UpdateLogic( double delta );
 void DrawHUD();
 void DrawWorld();
 
+#include "GameConsts.h"
+
 void GameUpdate() {
 	static double previousTime = glfwGetTime();
 	double drawStart = glfwGetTime();
@@ -78,7 +80,7 @@ class Tile {
 		}
 		void Update( double delta ) {
 			if( m_State == 2 ) {
-				m_Growth += delta;
+				m_Growth += GROWTH_RATE * delta;
 				if( m_Growth >= 1.0f ) {
 					m_Growth = 1.0f;
 					m_State = 3;

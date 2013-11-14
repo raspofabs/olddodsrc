@@ -8,6 +8,8 @@
 #include "GameTextures.h"
 #include "GameMeshes.h"
 
+#include "GameConsts.h"
+
 #include <list>
 
 // asset handles
@@ -125,7 +127,7 @@ void UpdateLogic( double delta ) {
 	}
 
 	for( GrowingList::iterator i = gGrowingList.begin(); i != gGrowingList.end(); ) {
-		i->second += delta;
+		i->second += GROWTH_RATE * delta;
 		if( i->second >= 1.0f ) {
 			gTileState[i->first] = 3;
 			i = gGrowingList.erase( i );
