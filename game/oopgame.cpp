@@ -143,6 +143,7 @@ class Dude {
 				}
 			}
 		}
+		int GetNumSeeds() { return m_SeedCount; }
 
 		Vec3 GetWorldPos() { return Vec3( m_Pos.x * 2.0f, 0.0, m_Pos.y * 2.0f ); }
 		void Render() {
@@ -210,7 +211,9 @@ void DrawHUD() {
 	Mat44 modelMat;
 	modelMat = Translation(Vec3( 0.0f,0.0f,0.0f ));
 	modelMat.Scale(1.0f);
-	FontPrint( modelMat, "Your Farm" );
+	char buffer[128];
+	sprintf( buffer, "Your Farm .. Seeds: %i", gpDude->GetNumSeeds() );
+	FontPrint( modelMat, buffer);
 }
 
 void DrawWorld() {

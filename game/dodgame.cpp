@@ -153,7 +153,9 @@ void DrawHUD() {
 	Mat44 modelMat;
 	modelMat = Translation(Vec3( 0.0f,0.0f,0.0f ));
 	modelMat.Scale(1.0f);
-	FontPrint( modelMat, "Your Farm" );
+	char buffer[128];
+	sprintf( buffer, "Your Farm .. Seeds: %i", haveSeeds );
+	FontPrint( modelMat, buffer);
 }
 
 void DrawWorld() {
