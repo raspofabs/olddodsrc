@@ -83,10 +83,10 @@ void UpdateLogic( double delta ) {
 		if( mx != 0.0f || my != 0.0f ) {
 			if( mx != 0.0f && my != 0.0f ) {
 			} else {
-				if( mx > 0.0f ) { gDudeDest = gDudePos + Vec2(1.0f,0.0f); }
-				if( mx < 0.0f ) { gDudeDest = gDudePos - Vec2(1.0f,0.0f); }
-				if( my > 0.0f ) { gDudeDest = gDudePos + Vec2(0.0f,1.0f); }
-				if( my < 0.0f ) { gDudeDest = gDudePos - Vec2(0.0f,1.0f); }
+				if( gDudePos.x < 1.0f && mx > 0.0f ) { gDudeDest = gDudePos + Vec2(1.0f,0.0f); }
+				if( gDudePos.x > -1.0f && mx < 0.0f ) { gDudeDest = gDudePos - Vec2(1.0f,0.0f); }
+				if( gDudePos.y < 1.0f && my > 0.0f ) { gDudeDest = gDudePos + Vec2(0.0f,1.0f); }
+				if( gDudePos.y > -1.0f && my < 0.0f ) { gDudeDest = gDudePos - Vec2(0.0f,1.0f); }
 			}
 		}
 	}

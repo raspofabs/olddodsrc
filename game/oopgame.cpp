@@ -109,10 +109,14 @@ class Dude {
 				if( m_Control != Vec2(0,0) ) {
 					if( m_Control.x != 0.0f && m_Control.y != 0.0f ) {
 					} else {
-						if( m_Control.x > 0.0f ) { m_Dest = m_Pos + Vec2(1.0f,0.0f); }
-						if( m_Control.x < 0.0f ) { m_Dest = m_Pos - Vec2(1.0f,0.0f); }
-						if( m_Control.y > 0.0f ) { m_Dest = m_Pos + Vec2(0.0f,1.0f); }
-						if( m_Control.y < 0.0f ) { m_Dest = m_Pos - Vec2(0.0f,1.0f); }
+						bool canGoLeft = m_Pos.x > -1.0f;
+						bool canGoRight = m_Pos.x < 1.0f;
+						bool canGoUp = m_Pos.y > -1.0f;
+						bool canGoDown = m_Pos.y < 1.0f;
+						if( canGoRight && m_Control.x > 0.0f ) { m_Dest = m_Pos + Vec2(1.0f,0.0f); }
+						if( canGoLeft && m_Control.x < 0.0f ) { m_Dest = m_Pos - Vec2(1.0f,0.0f); }
+						if( canGoDown && m_Control.y > 0.0f ) { m_Dest = m_Pos + Vec2(0.0f,1.0f); }
+						if( canGoUp && m_Control.y < 0.0f ) { m_Dest = m_Pos - Vec2(0.0f,1.0f); }
 					}
 				}
 			}
