@@ -8,6 +8,8 @@
 #include "GameTextures.h"
 #include "GameMeshes.h"
 
+#include <list>
+
 // asset handles
 BadMesh *cube, *dude;
 BadMesh *smallertile;
@@ -51,6 +53,9 @@ void GameShutdown() {
 
 // game state
 int gTileState[3*3];
+typedef std::pair<int,float> Growing;
+typedef std::list<Growing> GrowingList;
+GrowingList gGrowingList;
 Vec2 gDudePos;
 Vec2 gDudeDest;
 int haveSeeds = 5;
@@ -108,9 +113,20 @@ void UpdateLogic( double delta ) {
 				Log( 1, "ploughed the land at %i (%.2f,%.2f)\n", cell, x, y );
 			} else if( gTileState[cell] == 1 && haveSeeds ) {
 				gTileState[cell] = 2;
+				gGrowingList.push_back( Growing( cell, 0.0f ) );
 				haveSeeds -= 1;
 				Log( 1, "planted an owl at %i (%.2f,%.2f)\n", cell, x, y );
 			}
+		}
+	}
+
+	for( GrowingList::iterator i = gGrowingList.begin(); i != gGrowingList.end(); ) {
+		i->second += delta;
+		if( i->second >= 1.0f ) {
+			gTileState[i->first] = 3;
+			i = gGrowingList.erase( i );
+		} else {
+			++i;
 		}
 	}
 }
@@ -157,6 +173,7 @@ void DrawWorld() {
 				case 0: SetTexture( "earth", 0 ); break;
 				case 1: SetTexture( "pick", 0 ); break;
 				case 2: SetTexture( "owl", 0 ); break;
+				case 3: SetTexture( "dragon", 0 ); break;
 			}
 			smallertile->DrawTriangles();
 			tile += 1;

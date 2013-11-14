@@ -47,7 +47,7 @@ void GameShutdown() {
 // game state
 class Tile {
 	public:
-		Tile() : m_State(0) {
+		Tile() : m_State(0), m_Growth(0) {
 			m_Mesh = GameMeshes::Get("smallertile");
 		}
 		
@@ -61,12 +61,23 @@ class Tile {
 				case 0: SetTexture( "earth", 0 ); break;
 				case 1: SetTexture( "pick", 0 ); break;
 				case 2: SetTexture( "owl", 0 ); break;
+				case 3: SetTexture( "dragon", 0 ); break;
 			}
 			m_Mesh->DrawTriangles();
+		}
+		void Update( double delta ) {
+			if( m_State == 2 ) {
+				m_Growth += delta;
+				if( m_Growth >= 1.0f ) {
+					m_Growth = 1.0f;
+					m_State = 3;
+				}
+			}
 		}
 
 	private:
 		int m_State;
+		float m_Growth;
 		BadMesh *m_Mesh;
 };
 
@@ -164,6 +175,11 @@ void UpdateLogic( double delta ) {
 
 	gpDude->UpdateInput( inputVec );
 	gpDude->Update( delta );
+
+	for( int i = 0; i < 3 * 3; ++i ) {
+		Tile &t = gpTiles[i];
+		t.Update(delta);
+	}
 }
 
 void DrawHUD() {
