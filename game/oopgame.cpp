@@ -48,7 +48,8 @@ void GameShutdown() {
 class Tile {
 	public:
 		Tile() : m_State(0), m_Growth(0) {
-			m_Mesh = GameMeshes::Get("smallertile");
+			m_GroundMesh = GameMeshes::Get("smallertile");
+			m_OwlMesh = GameMeshes::Get("quadpeep");
 		}
 		
 		bool CanBePloughed() { return m_State == 0; }
@@ -58,14 +59,22 @@ class Tile {
 		void Plant() { m_State = 2; m_Growth = 0.0f; }
 		void Harvest() { m_State = 0; }
 
-		void Render() {
+		void Render( const Mat44 &modelMat ) {
+			SetModel( modelMat );
 			switch(m_State) {
 				case 0: SetTexture( "earth", 0 ); break;
-				case 1: SetTexture( "pick", 0 ); break;
-				case 2: SetTexture( "owl", 0 ); break;
-				case 3: SetTexture( "dragon", 0 ); break;
+				case 1:
+				case 2:
+				case 3: SetTexture( "pick", 0 ); break;
 			}
-			m_Mesh->DrawTriangles();
+			m_GroundMesh->DrawTriangles();
+			if( m_State > 1 ) {
+				SetTexture( "owl", 0 );
+				Mat44 owlMat = modelMat;
+				owlMat.Scale( 0.5f * m_Growth );
+				SetModel( owlMat );
+				m_OwlMesh->DrawTriangles();
+			}
 		}
 		void Update( double delta ) {
 			if( m_State == 2 ) {
@@ -80,7 +89,7 @@ class Tile {
 	private:
 		int m_State;
 		float m_Growth;
-		BadMesh *m_Mesh;
+		BadMesh *m_GroundMesh, *m_OwlMesh;
 };
 
 Tile *gpTiles;
@@ -138,7 +147,7 @@ class Dude {
 					} else if( t.CanBeHarvested() ) {
 						t.Harvest();
 						m_SeedCount += 3;
-						Log( 1, "harvested a dragon to get three owl seeds.\n" );
+						Log( 1, "harvested an owl to get three owl seeds.\n" );
 					}
 				}
 			}
@@ -232,8 +241,7 @@ void DrawWorld() {
 	for( float tz = -2.0f; tz <= 2.0f; tz += 2.0f ) {
 		for( float tx = -2.0f; tx <= 2.0f; tx += 2.0f ) {
 			modelMat = Translation(Vec3( tx, 0.0, tz ));
-			SetModel( modelMat );
-			gpTiles[tile].Render();
+			gpTiles[tile].Render( modelMat );
 			tile += 1;
 		}
 	}

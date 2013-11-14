@@ -119,7 +119,7 @@ void UpdateLogic( double delta ) {
 			} else if( gTileState[cell] == 3 ) {
 				gTileState[cell] = 0;
 				haveSeeds += 3;
-				Log( 1, "harvested a dragon to get three owl seeds.\n" );
+				Log( 1, "harvested an owl to get three owl seeds.\n" );
 			}
 		}
 	}
@@ -177,13 +177,30 @@ void DrawWorld() {
 			SetModel( modelMat );
 			switch(gTileState[tile]) {
 				case 0: SetTexture( "earth", 0 ); break;
-				case 1: SetTexture( "pick", 0 ); break;
-				case 2: SetTexture( "owl", 0 ); break;
-				case 3: SetTexture( "dragon", 0 ); break;
+				case 1:
+				case 2:
+				case 3: SetTexture( "pick", 0 ); break;
 			}
 			smallertile->DrawTriangles();
+			if(gTileState[tile]==3) {
+				modelMat = Translation(Vec3( tx, 0.0, tz ));
+				modelMat.Scale( 0.5f );
+				SetModel( modelMat );
+				SetTexture( "owl", 0 );
+				dude->DrawTriangles();
+			}
 			tile += 1;
 		}
+	}
+
+	for( GrowingList::iterator i = gGrowingList.begin(); i != gGrowingList.end(); ++i ) {
+		float tx = (i->first%3) * 2.0f - 2.0f;
+		float tz = (i->first/3) * 2.0f - 2.0f;
+		modelMat = Translation(Vec3( tx, 0.0, tz ));
+		modelMat.Scale( i->second * 0.5f );
+		SetModel( modelMat );
+		SetTexture( "owl", 0 );
+		dude->DrawTriangles();
 	}
 
 	SetTexture( "guy", 0 );
