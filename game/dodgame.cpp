@@ -116,6 +116,10 @@ void UpdateLogic( double delta ) {
 				gGrowingList.push_back( Growing( cell, 0.0f ) );
 				haveSeeds -= 1;
 				Log( 1, "planted an owl at %i (%.2f,%.2f)\n", cell, x, y );
+			} else if( gTileState[cell] == 3 ) {
+				gTileState[cell] = 0;
+				haveSeeds += 3;
+				Log( 1, "harvested a dragon to get three owl seeds.\n" );
 			}
 		}
 	}

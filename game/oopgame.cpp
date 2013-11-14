@@ -53,8 +53,10 @@ class Tile {
 		
 		bool CanBePloughed() { return m_State == 0; }
 		bool CanBePlanted() { return m_State == 1; }
+		bool CanBeHarvested() { return m_State == 3; }
 		void Plough() { m_State = 1; }
-		void Plant() { m_State = 2; }
+		void Plant() { m_State = 2; m_Growth = 0.0f; }
+		void Harvest() { m_State = 0; }
 
 		void Render() {
 			switch(m_State) {
@@ -129,6 +131,10 @@ class Dude {
 						t.Plant();
 						m_SeedCount -= 1;
 						Log( 1, "planted an owl at %i (%.2f,%.2f)\n", cell, x, y );
+					} else if( t.CanBeHarvested() ) {
+						t.Harvest();
+						m_SeedCount += 3;
+						Log( 1, "harvested a dragon to get three owl seeds.\n" );
 					}
 				}
 			}
