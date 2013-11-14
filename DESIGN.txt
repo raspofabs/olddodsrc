@@ -1,4 +1,26 @@
+Update 3: OOPVDOD, the game Design document. Tweaks before launch.
+
+1. The player is in control of a character in the world.
+1.1. They move from square to square by pressing the wasd / arrow keys.
+1.2. Movement is a whole square at once (the dude animates from one space to another.)
+1.3. The dude needs to turn to face where he is going.
+1.4. Movement is a confined to the 16 farm tiles.
+2. The world is a farm, 4 x 4 plots of earth.
+3. The earth can be ploughed. (holding space digs)
+3.1 ploughing isn't instant, it takes time, have to hold space until ploughed.
+3.2 the player can let go early to move.
+4. The ploughed earth can have owls planted in it.
+4.1 only while they have enough seeds. you start with 5
+4.2 number of seeds must be shown on screen.
+4.3 you can harvest fully grown owls to get more owl seeds.
+4.4 harvesting only has a 50% change of unploughing the field.
+5. The owls grow over time. Once fully grown, you can cut them down.
+5.1 must take a few seconds, and animate them growing.
+5.2 should always blow gently in the wind.
+6. That's it, the whole game.
+
 Update 2: OOPVDOD, the game Design document. Final Polish.
+// completed in 06191a8612962c1eabb99dc78d5f6acc8104887e animate over a few seconds
 
 1. The player is in control of a character in the world.
 1.1. They move from square to square by pressing the wasd / arrow keys.
