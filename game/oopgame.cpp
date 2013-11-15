@@ -98,7 +98,7 @@ Tile *gpTiles;
 
 class Dude {
 	public:
-		Dude() : m_Pos(0,0), m_Dest(0,0), m_Control(0,0), m_DoAction(0), m_SeedCount(5) {
+		Dude() : m_Pos(0,0), m_Dest(0,0), m_Facing(0,-1), m_Control(0,0), m_DoAction(0), m_SeedCount(5) {
 			m_Mesh = GameMeshes::Get("quadpeep");
 		}
 
@@ -109,13 +109,33 @@ class Dude {
 			m_DoAction = true;
 		}
 		void Update( double delta ) {
-			bool moving = m_Pos != m_Dest;
+			Vec2 d = m_Dest - m_Pos;
+			bool moving = d != Vec2(0.0f,0.0f);
 			if( moving ) {
-				const float dudeSpeed = 1.5f * delta;
-				Vec2 d = m_Dest - m_Pos;
-				d.x = clamp( d.x, -dudeSpeed, dudeSpeed );
-				d.y = clamp( d.y, -dudeSpeed, dudeSpeed );
-				m_Pos += d;
+				bool aboutTurn = dot( m_Facing, d ) < 0.0f;
+				float offBy = cross( m_Facing, d );
+				bool turning = aboutTurn || offBy != 0.0f;
+				if( turning ) {
+					Mat22 turn;
+					if( offBy > 0.0f ) {
+						turn.Rot( TURN_SPEED * delta );
+					} else {
+						turn.Rot( -TURN_SPEED * delta );
+					}
+					Vec2 newFace = turn * m_Facing;
+					float newOff = cross( newFace, d );
+					if( !aboutTurn && newOff * offBy <= 0.0f ) {
+						m_Facing = d.normalized();	
+					} else {
+						m_Facing = newFace;
+					}
+				} else {
+					const float dudeSpeed = 1.5f * delta;
+					Vec2 d = m_Dest - m_Pos;
+					d.x = clamp( d.x, -dudeSpeed, dudeSpeed );
+					d.y = clamp( d.y, -dudeSpeed, dudeSpeed );
+					m_Pos += d;
+				}
 			} else {
 				if( m_Control != Vec2(0,0) ) {
 					if( m_Control.x != 0.0f && m_Control.y != 0.0f ) {
@@ -158,11 +178,18 @@ class Dude {
 
 		Vec3 GetWorldPos() { return Vec3( m_Pos.x * 2.0f, 0.0, m_Pos.y * 2.0f ); }
 		void Render() {
+			Mat44 modelMat = Translation( GetWorldPos() );
+			Vec2 aim( -m_Facing.y, m_Facing.x );
+			modelMat.x.x = aim.x;
+			modelMat.x.z = aim.y;
+			modelMat.z.x = -aim.y;
+			modelMat.z.z = aim.x;
+			SetModel( modelMat );
 			m_Mesh->DrawTriangles();
 		}
 
 	private:
-		Vec2 m_Pos, m_Dest;
+		Vec2 m_Pos, m_Dest, m_Facing;
 		Vec2 m_Control;
 		bool m_DoAction;
 		int m_SeedCount;

@@ -59,18 +59,38 @@ typedef std::pair<int,float> Growing;
 typedef std::list<Growing> GrowingList;
 GrowingList gGrowingList;
 Vec2 gDudePos;
+Vec2 gDudeFacing(0.0f,-1.0f);
 Vec2 gDudeDest;
 int haveSeeds = 5;
 
 void UpdateLogic( double delta ) {
 
-	bool moving = gDudePos != gDudeDest;
+	Vec2 d = gDudeDest - gDudePos;
+	bool moving = d != Vec2(0.0f,0.0f);
 	if( moving ) {
-		const float dudeSpeed = 1.5f * delta;
-		Vec2 d = gDudeDest - gDudePos;
-		d.x = clamp( d.x, -dudeSpeed, dudeSpeed );
-		d.y = clamp( d.y, -dudeSpeed, dudeSpeed );
-		gDudePos += d;
+		bool aboutTurn = dot( gDudeFacing, d ) < 0.0f;
+		float offBy = cross( gDudeFacing, d );
+		bool turning = aboutTurn || offBy != 0.0f;
+		if( turning ) {
+			Mat22 turn;
+			if( offBy > 0.0f ) {
+				turn.Rot( TURN_SPEED * delta );
+			} else {
+				turn.Rot( -TURN_SPEED * delta );
+			}
+			Vec2 newFace = turn * gDudeFacing;
+			float newOff = cross( newFace, d );
+			if( !aboutTurn && newOff * offBy <= 0.0f ) {
+				gDudeFacing = d.normalized();	
+			} else {
+				gDudeFacing = newFace;
+			}
+		} else {
+			const float dudeSpeed = 1.5f * delta;
+			d.x = clamp( d.x, -dudeSpeed, dudeSpeed );
+			d.y = clamp( d.y, -dudeSpeed, dudeSpeed );
+			gDudePos += d;
+		}
 	} else {
 		float mx=0.0f,my=0.0f;
 		if ( glfwGetKey( 'W' ) == GLFW_PRESS ) my += 1.0f;
@@ -207,6 +227,11 @@ void DrawWorld() {
 
 	SetTexture( "guy", 0 );
 	modelMat = Translation( Vec3( gDudePos.x * 2.0f, 0.0f, gDudePos.y * 2.0f ) );
+	Vec2 aim( -gDudeFacing.y, gDudeFacing.x );
+	modelMat.x.x = aim.x;
+	modelMat.x.z = aim.y;
+	modelMat.z.x = -aim.y;
+	modelMat.z.z = aim.x;
 	SetModel( modelMat );
 	dude->DrawTriangles();
 }

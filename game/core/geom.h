@@ -14,12 +14,33 @@ struct Vec2 {
 	Vec2 operator/(const float &other) const { return Vec2(x/other, y/other); }
 	Vec2& operator+=(const Vec2 &other) { x+=other.x; y+=other.y; return *this; }
 	Vec2& operator-=(const Vec2 &other) { x-=other.x; y-=other.y; return *this; }
+	Vec2& operator*=(const float &other) { *this = Vec2(x*other, y*other); return *this; }
 	float dot(const Vec2 &other) const { return x*other.x + y*other.y;}
+	float cross(const Vec2 &other) const { return x*other.y - y*other.x;}
 	float abs() const { return sqrtf(dot(*this)); }
 	Vec2 normalized() const { return *this * (1.0f / abs()); }
 	void normalize() { float mod = 1.0f / abs(); x *= mod; y *= mod; }
 	Vec2 operator-() const { return Vec2(-x, -y); }
 };
+
+struct Mat22 {
+	Vec2 x,y;
+	Mat22( Vec2 _x, Vec2 _y ) : x(_x), y(_y) {}
+	Mat22() {}
+	void SetIdentity() { *this = Mat22( Vec2(1,0), Vec2(0,1) ); }
+	void Rot(float rotation) {
+		const float c = cos(rotation), s = sin(rotation);
+		x = Vec2( c, s );
+		y = Vec2( -s, c );
+	}
+	void Scale(float scale) {
+		x *= scale;
+		y *= scale;
+	}
+	operator float*() { return &x.x; }
+	operator const float*() const { return &x.x; }
+};
+
 
 struct Vec3 {
 	float x,y,z;
@@ -103,6 +124,7 @@ struct Mat44 {
 
 // Vec2 operations
 inline float dot( const Vec2 a, const Vec2 b ) { return a.dot(b); }
+inline float cross( const Vec2 a, const Vec2 b ) { return a.cross(b); }
 inline Vec2 operator*( float a, const Vec2 b ) { return b*a; }
 inline bool operator==( const Vec2 a, const Vec2 b ) { return a.x == b.x && a.y == b.y; }
 inline bool operator!=( const Vec2 a, const Vec2 b ) { return a.x != b.x || a.y != b.y; }
@@ -200,6 +222,13 @@ inline Vec3 RayFromCam( const Mat44 &mat, Vec2 screenPos, float xscale, float ys
 
 inline Mat44 Translation( Vec3 v ) {
 	return Mat44( Vec4(1,0,0,0), Vec4(0,1,0,0), Vec4(0,0,1,0), Vec4(v) );
+}
+
+inline Vec2 operator *( const Mat22 &lhs, const Vec2 &rhs )
+{
+	return
+		rhs.x * lhs.x +
+		rhs.y * lhs.y;
 }
 
 extern Vec3 gXVec3;
