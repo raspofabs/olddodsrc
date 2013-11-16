@@ -15,6 +15,8 @@ void DrawWorld();
 
 #include "GameConsts.h"
 
+const float FARM_OFFSET = ((FARM_WIDTH-1)*FARM_TILE_WIDTH*0.5f);
+
 void GameUpdate() {
 	static double previousTime = glfwGetTime();
 	double drawStart = glfwGetTime();
@@ -98,7 +100,7 @@ Tile *gpTiles;
 
 class Dude {
 	public:
-		Dude() : m_Pos(0,0), m_Dest(0,0), m_Facing(0,-1), m_Control(0,0), m_DoAction(0), m_SeedCount(5) {
+		Dude() : m_Pos( floorf( FARM_WIDTH * 0.5f ) ), m_Dest( m_Pos ), m_Facing(0,-1), m_Control(0), m_DoAction(0), m_SeedCount(5) {
 			m_Mesh = GameMeshes::Get("quadpeep");
 		}
 
@@ -110,7 +112,7 @@ class Dude {
 		}
 		void Update( double delta ) {
 			Vec2 d = m_Dest - m_Pos;
-			bool moving = d != Vec2(0.0f,0.0f);
+			bool moving = d != Vec2(0);
 			if( moving ) {
 				bool aboutTurn = dot( m_Facing, d ) < 0.0f;
 				float offBy = cross( m_Facing, d );
@@ -137,13 +139,13 @@ class Dude {
 					m_Pos += d;
 				}
 			} else {
-				if( m_Control != Vec2(0,0) ) {
+				if( m_Control != Vec2(0) ) {
 					if( m_Control.x != 0.0f && m_Control.y != 0.0f ) {
 					} else {
-						bool canGoLeft = m_Pos.x > -1.0f;
-						bool canGoRight = m_Pos.x < 1.0f;
-						bool canGoUp = m_Pos.y > -1.0f;
-						bool canGoDown = m_Pos.y < 1.0f;
+						bool canGoLeft = m_Pos.x > 0.0f;
+						bool canGoRight = m_Pos.x < FARM_WIDTH-1;
+						bool canGoUp = m_Pos.y > 0.0f;
+						bool canGoDown = m_Pos.y < FARM_WIDTH-1;
 						if( canGoRight && m_Control.x > 0.0f ) { m_Dest = m_Pos + Vec2(1.0f,0.0f); }
 						if( canGoLeft && m_Control.x < 0.0f ) { m_Dest = m_Pos - Vec2(1.0f,0.0f); }
 						if( canGoDown && m_Control.y > 0.0f ) { m_Dest = m_Pos + Vec2(0.0f,1.0f); }
@@ -153,11 +155,10 @@ class Dude {
 			}
 			if( m_DoAction ) {
 				m_DoAction = false;
-				Vec3 rel = m_Pos - Vec2( -1.0f, -1.0f );
-				float x = floorf( rel.x + 0.5f );
-				float y = floorf( rel.y + 0.5f );
-				if( x >= 0 && x < 3 && y >= 0 && y < 3 ) {
-					int cell = (int)x + 3 * (int)y;
+				float x = floorf( m_Pos.x + 0.5f );
+				float y = floorf( m_Pos.y + 0.5f );
+				if( x >= 0 && x < FARM_WIDTH && y >= 0 && y < FARM_WIDTH ) {
+					int cell = (int)x + FARM_WIDTH * (int)y;
 					Tile &t = gpTiles[cell];
 					if( t.CanBePloughed() ) {
 						t.Plough();
@@ -176,7 +177,7 @@ class Dude {
 		}
 		int GetNumSeeds() { return m_SeedCount; }
 
-		Vec3 GetWorldPos() { return Vec3( m_Pos.x * 2.0f, 0.0, m_Pos.y * 2.0f ); }
+		Vec3 GetWorldPos() { return Vec3( m_Pos.x * FARM_TILE_WIDTH - FARM_OFFSET, 0.0, m_Pos.y * FARM_TILE_WIDTH - FARM_OFFSET ); }
 		void Render() {
 			Mat44 modelMat = Translation( GetWorldPos() );
 			Vec2 aim( -m_Facing.y, m_Facing.x );
@@ -200,7 +201,7 @@ Dude *gpDude;
 
 void CreateEntities() {
 	gpDude = new Dude();
-	gpTiles = new Tile[3*3];
+	gpTiles = new Tile[FARM_WIDTH*FARM_WIDTH];
 }
 
 void UpdateLogic( double delta ) {
@@ -225,7 +226,7 @@ void UpdateLogic( double delta ) {
 	gpDude->UpdateInput( inputVec );
 	gpDude->Update( delta );
 
-	for( int i = 0; i < 3 * 3; ++i ) {
+	for( int i = 0; i < FARM_WIDTH * FARM_WIDTH; ++i ) {
 		Tile &t = gpTiles[i];
 		t.Update(delta);
 	}
@@ -267,8 +268,10 @@ void DrawWorld() {
 	SetCamera(look);
 
 	int tile = 0;
-	for( float tz = -2.0f; tz <= 2.0f; tz += 2.0f ) {
-		for( float tx = -2.0f; tx <= 2.0f; tx += 2.0f ) {
+	for( int y = 0; y < FARM_WIDTH; ++y ) {
+		for( int x = 0; x < FARM_WIDTH; ++x ) {
+			float tx = x * FARM_TILE_WIDTH - FARM_OFFSET;
+			float tz = y * FARM_TILE_WIDTH - FARM_OFFSET;
 			modelMat = Translation(Vec3( tx, 0.0, tz ));
 			gpTiles[tile].Render( modelMat );
 			tile += 1;

@@ -6,6 +6,7 @@
 
 struct Vec2 {
 	float x,y;
+	Vec2( float _v ) : x(_v), y(_v) {}
 	Vec2( float _x, float _y) : x(_x), y(_y) {}
 	Vec2() {x = 0.0f; y = 0.0f;}
 	Vec2 operator+(const Vec2 &other) const { return Vec2(x+other.x, y+other.y); }
@@ -45,7 +46,9 @@ struct Mat22 {
 struct Vec3 {
 	float x,y,z;
 	Vec3( float _x, float _y, float _z ) : x(_x), y(_y), z(_z) {}
+	Vec3( float _v ) : x(_v), y(_v), z(_v) {}
 	Vec3( const Vec2 v ) : x(v.x), y(v.y), z(0) {}
+	Vec3( const Vec2 v, float _z ) : x(v.x), y(v.y), z(_z) {}
 	Vec3() {}
 	Vec3 operator+(const Vec3 &other) const { return Vec3(x+other.x, y+other.y, z+other.z); }
 	Vec3 operator-(const Vec3 &other) const { return Vec3(x-other.x, y-other.y, z-other.z); }
@@ -70,7 +73,9 @@ struct Vec3 {
 struct Vec4 {
 	float x,y,z,w;
 	Vec4( float _x, float _y, float _z, float _w ) : x(_x), y(_y), z(_z), w(_w) {}
+	Vec4( float _v ) : x(_v), y(_v), z(_v), w(_v) {}
 	Vec4( const Vec3 &v ) : x(v.x), y(v.y), z(v.z), w(1.0f) {}
+	Vec4( const Vec3 &v, float _w ) : x(v.x), y(v.y), z(v.z), w(_w) {}
 	Vec4() {}
 	Vec4 operator+(const Vec4 &other) const { return Vec4(x+other.x, y+other.y, z+other.z, w+other.w); }
 	Vec4 operator-(const Vec4 &other) const { return Vec4(x-other.x, y-other.y, z-other.z, w-other.w); }

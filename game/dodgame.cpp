@@ -54,19 +54,19 @@ void GameShutdown() {
 }
 
 // game state
-int gTileState[3*3];
+int gTileState[FARM_WIDTH*FARM_WIDTH];
 typedef std::pair<int,float> Growing;
 typedef std::list<Growing> GrowingList;
 GrowingList gGrowingList;
-Vec2 gDudePos;
-Vec2 gDudeFacing(0.0f,-1.0f);
-Vec2 gDudeDest;
+Vec2 gDudePos( floorf( FARM_WIDTH * 0.5f ) );
+Vec2 gDudeFacing(0,-1);
+Vec2 gDudeDest = gDudePos;
 int haveSeeds = 5;
 
 void UpdateLogic( double delta ) {
 
 	Vec2 d = gDudeDest - gDudePos;
-	bool moving = d != Vec2(0.0f,0.0f);
+	bool moving = d != Vec2(0);
 	if( moving ) {
 		bool aboutTurn = dot( gDudeFacing, d ) < 0.0f;
 		float offBy = cross( gDudeFacing, d );
@@ -105,10 +105,10 @@ void UpdateLogic( double delta ) {
 		if( mx != 0.0f || my != 0.0f ) {
 			if( mx != 0.0f && my != 0.0f ) {
 			} else {
-				if( gDudePos.x < 1.0f && mx > 0.0f ) { gDudeDest = gDudePos + Vec2(1.0f,0.0f); }
-				if( gDudePos.x > -1.0f && mx < 0.0f ) { gDudeDest = gDudePos - Vec2(1.0f,0.0f); }
-				if( gDudePos.y < 1.0f && my > 0.0f ) { gDudeDest = gDudePos + Vec2(0.0f,1.0f); }
-				if( gDudePos.y > -1.0f && my < 0.0f ) { gDudeDest = gDudePos - Vec2(0.0f,1.0f); }
+				if( gDudePos.x < FARM_WIDTH-1 && mx > 0.0f ) { gDudeDest = gDudePos + Vec2(1.0f,0.0f); }
+				if( gDudePos.x > 0.0f && mx < 0.0f ) { gDudeDest = gDudePos - Vec2(1.0f,0.0f); }
+				if( gDudePos.y < FARM_WIDTH-1 && my > 0.0f ) { gDudeDest = gDudePos + Vec2(0.0f,1.0f); }
+				if( gDudePos.y > 0.0f && my < 0.0f ) { gDudeDest = gDudePos - Vec2(0.0f,1.0f); }
 			}
 		}
 	}
@@ -125,11 +125,10 @@ void UpdateLogic( double delta ) {
 	}
 
 	if( action ) {
-		Vec3 gDudeRelative = gDudePos - Vec2( -1.0f, -1.0f );
-		float x = floorf( gDudeRelative.x + 0.5f );
-		float y = floorf( gDudeRelative.y + 0.5f );
-		if( x >= 0 && x < 3 && y >= 0 && y < 3 ) {
-			int cell = (int)x + 3 * (int)y;
+		float x = floorf( gDudePos.x + 0.5f );
+		float y = floorf( gDudePos.y + 0.5f );
+		if( x >= 0 && x < FARM_WIDTH && y >= 0 && y < FARM_WIDTH ) {
+			int cell = (int)x + FARM_WIDTH * (int)y;
 			if( gTileState[cell] == 0 ) {
 				gTileState[cell] = 1;
 				Log( 1, "ploughed the land at %i (%.2f,%.2f)\n", cell, x, y );
@@ -173,7 +172,7 @@ void DrawHUD() {
 	glDepthFunc(GL_LEQUAL);
 
 	Mat44 modelMat;
-	modelMat = Translation(Vec3( 0.0f,0.0f,0.0f ));
+	modelMat = Translation(Vec3(0.0f));
 	modelMat.Scale(1.0f);
 	char buffer[128];
 	sprintf( buffer, "Your Farm .. Seeds: %i", haveSeeds );
@@ -187,14 +186,18 @@ void DrawWorld() {
 	extern float g_fGameTime;
 	glUniform1f(GLShader::Current()->timeLocation, g_fGameTime);
 	from = Vec3( 0.1f, 4.0f, -10.0f );
-	to = Vec3( 0.0f, 0.0f, 0.0f );
+	to = Vec3(0.0f);
 
 	Mat44 look = Mat44LookAt( from, to, gYVec4 );
 	SetCamera(look);
 
+	const float FARM_OFFSET = ((FARM_WIDTH-1)*FARM_TILE_WIDTH*0.5f);
 	int tile = 0;
-	for( float tz = -2.0f; tz <= 2.0f; tz += 2.0f ) {
-		for( float tx = -2.0f; tx <= 2.0f; tx += 2.0f ) {
+	for( int y = 0; y < FARM_WIDTH; ++y ) {
+		for( int x = 0; x < FARM_WIDTH; ++x ) {
+			// ignoring innefficiency of doing int to float here
+			float tx = x * FARM_TILE_WIDTH - FARM_OFFSET;
+			float tz = y * FARM_TILE_WIDTH - FARM_OFFSET;
 			modelMat = Translation(Vec3( tx, 0.0, tz ));
 			SetModel( modelMat );
 			switch(gTileState[tile]) {
@@ -216,8 +219,10 @@ void DrawWorld() {
 	}
 
 	for( GrowingList::iterator i = gGrowingList.begin(); i != gGrowingList.end(); ++i ) {
-		float tx = (i->first%3) * 2.0f - 2.0f;
-		float tz = (i->first/3) * 2.0f - 2.0f;
+		int x = i->first%FARM_WIDTH;
+		int z = i->first/FARM_WIDTH;
+		float tx = x * FARM_TILE_WIDTH - FARM_OFFSET;
+		float tz = z * FARM_TILE_WIDTH - FARM_OFFSET;
 		modelMat = Translation(Vec3( tx, 0.0, tz ));
 		modelMat.Scale( i->second * 0.5f );
 		SetModel( modelMat );
@@ -226,7 +231,7 @@ void DrawWorld() {
 	}
 
 	SetTexture( "guy", 0 );
-	modelMat = Translation( Vec3( gDudePos.x * 2.0f, 0.0f, gDudePos.y * 2.0f ) );
+	modelMat = Translation( Vec3( gDudePos.x * FARM_TILE_WIDTH - FARM_OFFSET, 0.0f, gDudePos.y * FARM_TILE_WIDTH - FARM_OFFSET ) );
 	Vec2 aim( -gDudeFacing.y, gDudeFacing.x );
 	modelMat.x.x = aim.x;
 	modelMat.x.z = aim.y;
