@@ -164,7 +164,11 @@ void UpdateLogic( double delta ) {
 				haveSeeds -= 1;
 				Log( 1, "planted an owl at %i (%.2f,%.2f)\n", cell, x, y );
 			} else if( gTileState[cell] == 3 ) {
-				gTileState[cell] = 0;
+				if( (rand()&4095)/4096.0 > RETURN_TO_UNPLOUGHED_PROBABILITY ) {
+					gTileState[cell] = 0;
+				} else {
+					gTileState[cell] = 1;
+				}
 				haveSeeds += 3;
 				Log( 1, "harvested an owl to get three owl seeds.\n" );
 			}

@@ -61,7 +61,13 @@ class Tile {
 		bool CanBeHarvested() { return m_State == 3; }
 		void Plough() { m_State = 1; }
 		void Plant() { m_State = 2; m_Growth = 0.0f; }
-		void Harvest() { m_State = 0; }
+		void Harvest() { 
+			if( (rand()&4095)/4096.0 > RETURN_TO_UNPLOUGHED_PROBABILITY ) {
+				m_State = 0;
+			} else {
+				m_State = 1;
+			}
+		}
 
 		void Render( const Mat44 &modelMat ) {
 			SetModel( modelMat );
