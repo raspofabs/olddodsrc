@@ -100,15 +100,25 @@ Tile *gpTiles;
 
 class Dude {
 	public:
-		Dude() : m_Pos( floorf( FARM_WIDTH * 0.5f ) ), m_Dest( m_Pos ), m_Facing(0,-1), m_Control(0), m_DoAction(0), m_SeedCount(5) {
+		Dude() :
+			m_Pos( floorf( FARM_WIDTH * 0.5f ) ), m_Dest( m_Pos ), m_Facing(0,-1), m_Control(0),
+			m_LastDo(0), m_StartDoing(0), m_StopDoing(0),
+			m_SeedCount(5), m_PloughTime(0.0f) {
 			m_Mesh = GameMeshes::Get("quadpeep");
 		}
 
 		void UpdateInput( const Vec2 &input ) {
 			m_Control = input;
 		}
-		void DoAction() {
-			m_DoAction = true;
+		void DoAction( bool doSomething ) {
+			if( m_LastDo != doSomething ) {
+				if( doSomething ) {
+					m_StartDoing = true;
+				} else {
+					m_StopDoing = true;
+				}
+			}
+			m_LastDo = doSomething;
 		}
 		void Update( double delta ) {
 			Vec2 d = m_Dest - m_Pos;
@@ -139,7 +149,7 @@ class Dude {
 					m_Pos += d;
 				}
 			} else {
-				if( m_Control != Vec2(0) ) {
+				if( m_PloughTime == 0.0f && m_Control != Vec2(0) ) {
 					if( m_Control.x != 0.0f && m_Control.y != 0.0f ) {
 					} else {
 						bool canGoLeft = m_Pos.x > 0.0f;
@@ -153,16 +163,34 @@ class Dude {
 					}
 				}
 			}
-			if( m_DoAction ) {
-				m_DoAction = false;
+			if( m_PloughTime > 0.0f ) {
+				if( m_StopDoing ) {
+					m_PloughTime = 0.0f;
+					Log( 1, "Gave up ploughing\n" );
+				} else {
+					m_PloughTime -= delta;
+					if( m_PloughTime <= 0.0f ) {
+						m_PloughTime = 0.0f;
+						float x = floorf( m_Pos.x + 0.5f );
+						float y = floorf( m_Pos.y + 0.5f );
+						int cell = (int)x + FARM_WIDTH * (int)y;
+						Tile &t = gpTiles[cell];
+						t.Plough();
+						Log( 1, "ploughed the land at %i (%.2f,%.2f)\n", cell, x, y );
+					}
+				}
+			}
+			if( m_StartDoing ) {
 				float x = floorf( m_Pos.x + 0.5f );
 				float y = floorf( m_Pos.y + 0.5f );
 				if( x >= 0 && x < FARM_WIDTH && y >= 0 && y < FARM_WIDTH ) {
 					int cell = (int)x + FARM_WIDTH * (int)y;
 					Tile &t = gpTiles[cell];
 					if( t.CanBePloughed() ) {
-						t.Plough();
-						Log( 1, "ploughed the land at %i (%.2f,%.2f)\n", cell, x, y );
+						if( !moving ) {
+							m_PloughTime = TIME_TO_PLOUGH;
+							Log( 1, "Started to plough the land at %i (%.2f,%.2f)\n", cell, x, y );
+						}
 					} else if( m_SeedCount && t.CanBePlanted() ) {
 						t.Plant();
 						m_SeedCount -= 1;
@@ -174,6 +202,8 @@ class Dude {
 					}
 				}
 			}
+			m_StartDoing = false;
+			m_StopDoing = false;
 		}
 		int GetNumSeeds() { return m_SeedCount; }
 
@@ -192,8 +222,11 @@ class Dude {
 	private:
 		Vec2 m_Pos, m_Dest, m_Facing;
 		Vec2 m_Control;
-		bool m_DoAction;
+		bool m_LastDo;
+		bool m_StartDoing, m_StopDoing;
 		int m_SeedCount;
+		bool m_Ploughing;
+		float m_PloughTime;
 		BadMesh *m_Mesh;
 };
 
@@ -206,7 +239,6 @@ void CreateEntities() {
 
 void UpdateLogic( double delta ) {
 	Vec2 inputVec( 0.0f, 0.0f );
-	static bool actionLast = false;
 	bool action = false;
 	if ( glfwGetKey( 'W' ) == GLFW_PRESS ) inputVec.y += 1.0f;
 	if ( glfwGetKey( 'S' ) == GLFW_PRESS ) inputVec.y -= 1.0f;
@@ -218,10 +250,7 @@ void UpdateLogic( double delta ) {
 	if ( glfwGetKey( GLFW_KEY_RIGHT ) == GLFW_PRESS ) inputVec.x -= 1.0f;
 	if ( glfwGetKey( GLFW_KEY_SPACE ) == GLFW_PRESS ) action = true;
 
-	if( !actionLast && action ) {
-		gpDude->DoAction();
-	}
-	actionLast = action;
+	gpDude->DoAction( action );
 
 	gpDude->UpdateInput( inputVec );
 	gpDude->Update( delta );

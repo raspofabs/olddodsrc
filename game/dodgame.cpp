@@ -61,6 +61,7 @@ GrowingList gGrowingList;
 Vec2 gDudePos( floorf( FARM_WIDTH * 0.5f ) );
 Vec2 gDudeFacing(0,-1);
 Vec2 gDudeDest = gDudePos;
+float gPloughing;
 int haveSeeds = 5;
 
 void UpdateLogic( double delta ) {
@@ -92,23 +93,25 @@ void UpdateLogic( double delta ) {
 			gDudePos += d;
 		}
 	} else {
-		float mx=0.0f,my=0.0f;
-		if ( glfwGetKey( 'W' ) == GLFW_PRESS ) my += 1.0f;
-		if ( glfwGetKey( 'S' ) == GLFW_PRESS ) my -= 1.0f;
-		if ( glfwGetKey( 'A' ) == GLFW_PRESS ) mx += 1.0f;
-		if ( glfwGetKey( 'D' ) == GLFW_PRESS ) mx -= 1.0f;
-		if ( glfwGetKey( GLFW_KEY_UP ) == GLFW_PRESS ) my += 1.0f;
-		if ( glfwGetKey( GLFW_KEY_DOWN ) == GLFW_PRESS ) my -= 1.0f;
-		if ( glfwGetKey( GLFW_KEY_LEFT ) == GLFW_PRESS ) mx += 1.0f;
-		if ( glfwGetKey( GLFW_KEY_RIGHT ) == GLFW_PRESS ) mx -= 1.0f;
+		if( gPloughing == 0.0f ) {
+			float mx=0.0f,my=0.0f;
+			if ( glfwGetKey( 'W' ) == GLFW_PRESS ) my += 1.0f;
+			if ( glfwGetKey( 'S' ) == GLFW_PRESS ) my -= 1.0f;
+			if ( glfwGetKey( 'A' ) == GLFW_PRESS ) mx += 1.0f;
+			if ( glfwGetKey( 'D' ) == GLFW_PRESS ) mx -= 1.0f;
+			if ( glfwGetKey( GLFW_KEY_UP ) == GLFW_PRESS ) my += 1.0f;
+			if ( glfwGetKey( GLFW_KEY_DOWN ) == GLFW_PRESS ) my -= 1.0f;
+			if ( glfwGetKey( GLFW_KEY_LEFT ) == GLFW_PRESS ) mx += 1.0f;
+			if ( glfwGetKey( GLFW_KEY_RIGHT ) == GLFW_PRESS ) mx -= 1.0f;
 
-		if( mx != 0.0f || my != 0.0f ) {
-			if( mx != 0.0f && my != 0.0f ) {
-			} else {
-				if( gDudePos.x < FARM_WIDTH-1 && mx > 0.0f ) { gDudeDest = gDudePos + Vec2(1.0f,0.0f); }
-				if( gDudePos.x > 0.0f && mx < 0.0f ) { gDudeDest = gDudePos - Vec2(1.0f,0.0f); }
-				if( gDudePos.y < FARM_WIDTH-1 && my > 0.0f ) { gDudeDest = gDudePos + Vec2(0.0f,1.0f); }
-				if( gDudePos.y > 0.0f && my < 0.0f ) { gDudeDest = gDudePos - Vec2(0.0f,1.0f); }
+			if( mx != 0.0f || my != 0.0f ) {
+				if( mx != 0.0f && my != 0.0f ) {
+				} else {
+					if( gDudePos.x < FARM_WIDTH-1 && mx > 0.0f ) { gDudeDest = gDudePos + Vec2(1.0f,0.0f); }
+					if( gDudePos.x > 0.0f && mx < 0.0f ) { gDudeDest = gDudePos - Vec2(1.0f,0.0f); }
+					if( gDudePos.y < FARM_WIDTH-1 && my > 0.0f ) { gDudeDest = gDudePos + Vec2(0.0f,1.0f); }
+					if( gDudePos.y > 0.0f && my < 0.0f ) { gDudeDest = gDudePos - Vec2(0.0f,1.0f); }
+				}
 			}
 		}
 	}
@@ -117,21 +120,44 @@ void UpdateLogic( double delta ) {
 	if ( glfwGetKey( GLFW_KEY_SPACE ) == GLFW_PRESS ) action = true;
 
 	static bool actionLast = false;
-	if( actionLast ) {
-		actionLast = action;
-		action = false;
-	} else {
-		actionLast = action;
+	bool actionStart = false;
+	bool actionEnd = false;
+	if( actionLast != action ) {
+		if( action ) {
+			actionStart = true;
+		} else {
+			actionEnd = true;
+		}
+	}
+	actionLast = action;
+
+	if( gPloughing > 0.0f ) {
+		if( actionEnd ) {
+			gPloughing = 0.0f;
+			Log( 1, "Gave up ploughing\n" );
+		} else {
+			gPloughing -= delta;
+			if( gPloughing <= 0.0f ) {
+				gPloughing = 0.0f;
+				float x = floorf( gDudePos.x + 0.5f );
+				float y = floorf( gDudePos.y + 0.5f );
+				int cell = (int)x + FARM_WIDTH * (int)y;
+				gTileState[cell] = 1;
+				Log( 1, "ploughed the land at %i (%.2f,%.2f)\n", cell, x, y );
+			}
+		}
 	}
 
-	if( action ) {
+	if( actionStart ) {
 		float x = floorf( gDudePos.x + 0.5f );
 		float y = floorf( gDudePos.y + 0.5f );
 		if( x >= 0 && x < FARM_WIDTH && y >= 0 && y < FARM_WIDTH ) {
 			int cell = (int)x + FARM_WIDTH * (int)y;
 			if( gTileState[cell] == 0 ) {
-				gTileState[cell] = 1;
-				Log( 1, "ploughed the land at %i (%.2f,%.2f)\n", cell, x, y );
+				if( !moving ) {
+					gPloughing = TIME_TO_PLOUGH;
+					Log( 1, "Started to plough the land at %i (%.2f,%.2f)\n", cell, x, y );
+				}
 			} else if( gTileState[cell] == 1 && haveSeeds ) {
 				gTileState[cell] = 2;
 				gGrowingList.push_back( Growing( cell, 0.0f ) );
