@@ -1,4 +1,5 @@
 Update 3: OOPVDOD, the game Design document. Tweaks before launch.
+// completed in 1d6b4feb5efebaa11e715d6d11b280a10204b9b4 and now the owls wave in the breeze
 
 1. The player is in control of a character in the world.
 1.1. They move from square to square by pressing the wasd / arrow keys.
