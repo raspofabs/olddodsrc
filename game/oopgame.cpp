@@ -82,6 +82,11 @@ class Tile {
 				SetTexture( "owl", 0 );
 				Mat44 owlMat = modelMat;
 				owlMat.Scale( 0.5f * m_Growth );
+				const float offset = owlMat.w.x * 1.3f + owlMat.w.z * 0.6f;
+				const float swaySpeed = 1.6f;
+				const float swayAmount = 0.1f;
+				extern float g_fGameTime;
+				owlMat.y.x = owlMat.y.y * sin( g_fGameTime * swaySpeed + offset ) * swayAmount;
 				SetModel( owlMat );
 				m_OwlMesh->DrawTriangles();
 			}

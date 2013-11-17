@@ -208,6 +208,13 @@ void DrawHUD() {
 	sprintf( buffer, "Your Farm .. Seeds: %i", haveSeeds );
 	FontPrint( modelMat, buffer);
 }
+void AddBreeze( Mat44 &m ) {
+	const float offset = m.w.x * 1.3f + m.w.z * 0.6f;
+	const float swaySpeed = 1.6f;
+	const float swayAmount = 0.1f;
+	extern float g_fGameTime;
+	m.y.x = m.y.y * sin( g_fGameTime * swaySpeed + offset ) * swayAmount;
+}
 
 void DrawWorld() {
 	Mat44 modelMat;
@@ -240,6 +247,7 @@ void DrawWorld() {
 			if(gTileState[tile]==3) {
 				modelMat = Translation(Vec3( tx, 0.0, tz ));
 				modelMat.Scale( 0.5f );
+				AddBreeze( modelMat );
 				SetModel( modelMat );
 				SetTexture( "owl", 0 );
 				dude->DrawTriangles();
@@ -255,6 +263,7 @@ void DrawWorld() {
 		float tz = z * FARM_TILE_WIDTH - FARM_OFFSET;
 		modelMat = Translation(Vec3( tx, 0.0, tz ));
 		modelMat.Scale( i->second * 0.5f );
+		AddBreeze( modelMat );
 		SetModel( modelMat );
 		SetTexture( "owl", 0 );
 		dude->DrawTriangles();
