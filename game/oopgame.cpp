@@ -7,6 +7,7 @@
 
 #include "GameTextures.h"
 #include "GameMeshes.h"
+#include "TileIDs.h"
 
 void CreateEntities();
 void UpdateLogic( double delta );
@@ -51,34 +52,39 @@ void GameShutdown() {
 // game state
 class Tile {
 	public:
-		Tile() : m_State(0), m_Growth(0) {
+		Tile() : m_State(TI_RAW), m_Growth(0) {
 			m_GroundMesh = GameMeshes::Get("smallertile");
 			m_OwlMesh = GameMeshes::Get("quadpeep");
 		}
 		
-		bool CanBePloughed() { return m_State == 0; }
-		bool CanBePlanted() { return m_State == 1; }
-		bool CanBeHarvested() { return m_State == 3; }
-		void Plough() { m_State = 1; }
-		void Plant() { m_State = 2; m_Growth = 0.0f; }
+		void SetAsChest() { m_State = TI_CHEST; }
+		bool IsChest() { return m_State == TI_CHEST; }
+		void OpenChest() { m_State = TI_CHEST_OPEN; }
+		bool CanBePloughed() { return m_State == TI_RAW; }
+		bool CanBePlanted() { return m_State == TI_PLOUGHED; }
+		bool CanBeHarvested() { return m_State == TI_GROWN_OWL; }
+		void Plough() { m_State = TI_PLOUGHED; }
+		void Plant() { m_State = TI_SEEDED_OWL; m_Growth = 0.0f; }
 		void Harvest() { 
 			if( (rand()&4095)/4096.0 > RETURN_TO_UNPLOUGHED_PROBABILITY ) {
-				m_State = 0;
+				m_State = TI_RAW;
 			} else {
-				m_State = 1;
+				m_State = TI_PLOUGHED;
 			}
 		}
 
 		void Render( const Mat44 &modelMat ) {
 			SetModel( modelMat );
 			switch(m_State) {
-				case 0: SetTexture( "earth", 0 ); break;
-				case 1:
-				case 2:
-				case 3: SetTexture( "pick", 0 ); break;
+				case TI_RAW: SetTexture( "earth", 0 ); break;
+				case TI_PLOUGHED:
+				case TI_SEEDED_OWL:
+				case TI_GROWN_OWL: SetTexture( "pick", 0 ); break;
+				case TI_CHEST: SetTexture( "chest", 0 ); break;
+				case TI_CHEST_OPEN: SetTexture( "chest-open", 0 ); break;
 			}
 			m_GroundMesh->DrawTriangles();
-			if( m_State > 1 ) {
+			if( m_State >= TI_GROWN_OWL && m_State <= TI_SEEDED_OWL ) {
 				SetTexture( "owl", 0 );
 				Mat44 owlMat = modelMat;
 				owlMat.Scale( 0.5f * m_Growth );
@@ -92,11 +98,11 @@ class Tile {
 			}
 		}
 		void Update( double delta ) {
-			if( m_State == 2 ) {
+			if( m_State == TI_SEEDED_OWL ) {
 				m_Growth += GROWTH_RATE * delta;
 				if( m_Growth >= 1.0f ) {
 					m_Growth = 1.0f;
-					m_State = 3;
+					m_State = TI_GROWN_OWL;
 				}
 			}
 		}
@@ -114,7 +120,8 @@ class Dude {
 		Dude() :
 			m_Pos( floorf( FARM_WIDTH * 0.5f ) ), m_Dest( m_Pos ), m_Facing(0,-1), m_Control(0),
 			m_LastDo(0), m_StartDoing(0), m_StopDoing(0),
-			m_SeedCount(5), m_PloughTime(0.0f) {
+			m_SeedCount(5), m_OwlCount(0), m_GoldCount(0),
+			m_PloughTime(0.0f) {
 			m_Mesh = GameMeshes::Get("quadpeep");
 		}
 
@@ -158,6 +165,15 @@ class Dude {
 					d.x = clamp( d.x, -dudeSpeed, dudeSpeed );
 					d.y = clamp( d.y, -dudeSpeed, dudeSpeed );
 					m_Pos += d;
+					if( m_Pos == m_Dest ) {
+						float x = floorf( m_Pos.x + 0.5f );
+						float y = floorf( m_Pos.y + 0.5f );
+						int cell = (int)x + FARM_WIDTH * (int)y;
+						if( gpTiles[cell].IsChest() ) {
+							gpTiles[cell].OpenChest();
+							m_GoldCount += 10;
+						}
+					}
 				}
 			} else {
 				if( m_PloughTime == 0.0f && m_Control != Vec2(0) ) {
@@ -208,7 +224,7 @@ class Dude {
 						Log( 1, "planted an owl at %i (%.2f,%.2f)\n", cell, x, y );
 					} else if( t.CanBeHarvested() ) {
 						t.Harvest();
-						m_SeedCount += 3;
+						m_OwlCount += 1;
 						Log( 1, "harvested an owl to get three owl seeds.\n" );
 					}
 				}
@@ -217,6 +233,8 @@ class Dude {
 			m_StopDoing = false;
 		}
 		int GetNumSeeds() { return m_SeedCount; }
+		int GetNumOwls() { return m_OwlCount; }
+		int GetNumGold() { return m_GoldCount; }
 
 		Vec3 GetWorldPos() { return Vec3( m_Pos.x * FARM_TILE_WIDTH - FARM_OFFSET, 0.0, m_Pos.y * FARM_TILE_WIDTH - FARM_OFFSET ); }
 		void Render() {
@@ -235,7 +253,7 @@ class Dude {
 		Vec2 m_Control;
 		bool m_LastDo;
 		bool m_StartDoing, m_StopDoing;
-		int m_SeedCount;
+		int m_SeedCount, m_OwlCount, m_GoldCount;
 		bool m_Ploughing;
 		float m_PloughTime;
 		BadMesh *m_Mesh;
@@ -246,6 +264,7 @@ Dude *gpDude;
 void CreateEntities() {
 	gpDude = new Dude();
 	gpTiles = new Tile[FARM_WIDTH*FARM_WIDTH];
+	gpTiles[0].SetAsChest();
 }
 
 void UpdateLogic( double delta ) {
@@ -291,8 +310,14 @@ void DrawHUD() {
 	modelMat = Translation(Vec3( 0.0f,0.0f,0.0f ));
 	modelMat.Scale(1.0f);
 	char buffer[128];
-	sprintf( buffer, "Your Farm .. Seeds: %i", gpDude->GetNumSeeds() );
-	FontPrint( modelMat, buffer);
+
+	FontPrint( modelMat, "Your Farm .." ); modelMat.w.y += 16.0f;
+	sprintf( buffer, "Seeds: %i", gpDude->GetNumSeeds() );
+	FontPrint( modelMat, buffer); modelMat.w.y += 8.0f;
+	sprintf( buffer, "Owls: %i", gpDude->GetNumOwls() );
+	FontPrint( modelMat, buffer); modelMat.w.y += 8.0f;
+	sprintf( buffer, "Gold: %i", gpDude->GetNumGold() );
+	FontPrint( modelMat, buffer); modelMat.w.y += 8.0f;
 }
 
 void DrawWorld() {

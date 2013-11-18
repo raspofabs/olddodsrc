@@ -9,6 +9,7 @@
 #include "GameMeshes.h"
 
 #include "GameConsts.h"
+#include "TileIDs.h"
 
 #include <list>
 
@@ -20,6 +21,20 @@ void UpdateLogic( double delta );
 void DrawHUD();
 void DrawWorld();
 
+// game state
+int gTileState[FARM_WIDTH*FARM_WIDTH];
+typedef std::pair<int,float> Growing;
+typedef std::list<Growing> GrowingList;
+GrowingList gGrowingList;
+Vec2 gDudePos( floorf( FARM_WIDTH * 0.5f ) );
+Vec2 gDudeFacing(0,-1);
+Vec2 gDudeDest = gDudePos;
+float gPloughing;
+int haveSeeds = 5;
+int haveOwls = 0;
+int haveGold = 0;
+
+// update/init/shutdown
 void GameUpdate() {
 	static double previousTime = glfwGetTime();
 	double drawStart = glfwGetTime();
@@ -49,20 +64,11 @@ void GameInit() {
 	cube->UVsFromBB();
 
 	SetGameTitle( "DOD game" );
+
+	gTileState[0] = TI_CHEST;
 }
 void GameShutdown() {
 }
-
-// game state
-int gTileState[FARM_WIDTH*FARM_WIDTH];
-typedef std::pair<int,float> Growing;
-typedef std::list<Growing> GrowingList;
-GrowingList gGrowingList;
-Vec2 gDudePos( floorf( FARM_WIDTH * 0.5f ) );
-Vec2 gDudeFacing(0,-1);
-Vec2 gDudeDest = gDudePos;
-float gPloughing;
-int haveSeeds = 5;
 
 void UpdateLogic( double delta ) {
 
@@ -91,6 +97,15 @@ void UpdateLogic( double delta ) {
 			d.x = clamp( d.x, -dudeSpeed, dudeSpeed );
 			d.y = clamp( d.y, -dudeSpeed, dudeSpeed );
 			gDudePos += d;
+			if( gDudePos == gDudeDest ) {
+				float x = floorf( gDudePos.x + 0.5f );
+				float y = floorf( gDudePos.y + 0.5f );
+				int cell = (int)x + FARM_WIDTH * (int)y;
+				if( gTileState[cell] == TI_CHEST ) {
+					gTileState[cell] = TI_CHEST_OPEN;
+					haveGold += 10;
+				}
+			}
 		}
 	} else {
 		if( gPloughing == 0.0f ) {
@@ -142,7 +157,7 @@ void UpdateLogic( double delta ) {
 				float x = floorf( gDudePos.x + 0.5f );
 				float y = floorf( gDudePos.y + 0.5f );
 				int cell = (int)x + FARM_WIDTH * (int)y;
-				gTileState[cell] = 1;
+				gTileState[cell] = TI_PLOUGHED;
 				Log( 1, "ploughed the land at %i (%.2f,%.2f)\n", cell, x, y );
 			}
 		}
@@ -153,24 +168,24 @@ void UpdateLogic( double delta ) {
 		float y = floorf( gDudePos.y + 0.5f );
 		if( x >= 0 && x < FARM_WIDTH && y >= 0 && y < FARM_WIDTH ) {
 			int cell = (int)x + FARM_WIDTH * (int)y;
-			if( gTileState[cell] == 0 ) {
+			if( gTileState[cell] == TI_RAW ) {
 				if( !moving ) {
 					gPloughing = TIME_TO_PLOUGH;
 					Log( 1, "Started to plough the land at %i (%.2f,%.2f)\n", cell, x, y );
 				}
-			} else if( gTileState[cell] == 1 && haveSeeds ) {
-				gTileState[cell] = 2;
+			} else if( gTileState[cell] == TI_PLOUGHED && haveSeeds ) {
+				gTileState[cell] = TI_SEEDED_OWL;
 				gGrowingList.push_back( Growing( cell, 0.0f ) );
 				haveSeeds -= 1;
 				Log( 1, "planted an owl at %i (%.2f,%.2f)\n", cell, x, y );
-			} else if( gTileState[cell] == 3 ) {
+			} else if( gTileState[cell] == TI_GROWN_OWL ) {
 				if( (rand()&4095)/4096.0 > RETURN_TO_UNPLOUGHED_PROBABILITY ) {
-					gTileState[cell] = 0;
+					gTileState[cell] = TI_RAW;
 				} else {
-					gTileState[cell] = 1;
+					gTileState[cell] = TI_PLOUGHED;
 				}
-				haveSeeds += 3;
-				Log( 1, "harvested an owl to get three owl seeds.\n" );
+				haveOwls += 1;
+				Log( 1, "harvested an owl to get an owl.\n" );
 			}
 		}
 	}
@@ -178,7 +193,7 @@ void UpdateLogic( double delta ) {
 	for( GrowingList::iterator i = gGrowingList.begin(); i != gGrowingList.end(); ) {
 		i->second += GROWTH_RATE * delta;
 		if( i->second >= 1.0f ) {
-			gTileState[i->first] = 3;
+			gTileState[i->first] = TI_GROWN_OWL;
 			i = gGrowingList.erase( i );
 		} else {
 			++i;
@@ -192,8 +207,8 @@ void DrawHUD() {
 	SetModel(gIdentityMat);
 	glDepthFunc(GL_LEQUAL);
 	ClearScreen( 0.3f, 0.3f, 0.3f );
-	SetTexture( "sword", 0 );
-	DrawSquare( 16, 16, 32, 32, 0xFFFFFFFF );
+	//SetTexture( "sword", 0 );
+	//DrawSquare( 16, 16, 32, 32, 0xFFFFFFFF );
 
 
 	DefaultOrtho();
@@ -205,8 +220,13 @@ void DrawHUD() {
 	modelMat = Translation(Vec3(0.0f));
 	modelMat.Scale(1.0f);
 	char buffer[128];
-	sprintf( buffer, "Your Farm .. Seeds: %i", haveSeeds );
-	FontPrint( modelMat, buffer);
+	FontPrint( modelMat, "Your Farm .." ); modelMat.w.y += 16.0f;
+	sprintf( buffer, "Seeds: %i", haveSeeds );
+	FontPrint( modelMat, buffer); modelMat.w.y += 8.0f;
+	sprintf( buffer, "Owls: %i", haveOwls );
+	FontPrint( modelMat, buffer); modelMat.w.y += 8.0f;
+	sprintf( buffer, "Gold: %i", haveGold );
+	FontPrint( modelMat, buffer); modelMat.w.y += 8.0f;
 }
 void AddBreeze( Mat44 &m ) {
 	const float offset = m.w.x * 1.3f + m.w.z * 0.6f;
@@ -238,13 +258,15 @@ void DrawWorld() {
 			modelMat = Translation(Vec3( tx, 0.0, tz ));
 			SetModel( modelMat );
 			switch(gTileState[tile]) {
-				case 0: SetTexture( "earth", 0 ); break;
-				case 1:
-				case 2:
-				case 3: SetTexture( "pick", 0 ); break;
+				case TI_RAW: SetTexture( "earth", 0 ); break;
+				case TI_PLOUGHED:
+				case TI_SEEDED_OWL:
+				case TI_GROWN_OWL: SetTexture( "pick", 0 ); break;
+				case TI_CHEST: SetTexture( "chest", 0 ); break;
+				case TI_CHEST_OPEN: SetTexture( "chest-open", 0 ); break;
 			}
 			smallertile->DrawTriangles();
-			if(gTileState[tile]==3) {
+			if(gTileState[tile]==TI_GROWN_OWL) {
 				modelMat = Translation(Vec3( tx, 0.0, tz ));
 				modelMat.Scale( 0.5f );
 				AddBreeze( modelMat );

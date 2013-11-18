@@ -6,3 +6,16 @@ need to render, then they are trying to grab assets before they are ready to be
 grabbed.
 
 
+during change 2 (adding growing to the owls):
+
+the DOD approach is to have a list of owls that are growing, and only increment
+the growing timer of owls that might be growing. This means that the
+non-growing owls don't get an update tick, and also that the non-growing owls
+don't have a growing time field. This saves both time and space.
+
+during update 4 (owls harvested, chest of gold, bears, woods):
+
+having the seed count in the dude didn't seem bad earlier, but now with the owl
+count and the gold count too, it's startig to look innappropriate from a DOD
+perspective. But this is how games traditionally handle per character
+attributes, so the OOP version is starting to need more accessors.
