@@ -36,6 +36,7 @@ namespace GameTextures {
 		AddSubAsset( "ring-red", *sheet, 1,4 );
 		AddSubAsset( "potion-yellow", *sheet, 2,5 );
 		AddSubAsset( "ring-yellow", *sheet, 2,4 );
+		AddSubAsset( "boar", *sheet, 12,8 );
 
 		AddAsset( "cursor", LoadImageG("data/cursor.png") );
 		AddAsset( "sheet", sheet );
