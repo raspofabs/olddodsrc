@@ -8,7 +8,11 @@ namespace GameTextures {
 
 	void Init() {
 		Log( 1, "loading images\n" );
+
+		// the cute dungeon spritesheet was
+		// downloaded from http://makegames.tumblr.com/
 		sheet = LoadImageG("data/sprite1.png"); // (C) Derek Yu 2008 
+
 		AddSubAsset( "sword", *sheet, 2,11 );
 		AddSubAsset( "owl", *sheet, 5,7 );
 		AddSubAsset( "door-closed", *sheet, 4,10 );
