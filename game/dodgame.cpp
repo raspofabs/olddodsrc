@@ -23,12 +23,14 @@ void DrawWorld();
 
 // game state
 int gTileState[FARM_WIDTH*FARM_WIDTH];
+int gWoodsTile[WOODS_WIDTH*1];
 typedef std::pair<int,float> Growing;
 typedef std::list<Growing> GrowingList;
 GrowingList gGrowingList;
 Vec2 gDudePos( floorf( FARM_WIDTH * 0.5f ) );
 Vec2 gDudeFacing(0,-1);
 Vec2 gDudeDest = gDudePos;
+bool inWoods;
 float gPloughing;
 int haveSeeds = 5;
 int haveOwls = 0;
@@ -65,7 +67,7 @@ void GameInit() {
 
 	SetGameTitle( "DOD game" );
 
-	gTileState[0] = TI_CHEST;
+	gWoodsTile[WOODS_WIDTH-1] = TI_CHEST;
 }
 void GameShutdown() {
 }
@@ -101,6 +103,11 @@ void UpdateLogic( double delta ) {
 				float x = floorf( gDudePos.x + 0.5f );
 				float y = floorf( gDudePos.y + 0.5f );
 				int cell = (int)x + FARM_WIDTH * (int)y;
+				if( x == FARM_WIDTH && y == 2 ) {
+					inWoods = true;
+					gDudePos = Vec2(0.0f);
+					gDudeDest = Vec2(0.0f);
+				}
 				if( gTileState[cell] == TI_CHEST ) {
 					gTileState[cell] = TI_CHEST_OPEN;
 					haveGold += 10;
@@ -122,10 +129,14 @@ void UpdateLogic( double delta ) {
 			if( mx != 0.0f || my != 0.0f ) {
 				if( mx != 0.0f && my != 0.0f ) {
 				} else {
-					if( gDudePos.x < FARM_WIDTH-1 && mx > 0.0f ) { gDudeDest = gDudePos + Vec2(1.0f,0.0f); }
-					if( gDudePos.x > 0.0f && mx < 0.0f ) { gDudeDest = gDudePos - Vec2(1.0f,0.0f); }
-					if( gDudePos.y < FARM_WIDTH-1 && my > 0.0f ) { gDudeDest = gDudePos + Vec2(0.0f,1.0f); }
-					if( gDudePos.y > 0.0f && my < 0.0f ) { gDudeDest = gDudePos - Vec2(0.0f,1.0f); }
+					bool canGoLeft = gDudePos.x < FARM_WIDTH-1 || ( gDudePos.y == 2 );
+					bool canGoRight = gDudePos.x > 0;
+					bool canGoFw = gDudePos.y < FARM_WIDTH-1;
+					bool canGoBw = gDudePos.y > 0;
+					if( canGoLeft && mx > 0.0f ) { gDudeDest = gDudePos + Vec2(1.0f,0.0f); }
+					if( canGoRight && mx < 0.0f ) { gDudeDest = gDudePos - Vec2(1.0f,0.0f); }
+					if( canGoFw && my > 0.0f ) { gDudeDest = gDudePos + Vec2(0.0f,1.0f); }
+					if( canGoBw && my < 0.0f ) { gDudeDest = gDudePos - Vec2(0.0f,1.0f); }
 				}
 			}
 		}
@@ -248,51 +259,83 @@ void DrawWorld() {
 	Mat44 look = Mat44LookAt( from, to, gYVec4 );
 	SetCamera(look);
 
-	const float FARM_OFFSET = ((FARM_WIDTH-1)*FARM_TILE_WIDTH*0.5f);
-	int tile = 0;
-	for( int y = 0; y < FARM_WIDTH; ++y ) {
-		for( int x = 0; x < FARM_WIDTH; ++x ) {
-			// ignoring innefficiency of doing int to float here
+	if( !inWoods ) {
+		const float FARM_OFFSET = ((FARM_WIDTH-1)*FARM_TILE_WIDTH*0.5f);
+		int tile = 0;
+		for( int y = 0; y < FARM_WIDTH; ++y ) {
+			for( int x = 0; x < FARM_WIDTH; ++x ) {
+				// ignoring innefficiency of doing int to float here
+				float tx = x * FARM_TILE_WIDTH - FARM_OFFSET;
+				float tz = y * FARM_TILE_WIDTH - FARM_OFFSET;
+				modelMat = Translation(Vec3( tx, 0.0, tz ));
+				SetModel( modelMat );
+				switch(gTileState[tile]) {
+					case TI_RAW: SetTexture( "earth", 0 ); break;
+					case TI_PLOUGHED:
+					case TI_SEEDED_OWL:
+					case TI_GROWN_OWL: SetTexture( "pick", 0 ); break;
+					case TI_CHEST: SetTexture( "chest", 0 ); break;
+					case TI_CHEST_OPEN: SetTexture( "chest-open", 0 ); break;
+				}
+				smallertile->DrawTriangles();
+				if(gTileState[tile]==TI_GROWN_OWL) {
+					modelMat = Translation(Vec3( tx, 0.0, tz ));
+					modelMat.Scale( 0.5f );
+					AddBreeze( modelMat );
+					SetModel( modelMat );
+					SetTexture( "owl", 0 );
+					dude->DrawTriangles();
+				}
+				tile += 1;
+			}
+		}
+
+		for( GrowingList::iterator i = gGrowingList.begin(); i != gGrowingList.end(); ++i ) {
+			int x = i->first%FARM_WIDTH;
+			int z = i->first/FARM_WIDTH;
 			float tx = x * FARM_TILE_WIDTH - FARM_OFFSET;
-			float tz = y * FARM_TILE_WIDTH - FARM_OFFSET;
+			float tz = z * FARM_TILE_WIDTH - FARM_OFFSET;
+			modelMat = Translation(Vec3( tx, 0.0, tz ));
+			modelMat.Scale( i->second * 0.5f );
+			AddBreeze( modelMat );
+			SetModel( modelMat );
+			SetTexture( "owl", 0 );
+			dude->DrawTriangles();
+		}
+
+		if( 1 ) {
+			float tx = FARM_WIDTH * FARM_TILE_WIDTH - FARM_OFFSET;
+			float tz = (FARM_WIDTH/2) * FARM_TILE_WIDTH - FARM_OFFSET;
 			modelMat = Translation(Vec3( tx, 0.0, tz ));
 			SetModel( modelMat );
-			switch(gTileState[tile]) {
-				case TI_RAW: SetTexture( "earth", 0 ); break;
-				case TI_PLOUGHED:
-				case TI_SEEDED_OWL:
-				case TI_GROWN_OWL: SetTexture( "pick", 0 ); break;
-				case TI_CHEST: SetTexture( "chest", 0 ); break;
-				case TI_CHEST_OPEN: SetTexture( "chest-open", 0 ); break;
-			}
+			SetTexture( "earth", 0 );
 			smallertile->DrawTriangles();
-			if(gTileState[tile]==TI_GROWN_OWL) {
-				modelMat = Translation(Vec3( tx, 0.0, tz ));
-				modelMat.Scale( 0.5f );
-				AddBreeze( modelMat );
-				SetModel( modelMat );
-				SetTexture( "owl", 0 );
-				dude->DrawTriangles();
-			}
-			tile += 1;
 		}
-	}
 
-	for( GrowingList::iterator i = gGrowingList.begin(); i != gGrowingList.end(); ++i ) {
-		int x = i->first%FARM_WIDTH;
-		int z = i->first/FARM_WIDTH;
-		float tx = x * FARM_TILE_WIDTH - FARM_OFFSET;
-		float tz = z * FARM_TILE_WIDTH - FARM_OFFSET;
-		modelMat = Translation(Vec3( tx, 0.0, tz ));
-		modelMat.Scale( i->second * 0.5f );
-		AddBreeze( modelMat );
-		SetModel( modelMat );
-		SetTexture( "owl", 0 );
-		dude->DrawTriangles();
+		modelMat = Translation( Vec3( gDudePos.x * FARM_TILE_WIDTH - FARM_OFFSET, 0.0f, gDudePos.y * FARM_TILE_WIDTH - FARM_OFFSET ) );
+	} else {
+		const float WOODS_OFFSET = ((WOODS_WIDTH-1)*FARM_TILE_WIDTH*0.5f);
+		int tile = 0;
+		for( int y = 0; y < 1; ++y ) {
+			for( int x = 0; x < WOODS_WIDTH; ++x ) {
+				// ignoring innefficiency of doing int to float here
+				float tx = x * FARM_TILE_WIDTH - WOODS_OFFSET;
+				float tz = y * FARM_TILE_WIDTH;
+				modelMat = Translation(Vec3( tx, 0.0, tz ));
+				SetModel( modelMat );
+				switch(gWoodsTile[tile]) {
+					case 0: SetTexture( "tree", 0 ); break;
+					case TI_CHEST: SetTexture( "chest", 0 ); break;
+					case TI_CHEST_OPEN: SetTexture( "chest-open", 0 ); break;
+				}
+				smallertile->DrawTriangles();
+				tile += 1;
+			}
+		}
+		modelMat = Translation( Vec3( gDudePos.x * FARM_TILE_WIDTH - WOODS_OFFSET, 0.0f, gDudePos.y * FARM_TILE_WIDTH ) );
 	}
 
 	SetTexture( "guy", 0 );
-	modelMat = Translation( Vec3( gDudePos.x * FARM_TILE_WIDTH - FARM_OFFSET, 0.0f, gDudePos.y * FARM_TILE_WIDTH - FARM_OFFSET ) );
 	Vec2 aim( -gDudeFacing.y, gDudeFacing.x );
 	modelMat.x.x = aim.x;
 	modelMat.x.z = aim.y;

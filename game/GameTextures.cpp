@@ -22,6 +22,7 @@ namespace GameTextures {
 		AddSubAsset( "dragon", *sheet, 7,11 );
 		AddSubAsset( "shark", *sheet, 8,11 );
 		AddSubAsset( "reddragon", *sheet, 10,11 );
+		AddSubAsset( "tree", *sheet, 10,12 );
 		AddSubAsset( "cobra", *sheet, 11,11 );
 		AddSubAsset( "earth", *sheet, 12,11 );
 		AddSubAsset( "bomb", *sheet, 13,11 );
