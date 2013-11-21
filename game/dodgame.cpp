@@ -72,6 +72,29 @@ void GameInit() {
 void GameShutdown() {
 }
 
+const int MOVE_LEFT = 1;
+const int MOVE_RIGHT = 2;
+const int MOVE_FORWARD = 4;
+const int MOVE_BACKWARD = 8;
+int GetMovementOptionsAt( const Vec2 &p ) {
+	int r = 0;
+	if( inWoods ) {
+		if( p.x < WOODS_WIDTH -1 )
+			r |= MOVE_LEFT;
+		r |= MOVE_RIGHT;
+	} else {
+		if( p.x < FARM_WIDTH-1 || ( p.y == 2 ) )
+			r |= MOVE_LEFT;
+		if( p.x > 0 )
+			r |= MOVE_RIGHT;
+		if( p.y < FARM_WIDTH-1 )
+			r |= MOVE_FORWARD;
+		if( p.y > 0 )
+			r |= MOVE_BACKWARD;
+	}
+	return r;
+}
+
 void UpdateLogic( double delta ) {
 
 	Vec2 d = gDudeDest - gDudePos;
@@ -102,15 +125,34 @@ void UpdateLogic( double delta ) {
 			if( gDudePos == gDudeDest ) {
 				float x = floorf( gDudePos.x + 0.5f );
 				float y = floorf( gDudePos.y + 0.5f );
-				int cell = (int)x + FARM_WIDTH * (int)y;
-				if( x == FARM_WIDTH && y == 2 ) {
-					inWoods = true;
-					gDudePos = Vec2(0.0f);
-					gDudeDest = Vec2(0.0f);
-				}
-				if( gTileState[cell] == TI_CHEST ) {
-					gTileState[cell] = TI_CHEST_OPEN;
-					haveGold += 10;
+				Log( 3, "Arrive at %0.1f,%0.1f\n", x, y );
+				int cell = 0;
+				if( !inWoods ) {
+					cell = (int)x + FARM_WIDTH * (int)y;
+					if( x == FARM_WIDTH && y == 2 ) {
+						inWoods = true;
+						gDudePos = Vec2(-1.0f,0.0f);
+						gDudeFacing = Vec2(1.0f,0.0f);
+						gDudeDest = gDudePos + gDudeFacing;
+					}
+					Log( 3, "Farm Cell %i\n", cell );
+					if( gTileState[cell] == TI_CHEST ) {
+						gTileState[cell] = TI_CHEST_OPEN;
+						haveGold += 10;
+					}
+				} else {
+					cell = (int)x + WOODS_WIDTH * (int)y;
+					if( x == -1 && y == 0 ) {
+						inWoods = false;
+						gDudePos = Vec2(FARM_WIDTH,2.0f);
+						gDudeFacing = Vec2(-1.0f,0.0f);
+						gDudeDest = gDudePos + gDudeFacing;
+					}
+					Log( 3, "Wood Cell %i\n", cell );
+					if( gWoodsTile[cell] == TI_CHEST ) {
+						gWoodsTile[cell] = TI_CHEST_OPEN;
+						haveGold += 10;
+					}
 				}
 			}
 		}
@@ -129,10 +171,11 @@ void UpdateLogic( double delta ) {
 			if( mx != 0.0f || my != 0.0f ) {
 				if( mx != 0.0f && my != 0.0f ) {
 				} else {
-					bool canGoLeft = gDudePos.x < FARM_WIDTH-1 || ( gDudePos.y == 2 );
-					bool canGoRight = gDudePos.x > 0;
-					bool canGoFw = gDudePos.y < FARM_WIDTH-1;
-					bool canGoBw = gDudePos.y > 0;
+					int canGo = GetMovementOptionsAt( gDudePos );
+					bool canGoLeft = canGo&MOVE_LEFT;
+					bool canGoRight = canGo&MOVE_RIGHT;
+					bool canGoFw = canGo&MOVE_FORWARD;
+					bool canGoBw = canGo&MOVE_BACKWARD;
 					if( canGoLeft && mx > 0.0f ) { gDudeDest = gDudePos + Vec2(1.0f,0.0f); }
 					if( canGoRight && mx < 0.0f ) { gDudeDest = gDudePos - Vec2(1.0f,0.0f); }
 					if( canGoFw && my > 0.0f ) { gDudeDest = gDudePos + Vec2(0.0f,1.0f); }
