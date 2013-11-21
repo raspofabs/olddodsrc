@@ -65,5 +65,12 @@ bool World::CanVisit( const Vec2 &p ) {
 	return false;
 }
 
+void World::SetEntry( int x, int y ) {
+	m_Entry = Vec2( x, y );
+}
+Vec2 World::GetEntry() {
+	return m_Entry;
+}
+
 float World::XOff() const { return ((mc_Width-1)*FARM_TILE_WIDTH*0.5f); }
 float World::YOff() const { return ((mc_Height-1)*FARM_TILE_WIDTH*0.5f); }

@@ -20,6 +20,7 @@ void DrawWorld();
 #include "oopworld.h"
 
 World *gpWorld;
+World *gpFarm, *gpWoods;
 
 //const float FARM_OFFSET = ((FARM_WIDTH-1)*FARM_TILE_WIDTH*0.5f);
 
@@ -110,9 +111,23 @@ class Dude {
 						float x = floorf( m_Pos.x + 0.5f );
 						float y = floorf( m_Pos.y + 0.5f );
 						Tile *tile = gpWorld->GetTile( x, y );
-						if( tile->IsChest() ) {
-							tile->OpenChest();
-							m_GoldCount += 10;
+						if( tile ) {
+							if( tile->IsChest() ) {
+								tile->OpenChest();
+								m_GoldCount += 10;
+							}
+							int newWorld = -2;
+							if( tile->IsPortal( newWorld ) ) {
+								switch( newWorld ) {
+									case 0: gpWorld = gpFarm; Log( 3, "Moving to the farm\n" ); break;
+									case 1: gpWorld = gpWoods; Log( 3, "Moving to the woods\n" ); break;
+									default: eprintf( "Where the hell are we? [%i]\n", newWorld );
+								}
+								m_Pos = gpWorld->GetEntry();
+								m_Dest = m_Pos + m_Facing;
+							}
+						} else {
+							eprintf( "On an invalid tile\n" );
 						}
 					}
 				}
@@ -201,14 +216,17 @@ class Dude {
 };
 
 Dude *gpDude;
-World *gpFarm, *gpWoods;
 
 void CreateEntities() {
 	gpDude = new Dude();
 	gpFarm = new World( FARM_WIDTH, FARM_WIDTH );
 	gpWoods = new World( WOODS_WIDTH, 1 );
 	gpFarm->AddTile( FARM_WIDTH, 2 );
+	gpFarm->GetTile( FARM_WIDTH, 2 )->SetAsPortal( 1 );
+	gpFarm->SetEntry( FARM_WIDTH, 2 );
 	gpWoods->AddTile( -1, 0 );
+	gpWoods->GetTile( -1, 0 )->SetAsPortal( 0 );
+	gpWoods->SetEntry( -1, 0 );
 	gpWorld = gpFarm;
 	gpWoods->GetTile( WOODS_WIDTH-1, 0 )->SetAsChest();
 }

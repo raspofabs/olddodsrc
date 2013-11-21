@@ -8,7 +8,7 @@
 #include <stdlib.h>
 #include "GameConsts.h"
 
-Tile::Tile() : m_State(TI_RAW), m_Growth(0) {
+Tile::Tile() : m_State(TI_RAW), m_Growth(0), m_Portal(0), m_World(-1) {
 	m_GroundMesh = GameMeshes::Get("smallertile");
 	m_OwlMesh = GameMeshes::Get("quadpeep");
 }
@@ -43,6 +43,18 @@ void Tile::Harvest() {
 	} else {
 		m_State = TI_PLOUGHED;
 	}
+}
+
+void Tile::SetAsPortal( int world ) {
+	m_Portal = true;
+	m_World = world;
+}
+bool Tile::IsPortal( int &newWorld ) {
+	if( m_Portal ) {
+		newWorld = m_World;
+		return true;
+	}
+	return false;
 }
 
 void Tile::Render( const Mat44 &modelMat ) {
