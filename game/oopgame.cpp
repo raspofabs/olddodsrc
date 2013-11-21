@@ -16,7 +16,12 @@ void DrawWorld();
 
 #include "GameConsts.h"
 
-const float FARM_OFFSET = ((FARM_WIDTH-1)*FARM_TILE_WIDTH*0.5f);
+#include "ooptile.h"
+#include "oopworld.h"
+
+World *gpWorld;
+
+//const float FARM_OFFSET = ((FARM_WIDTH-1)*FARM_TILE_WIDTH*0.5f);
 
 void GameUpdate() {
 	static double previousTime = glfwGetTime();
@@ -50,70 +55,6 @@ void GameShutdown() {
 }
 
 // game state
-class Tile {
-	public:
-		Tile() : m_State(TI_RAW), m_Growth(0) {
-			m_GroundMesh = GameMeshes::Get("smallertile");
-			m_OwlMesh = GameMeshes::Get("quadpeep");
-		}
-		
-		void SetAsChest() { m_State = TI_CHEST; }
-		bool IsChest() { return m_State == TI_CHEST; }
-		void OpenChest() { m_State = TI_CHEST_OPEN; }
-		bool CanBePloughed() { return m_State == TI_RAW; }
-		bool CanBePlanted() { return m_State == TI_PLOUGHED; }
-		bool CanBeHarvested() { return m_State == TI_GROWN_OWL; }
-		void Plough() { m_State = TI_PLOUGHED; }
-		void Plant() { m_State = TI_SEEDED_OWL; m_Growth = 0.0f; }
-		void Harvest() { 
-			if( (rand()&4095)/4096.0 > RETURN_TO_UNPLOUGHED_PROBABILITY ) {
-				m_State = TI_RAW;
-			} else {
-				m_State = TI_PLOUGHED;
-			}
-		}
-
-		void Render( const Mat44 &modelMat ) {
-			SetModel( modelMat );
-			switch(m_State) {
-				case TI_RAW: SetTexture( "earth", 0 ); break;
-				case TI_PLOUGHED:
-				case TI_SEEDED_OWL:
-				case TI_GROWN_OWL: SetTexture( "pick", 0 ); break;
-				case TI_CHEST: SetTexture( "chest", 0 ); break;
-				case TI_CHEST_OPEN: SetTexture( "chest-open", 0 ); break;
-			}
-			m_GroundMesh->DrawTriangles();
-			if( m_State >= TI_GROWN_OWL && m_State <= TI_SEEDED_OWL ) {
-				SetTexture( "owl", 0 );
-				Mat44 owlMat = modelMat;
-				owlMat.Scale( 0.5f * m_Growth );
-				const float offset = owlMat.w.x * 1.3f + owlMat.w.z * 0.6f;
-				const float swaySpeed = 1.6f;
-				const float swayAmount = 0.1f;
-				extern float g_fGameTime;
-				owlMat.y.x = owlMat.y.y * sin( g_fGameTime * swaySpeed + offset ) * swayAmount;
-				SetModel( owlMat );
-				m_OwlMesh->DrawTriangles();
-			}
-		}
-		void Update( double delta ) {
-			if( m_State == TI_SEEDED_OWL ) {
-				m_Growth += GROWTH_RATE * delta;
-				if( m_Growth >= 1.0f ) {
-					m_Growth = 1.0f;
-					m_State = TI_GROWN_OWL;
-				}
-			}
-		}
-
-	private:
-		int m_State;
-		float m_Growth;
-		BadMesh *m_GroundMesh, *m_OwlMesh;
-};
-
-Tile *gpTiles;
 
 class Dude {
 	public:
@@ -168,9 +109,9 @@ class Dude {
 					if( m_Pos == m_Dest ) {
 						float x = floorf( m_Pos.x + 0.5f );
 						float y = floorf( m_Pos.y + 0.5f );
-						int cell = (int)x + FARM_WIDTH * (int)y;
-						if( gpTiles[cell].IsChest() ) {
-							gpTiles[cell].OpenChest();
+						Tile *tile = gpWorld->GetTile( x, y );
+						if( tile->IsChest() ) {
+							tile->OpenChest();
 							m_GoldCount += 10;
 						}
 					}
@@ -179,10 +120,10 @@ class Dude {
 				if( m_PloughTime == 0.0f && m_Control != Vec2(0) ) {
 					if( m_Control.x != 0.0f && m_Control.y != 0.0f ) {
 					} else {
-						bool canGoLeft = m_Pos.x > 0.0f;
-						bool canGoRight = m_Pos.x < FARM_WIDTH-1;
-						bool canGoUp = m_Pos.y > 0.0f;
-						bool canGoDown = m_Pos.y < FARM_WIDTH-1;
+						bool canGoLeft = gpWorld->CanVisit( m_Pos + Vec2(-1.0f,0.0f) );
+						bool canGoRight = gpWorld->CanVisit( m_Pos + Vec2(1.0f,0.0f) );
+						bool canGoUp = gpWorld->CanVisit( m_Pos + Vec2(0.0f,-1.0f) );
+						bool canGoDown = gpWorld->CanVisit( m_Pos + Vec2(0.0f,1.0f) );
 						if( canGoRight && m_Control.x > 0.0f ) { m_Dest = m_Pos + Vec2(1.0f,0.0f); }
 						if( canGoLeft && m_Control.x < 0.0f ) { m_Dest = m_Pos - Vec2(1.0f,0.0f); }
 						if( canGoDown && m_Control.y > 0.0f ) { m_Dest = m_Pos + Vec2(0.0f,1.0f); }
@@ -201,8 +142,8 @@ class Dude {
 						float x = floorf( m_Pos.x + 0.5f );
 						float y = floorf( m_Pos.y + 0.5f );
 						int cell = (int)x + FARM_WIDTH * (int)y;
-						Tile &t = gpTiles[cell];
-						t.Plough();
+						Tile *tile = gpWorld->GetTile( x, y );
+						tile->Plough();
 						Log( 1, "ploughed the land at %i (%.2f,%.2f)\n", cell, x, y );
 					}
 				}
@@ -212,18 +153,18 @@ class Dude {
 				float y = floorf( m_Pos.y + 0.5f );
 				if( x >= 0 && x < FARM_WIDTH && y >= 0 && y < FARM_WIDTH ) {
 					int cell = (int)x + FARM_WIDTH * (int)y;
-					Tile &t = gpTiles[cell];
-					if( t.CanBePloughed() ) {
+					Tile *tile = gpWorld->GetTile( x, y );
+					if( tile->CanBePloughed() ) {
 						if( !moving ) {
 							m_PloughTime = TIME_TO_PLOUGH;
 							Log( 1, "Started to plough the land at %i (%.2f,%.2f)\n", cell, x, y );
 						}
-					} else if( m_SeedCount && t.CanBePlanted() ) {
-						t.Plant();
+					} else if( m_SeedCount && tile->CanBePlanted() ) {
+						tile->Plant();
 						m_SeedCount -= 1;
 						Log( 1, "planted an owl at %i (%.2f,%.2f)\n", cell, x, y );
-					} else if( t.CanBeHarvested() ) {
-						t.Harvest();
+					} else if( tile->CanBeHarvested() ) {
+						tile->Harvest();
 						m_OwlCount += 1;
 						Log( 1, "harvested an owl to get three owl seeds.\n" );
 					}
@@ -236,7 +177,7 @@ class Dude {
 		int GetNumOwls() { return m_OwlCount; }
 		int GetNumGold() { return m_GoldCount; }
 
-		Vec3 GetWorldPos() { return Vec3( m_Pos.x * FARM_TILE_WIDTH - FARM_OFFSET, 0.0, m_Pos.y * FARM_TILE_WIDTH - FARM_OFFSET ); }
+		Vec3 GetWorldPos() { return gpWorld->GetWorldPos( m_Pos ); }
 		void Render() {
 			Mat44 modelMat = Translation( GetWorldPos() );
 			Vec2 aim( -m_Facing.y, m_Facing.x );
@@ -260,11 +201,16 @@ class Dude {
 };
 
 Dude *gpDude;
+World *gpFarm, *gpWoods;
 
 void CreateEntities() {
 	gpDude = new Dude();
-	gpTiles = new Tile[FARM_WIDTH*FARM_WIDTH];
-	gpTiles[0].SetAsChest();
+	gpFarm = new World( FARM_WIDTH, FARM_WIDTH );
+	gpWoods = new World( WOODS_WIDTH, 1 );
+	gpFarm->AddTile( FARM_WIDTH, 2 );
+	gpWoods->AddTile( -1, 0 );
+	gpWorld = gpFarm;
+	gpWoods->GetTile( WOODS_WIDTH-1, 0 )->SetAsChest();
 }
 
 void UpdateLogic( double delta ) {
@@ -285,10 +231,7 @@ void UpdateLogic( double delta ) {
 	gpDude->UpdateInput( inputVec );
 	gpDude->Update( delta );
 
-	for( int i = 0; i < FARM_WIDTH * FARM_WIDTH; ++i ) {
-		Tile &t = gpTiles[i];
-		t.Update(delta);
-	}
+	gpWorld->Update( delta );
 }
 
 void DrawHUD() {
@@ -332,16 +275,7 @@ void DrawWorld() {
 	Mat44 look = Mat44LookAt( from, to, gYVec4 );
 	SetCamera(look);
 
-	int tile = 0;
-	for( int y = 0; y < FARM_WIDTH; ++y ) {
-		for( int x = 0; x < FARM_WIDTH; ++x ) {
-			float tx = x * FARM_TILE_WIDTH - FARM_OFFSET;
-			float tz = y * FARM_TILE_WIDTH - FARM_OFFSET;
-			modelMat = Translation(Vec3( tx, 0.0, tz ));
-			gpTiles[tile].Render( modelMat );
-			tile += 1;
-		}
-	}
+	gpWorld->Render();
 
 	SetTexture( "guy", 0 );
 	modelMat = Translation( gpDude->GetWorldPos() );

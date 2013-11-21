@@ -19,3 +19,11 @@ having the seed count in the dude didn't seem bad earlier, but now with the owl
 count and the gold count too, it's startig to look innappropriate from a DOD
 perspective. But this is how games traditionally handle per character
 attributes, so the OOP version is starting to need more accessors.
+
+In the object-oriented project, wer're going to be using a "world" object as
+the tendency to name things often leads to early structuring in OO C++
+development. The data-oriented approach is teetering on that decision because
+of the rule of thumb that is personal to me, which is if you have two things,
+don't genericise, but if you have three, then you probably should. Until there
+is a third destination, the data-oriented approach will stick with a "are you
+in the woods" check, as at this stage it's the simplest thing to do.

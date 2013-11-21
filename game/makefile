@@ -12,11 +12,12 @@ LIBS=-Wl,-Bsymbolic-functions \
 	-lGL -lglfw
 
 RAW_COMMONOBJECTS=GameTextures.o GameMeshes.o
+RAW_OOPOBJECTS=ooptile.o oopworld.o
 RAW_TARGETOBJECTS=$(TARGETS:%=%.o)
 COMMONOBJECTS=$(RAW_COMMONOBJECTS:%=build/%)
+OOPOBJECTS=$(RAW_OOPOBJECTS:%=build/%)
 TARGETOBJECTS=$(RAW_TARGETOBJECTS:%=build/%)
-ALLOBJECTS=$(COMMONOBJECTS) $(TARGETOBJECTS)
-OBJSRC=$(COMMONOBJECTS:.o=.cpp)
+ALLOBJECTS=$(COMMONOBJECTS) $(TARGETOBJECTS) $(OOPOBJECTS)
 CORE=core/core.a
 TINYJS=TinyJS/TinyJS.a
 
@@ -46,8 +47,8 @@ build/%.o: %.cpp | build
 # testing
 test: build/test.o $(COMMONOBJECTS) $(CORE) $(TINYJS)
 	$(CC) build/test.o $(COMMONOBJECTS) $(CORE) $(TINYJS) -o test $(LIBS)
-oopgame: build/oopgame.o $(COMMONOBJECTS) $(CORE) $(TINYJS)
-	$(CC) build/oopgame.o $(COMMONOBJECTS) $(CORE) $(TINYJS) -o oopgame $(LIBS)
+oopgame: build/oopgame.o $(COMMONOBJECTS) $(CORE) $(TINYJS) $(OOPOBJECTS)
+	$(CC) build/oopgame.o $(COMMONOBJECTS) $(CORE) $(TINYJS) $(OOPOBJECTS) -o oopgame $(LIBS)
 dodgame: build/dodgame.o $(COMMONOBJECTS) $(CORE) $(TINYJS)
 	$(CC) build/dodgame.o $(COMMONOBJECTS) $(CORE) $(TINYJS) -o dodgame $(LIBS)
 
