@@ -228,6 +228,9 @@ void CreateEntities() {
 	gpWoods->GetTile( -1, 0 )->SetAsPortal( 0 );
 	gpWoods->SetEntry( -1, 0 );
 	gpWorld = gpFarm;
+	for( int i = 0; i < WOODS_WIDTH-1; ++i ) {
+		gpWoods->GetTile( i, 0 )->SetSpecialTexture( "tree" );
+	}
 	gpWoods->GetTile( WOODS_WIDTH-1, 0 )->SetAsChest();
 }
 

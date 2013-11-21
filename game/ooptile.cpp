@@ -8,7 +8,7 @@
 #include <stdlib.h>
 #include "GameConsts.h"
 
-Tile::Tile() : m_State(TI_RAW), m_Growth(0), m_Portal(0), m_World(-1) {
+Tile::Tile() : m_State(TI_RAW), m_Growth(0), m_Portal(0), m_World(-1), m_SpecialTexture(0) {
 	m_GroundMesh = GameMeshes::Get("smallertile");
 	m_OwlMesh = GameMeshes::Get("quadpeep");
 }
@@ -57,28 +57,37 @@ bool Tile::IsPortal( int &newWorld ) {
 	return false;
 }
 
+void Tile::SetSpecialTexture( const char *name ) {
+	m_SpecialTexture = name;
+}
+
 void Tile::Render( const Mat44 &modelMat ) {
 	SetModel( modelMat );
-	switch(m_State) {
-		case TI_RAW: SetTexture( "earth", 0 ); break;
-		case TI_PLOUGHED:
-		case TI_SEEDED_OWL:
-		case TI_GROWN_OWL: SetTexture( "pick", 0 ); break;
-		case TI_CHEST: SetTexture( "chest", 0 ); break;
-		case TI_CHEST_OPEN: SetTexture( "chest-open", 0 ); break;
-	}
-	m_GroundMesh->DrawTriangles();
-	if( m_State <= TI_GROWN_OWL && m_State >= TI_SEEDED_OWL ) {
-		SetTexture( "owl", 0 );
-		Mat44 owlMat = modelMat;
-		owlMat.Scale( 0.5f * m_Growth );
-		const float offset = owlMat.w.x * 1.3f + owlMat.w.z * 0.6f;
-		const float swaySpeed = 1.6f;
-		const float swayAmount = 0.1f;
-		extern float g_fGameTime;
-		owlMat.y.x = owlMat.y.y * sin( g_fGameTime * swaySpeed + offset ) * swayAmount;
-		SetModel( owlMat );
-		m_OwlMesh->DrawTriangles();
+	if( m_SpecialTexture ) {
+		SetTexture( m_SpecialTexture, 0 ); 
+		m_GroundMesh->DrawTriangles();
+	} else {
+		switch(m_State) {
+			case TI_RAW: SetTexture( "earth", 0 ); break;
+			case TI_PLOUGHED:
+			case TI_SEEDED_OWL:
+			case TI_GROWN_OWL: SetTexture( "pick", 0 ); break;
+			case TI_CHEST: SetTexture( "chest", 0 ); break;
+			case TI_CHEST_OPEN: SetTexture( "chest-open", 0 ); break;
+		}
+		m_GroundMesh->DrawTriangles();
+		if( m_State <= TI_GROWN_OWL && m_State >= TI_SEEDED_OWL ) {
+			SetTexture( "owl", 0 );
+			Mat44 owlMat = modelMat;
+			owlMat.Scale( 0.5f * m_Growth );
+			const float offset = owlMat.w.x * 1.3f + owlMat.w.z * 0.6f;
+			const float swaySpeed = 1.6f;
+			const float swayAmount = 0.1f;
+			extern float g_fGameTime;
+			owlMat.y.x = owlMat.y.y * sin( g_fGameTime * swaySpeed + offset ) * swayAmount;
+			SetModel( owlMat );
+			m_OwlMesh->DrawTriangles();
+		}
 	}
 }
 void Tile::Update( double delta ) {

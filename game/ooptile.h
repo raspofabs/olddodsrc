@@ -25,6 +25,9 @@ class Tile {
 		void SetAsPortal( int world );
 		bool IsPortal( int &newWorld );
 
+		// special
+		void SetSpecialTexture( const char *name );
+
 		void Render( const Mat44 &modelMat );
 		void Update( double delta );
 
@@ -34,6 +37,7 @@ class Tile {
 		BadMesh *m_GroundMesh, *m_OwlMesh;
 		bool m_Portal;
 		int m_World;
+		const char *m_SpecialTexture;
 };
 
 #endif
