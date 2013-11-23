@@ -1,4 +1,34 @@
+Update 5: OOPVDOD, the game Design document. Publisher demands.
+
+1. The player is in control of a character in the world.
+2. The world is a farm, a woods, and a shop.
+2.1. the farm has 4 x 4 plots of earth.
+2.2. with a path to the woods on one side
+2.3. and a path to the shop on the other side
+2.4. the woods are a 6 x 1 path that leads to a chest.
+2.5. but there are four bears on the path, and you need to use owls to defeat the bears.
+3. The earth can be ploughed. (holding space digs)
+3.1 ploughing isn't instant, it takes time, have to hold space until ploughed.
+3.2 the player can let go early to move, and not have to wait until stopped to start the plough.
+4. The ploughed earth can have seeds planted in it.
+4.1 you start with 5 owl seeds, you can get mor from the shop.
+4.2 number and type of seeds must be shown on screen.
+4.3 you can harvest fully grown plants.
+4.3.1 harvest owls to get owls
+4.3.2 harvest chests to get gold
+4.3.3 harvest locked doors to get keys
+4.4 harvesting has a 100% change of unploughing the field.
+4.4.1 Unless the player has bought the improved spade (then 50%).
+5. The plants grow over time. Once fully grown, you can cut them down.
+5.1 must take a few seconds, and animate them growing.
+5.2 some seeds take ages to grow
+5.3 the plants should always blow gently in the wind.
+6. If you get to the chest in the woods, you get some gold. Which is cool. You should show this on screen.
+6.1 you can spend it in the shop, you can afford chest plant seeds, but not the spade or more owl seeds.
+7. That's it, the whole game.
+
 Update 4: OOPVDOD, the game Design document. One more feature before we ship.
+// completed in 8516f014d9a04537f103bb4038c318044d2188c0 adding ploughing anim
 
 1. The player is in control of a character in the world.
 1.1. They move from square to square by pressing the wasd / arrow keys.
