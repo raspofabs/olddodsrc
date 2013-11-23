@@ -69,6 +69,13 @@ bool World::CanVisit( const Vec2 &p ) {
 	}
 	return false;
 }
+bool World::CanAttack( const Vec2 &p ) {
+	if( Tile *t = GetTile( p.x, p.y ) ) {
+		if( t->IsBear() )
+			return true;
+	}
+	return false;
+}
 
 void World::SetEntry( int x, int y ) {
 	m_Entry = Vec2( x, y );

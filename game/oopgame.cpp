@@ -135,14 +135,14 @@ class Dude {
 				if( m_PloughTime == 0.0f && m_Control != Vec2(0) ) {
 					if( m_Control.x != 0.0f && m_Control.y != 0.0f ) {
 					} else {
-						bool canGoLeft = gpWorld->CanVisit( m_Pos + Vec2(-1.0f,0.0f) );
-						bool canGoRight = gpWorld->CanVisit( m_Pos + Vec2(1.0f,0.0f) );
-						bool canGoUp = gpWorld->CanVisit( m_Pos + Vec2(0.0f,-1.0f) );
-						bool canGoDown = gpWorld->CanVisit( m_Pos + Vec2(0.0f,1.0f) );
-						if( canGoRight && m_Control.x > 0.0f ) { m_Dest = m_Pos + Vec2(1.0f,0.0f); }
-						if( canGoLeft && m_Control.x < 0.0f ) { m_Dest = m_Pos - Vec2(1.0f,0.0f); }
-						if( canGoDown && m_Control.y > 0.0f ) { m_Dest = m_Pos + Vec2(0.0f,1.0f); }
-						if( canGoUp && m_Control.y < 0.0f ) { m_Dest = m_Pos - Vec2(0.0f,1.0f); }
+						Vec2 attempt = m_Pos + m_Control;
+						if( gpWorld->CanVisit( attempt ) ) {
+							m_Dest = attempt;
+						}
+						if( gpWorld->CanAttack( attempt ) && m_OwlCount > 0 ) {
+							m_OwlCount -= 1;
+							gpWorld->GetTile( attempt.x, attempt.y )->DefeatBear();
+						}
 					}
 				}
 			}

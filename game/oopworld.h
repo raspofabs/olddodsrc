@@ -21,6 +21,7 @@ class World {
 		void AddTile( int x, int y );
 		Vec3 GetWorldPos( const Vec2 &p );
 		bool CanVisit( const Vec2 &p );
+		bool CanAttack( const Vec2 &p );
 		void SetEntry( int x, int y );
 		Vec2 GetEntry();
 

@@ -74,27 +74,30 @@ void GameInit() {
 void GameShutdown() {
 }
 
-const int MOVE_LEFT = 1;
-const int MOVE_RIGHT = 2;
-const int MOVE_FORWARD = 4;
-const int MOVE_BACKWARD = 8;
-int GetMovementOptionsAt( const Vec2 &p ) {
-	int r = 0;
+bool CanMoveTo( const Vec2 &p ) {
 	if( inWoods ) {
-		if( p.x < WOODS_WIDTH -1 && gWoodsTile[(int)p.x+1] != TI_BEAR )
-			r |= MOVE_LEFT;
-		r |= MOVE_RIGHT;
+		if( gWoodsTile[(int)p.x] == TI_BEAR )
+			return false;
+		if( p.x >= WOODS_WIDTH )
+			return false;
+		if( p.y != 0 )
+			return false;
 	} else {
-		if( p.x < FARM_WIDTH-1 || ( p.y == 2 ) )
-			r |= MOVE_LEFT;
-		if( p.x > 0 )
-			r |= MOVE_RIGHT;
-		if( p.y < FARM_WIDTH-1 )
-			r |= MOVE_FORWARD;
-		if( p.y > 0 )
-			r |= MOVE_BACKWARD;
+		if( p.x == FARM_WIDTH && p.y == 2 )
+			return true;
+		if( p.x >= FARM_WIDTH || p.x < 0 )
+			return false;
+		if( p.y >= FARM_WIDTH || p.y < 0 )
+			return false;
 	}
-	return r;
+	return true;
+}
+bool CanAttack( const Vec2 &p ) {
+	if( inWoods ) {
+		if( gWoodsTile[(int)p.x] == TI_BEAR )
+			return true;
+	}
+	return false;
 }
 
 void UpdateLogic( double delta ) {
@@ -173,15 +176,16 @@ void UpdateLogic( double delta ) {
 			if( mx != 0.0f || my != 0.0f ) {
 				if( mx != 0.0f && my != 0.0f ) {
 				} else {
-					int canGo = GetMovementOptionsAt( gDudePos );
-					bool canGoLeft = canGo&MOVE_LEFT;
-					bool canGoRight = canGo&MOVE_RIGHT;
-					bool canGoFw = canGo&MOVE_FORWARD;
-					bool canGoBw = canGo&MOVE_BACKWARD;
-					if( canGoLeft && mx > 0.0f ) { gDudeDest = gDudePos + Vec2(1.0f,0.0f); }
-					if( canGoRight && mx < 0.0f ) { gDudeDest = gDudePos - Vec2(1.0f,0.0f); }
-					if( canGoFw && my > 0.0f ) { gDudeDest = gDudePos + Vec2(0.0f,1.0f); }
-					if( canGoBw && my < 0.0f ) { gDudeDest = gDudePos - Vec2(0.0f,1.0f); }
+					Vec2 tryToGoTo = gDudePos + Vec2(mx,my);
+					if( CanMoveTo( tryToGoTo ) ) {
+						gDudeDest = tryToGoTo;
+					}
+					if( CanAttack( tryToGoTo ) ) {
+						if( haveOwls ) {
+							haveOwls -= 1;
+							gWoodsTile[(int)tryToGoTo.x] = TI_RAW;
+						}
+					}
 				}
 			}
 		}
