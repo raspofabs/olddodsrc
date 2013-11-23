@@ -57,6 +57,16 @@ bool Tile::IsPortal( int &newWorld ) {
 	return false;
 }
 
+void Tile::SetAsBear() {
+	m_State = TI_BEAR;
+}
+bool Tile::IsBear() {
+	return m_State == TI_BEAR;
+}
+void Tile::DefeatBear() {
+	m_State = TI_RAW;
+}
+
 void Tile::SetSpecialTexture( const char *name ) {
 	m_SpecialTexture = name;
 }
@@ -66,6 +76,13 @@ void Tile::Render( const Mat44 &modelMat ) {
 	if( m_SpecialTexture ) {
 		SetTexture( m_SpecialTexture, 0 ); 
 		m_GroundMesh->DrawTriangles();
+		if( m_State == TI_BEAR ) {
+			SetTexture( "boar", 0 );
+			Mat44 bearMat = modelMat;
+			bearMat.Scale( 0.75f );
+			SetModel( bearMat );
+			m_OwlMesh->DrawTriangles();
+		}
 	} else {
 		switch(m_State) {
 			case TI_RAW: SetTexture( "earth", 0 ); break;

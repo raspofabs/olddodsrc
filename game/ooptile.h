@@ -25,6 +25,11 @@ class Tile {
 		void SetAsPortal( int world );
 		bool IsPortal( int &newWorld );
 
+		// chest
+		void SetAsBear();
+		bool IsBear();
+		void DefeatBear();
+
 		// special
 		void SetSpecialTexture( const char *name );
 

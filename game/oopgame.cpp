@@ -232,6 +232,9 @@ void CreateEntities() {
 		gpWoods->GetTile( i, 0 )->SetSpecialTexture( "tree" );
 	}
 	gpWoods->GetTile( WOODS_WIDTH-1, 0 )->SetAsChest();
+	for( int i = 1; i < WOODS_WIDTH-1; ++i )
+		gpWoods->GetTile( i, 0 )->SetAsBear();
+	gpWoods->GetTile( WOODS_WIDTH-1, 0 )->SetAsChest();
 }
 
 void UpdateLogic( double delta ) {
