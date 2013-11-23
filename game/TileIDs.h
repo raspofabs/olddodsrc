@@ -6,6 +6,7 @@ enum TileID {
 	TI_GROWN_OWL,
 	TI_CHEST,
 	TI_CHEST_OPEN,
+	TI_BEAR,
 
 	TI_MAX_TILE_ID
 };

@@ -67,6 +67,8 @@ void GameInit() {
 
 	SetGameTitle( "DOD game" );
 
+	for( int i = 1; i < WOODS_WIDTH-1; ++i )
+		gWoodsTile[i] = TI_BEAR;
 	gWoodsTile[WOODS_WIDTH-1] = TI_CHEST;
 }
 void GameShutdown() {
@@ -79,7 +81,7 @@ const int MOVE_BACKWARD = 8;
 int GetMovementOptionsAt( const Vec2 &p ) {
 	int r = 0;
 	if( inWoods ) {
-		if( p.x < WOODS_WIDTH -1 )
+		if( p.x < WOODS_WIDTH -1 && gWoodsTile[(int)p.x+1] != TI_BEAR )
 			r |= MOVE_LEFT;
 		r |= MOVE_RIGHT;
 	} else {
@@ -367,11 +369,18 @@ void DrawWorld() {
 				modelMat = Translation(Vec3( tx, 0.0, tz ));
 				SetModel( modelMat );
 				switch(gWoodsTile[tile]) {
-					case 0: SetTexture( "tree", 0 ); break;
+					case TI_RAW:
+					case TI_BEAR: SetTexture( "tree", 0 ); break;
 					case TI_CHEST: SetTexture( "chest", 0 ); break;
 					case TI_CHEST_OPEN: SetTexture( "chest-open", 0 ); break;
 				}
 				smallertile->DrawTriangles();
+				if( gWoodsTile[tile] == TI_BEAR ) {
+					SetTexture( "boar", 0 );
+					modelMat.Scale( 0.75f );
+					SetModel( modelMat );
+					dude->DrawTriangles();
+				}
 				tile += 1;
 			}
 		}
