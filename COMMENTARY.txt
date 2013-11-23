@@ -41,4 +41,13 @@ code. Adding the bears themselves were about the same complexity as DO, but the
 task of making them block was very straight forward in OO dev. The only thing
 is, that it was a very short victory as it turns out the reason why it was
 simple was that it lacked context, which means adding the owl fight might not
-be that simple.
+be that simple. - actually, it wasn't all that hard, but did need to add bears
+to the tiles. This is a problem brewing though, there's more and more external
+object type specific stuff going on and the responsibility is becoming muddied
+as to what is meant to be in the tiles, and what it in the world, and what the
+player interacts with (is it the state of the tile, or the world?) This is
+known as the boundary problem, the same problem faced when the developer of
+designer cannot make the call for when the collection of grains of sand turns
+into a pile. This core issue with OO manifests as ambiguous ownership of state
+and manipulators of that data.
+

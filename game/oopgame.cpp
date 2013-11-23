@@ -267,7 +267,7 @@ void DrawHUD() {
 	glDepthFunc(GL_LEQUAL);
 	ClearScreen( 0.3f, 0.3f, 0.3f );
 	SetTexture( "sword", 0 );
-	DrawSquare( 16, 16, 32, 32, 0xFFFFFFFF );
+	//DrawSquare( 16, 16, 32, 32, 0xFFFFFFFF );
 
 
 	DefaultOrtho();
