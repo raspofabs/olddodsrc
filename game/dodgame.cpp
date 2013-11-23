@@ -397,6 +397,7 @@ void DrawWorld() {
 	modelMat.x.z = aim.y;
 	modelMat.z.x = -aim.y;
 	modelMat.z.z = aim.x;
+	modelMat.w.y += sinf( 6.0f * gPloughing ) * 0.2f;
 	SetModel( modelMat );
 	dude->DrawTriangles();
 }

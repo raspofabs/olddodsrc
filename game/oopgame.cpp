@@ -200,6 +200,8 @@ class Dude {
 			modelMat.x.z = aim.y;
 			modelMat.z.x = -aim.y;
 			modelMat.z.z = aim.x;
+			if( m_Ploughing )
+				modelMat.w.y += sinf( 6.0f * m_PloughTime ) * 0.2f;
 			SetModel( modelMat );
 			m_Mesh->DrawTriangles();
 		}
@@ -302,7 +304,5 @@ void DrawWorld() {
 	gpWorld->Render();
 
 	SetTexture( "guy", 0 );
-	modelMat = Translation( gpDude->GetWorldPos() );
-	SetModel( modelMat );
 	gpDude->Render();
 }
