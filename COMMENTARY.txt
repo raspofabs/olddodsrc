@@ -27,3 +27,18 @@ of the rule of thumb that is personal to me, which is if you have two things,
 don't genericise, but if you have three, then you probably should. Until there
 is a third destination, the data-oriented approach will stick with a "are you
 in the woods" check, as at this stage it's the simplest thing to do.
+
+I notice during this change, the encapsulation of state really worked against
+the OO project as I suddenly had data that couldn't answer simple questions
+because they lacked context. This situation is common in OO development, but
+not normally noticed, as it is the norm. The DO approach doesn't force any data
+to lack context, on the contrary, it enforces flexibility of it by allowing you
+to define your schema ad hoc, we haven't seen it properly yet, but once the
+game grows the advantages should start to become more apparent.
+
+Interestingly, the OO approach won out (in coding time) in adding bear blocking
+code. Adding the bears themselves were about the same complexity as DO, but the
+task of making them block was very straight forward in OO dev. The only thing
+is, that it was a very short victory as it turns out the reason why it was
+simple was that it lacked context, which means adding the owl fight might not
+be that simple.
