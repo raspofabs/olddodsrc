@@ -61,5 +61,5 @@ basepackages:
 
 run:
 	#./test
-	#./oopgame
-	./dodgame
+	./oopgame
+	#./dodgame

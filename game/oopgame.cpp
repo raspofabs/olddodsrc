@@ -20,7 +20,8 @@ void DrawWorld();
 #include "oopworld.h"
 
 World *gpWorld;
-World *gpFarm, *gpWoods;
+World *gpFarm, *gpWoods, *gpShop;
+int currentWorld = 0;
 
 //const float FARM_OFFSET = ((FARM_WIDTH-1)*FARM_TILE_WIDTH*0.5f);
 
@@ -121,9 +122,11 @@ class Dude {
 								switch( newWorld ) {
 									case 0: gpWorld = gpFarm; Log( 3, "Moving to the farm\n" ); break;
 									case 1: gpWorld = gpWoods; Log( 3, "Moving to the woods\n" ); break;
+									case 2: gpWorld = gpShop; Log( 3, "Moving to the shop\n" ); break;
 									default: eprintf( "Where the hell are we? [%i]\n", newWorld );
 								}
-								m_Pos = gpWorld->GetEntry();
+								m_Pos = gpWorld->GetEntry( currentWorld );
+								currentWorld = newWorld;
 								m_Dest = m_Pos + m_Facing;
 							}
 						} else {
@@ -221,14 +224,30 @@ Dude *gpDude;
 
 void CreateEntities() {
 	gpDude = new Dude();
+
 	gpFarm = new World( FARM_WIDTH, FARM_WIDTH );
-	gpWoods = new World( WOODS_WIDTH, 1 );
+	// to woods
 	gpFarm->AddTile( FARM_WIDTH, 2 );
 	gpFarm->GetTile( FARM_WIDTH, 2 )->SetAsPortal( 1 );
-	gpFarm->SetEntry( FARM_WIDTH, 2 );
+	gpFarm->SetEntry( FARM_WIDTH, 2, 1 );
+	// to shop
+	gpFarm->AddTile( -1, 2 );
+	gpFarm->GetTile( -1, 2 )->SetAsPortal( 2 );
+	gpFarm->SetEntry( -1, 2, 2 );
+
+	gpWoods = new World( WOODS_WIDTH, 1 );
+	// back to farm
 	gpWoods->AddTile( -1, 0 );
 	gpWoods->GetTile( -1, 0 )->SetAsPortal( 0 );
-	gpWoods->SetEntry( -1, 0 );
+	gpWoods->SetEntry( -1, 0, 0 );
+
+	gpShop = new World( SHOP_WIDTH, 1 );
+	gpShop->SetAsShop();
+	// back to farm
+	gpShop->AddTile( SHOP_WIDTH, 0 );
+	gpShop->GetTile( SHOP_WIDTH, 0 )->SetAsPortal( 0 );
+	gpShop->SetEntry( SHOP_WIDTH, 0, 0 );
+
 	gpWorld = gpFarm;
 	for( int i = 0; i < WOODS_WIDTH-1; ++i ) {
 		gpWoods->GetTile( i, 0 )->SetSpecialTexture( "tree" );

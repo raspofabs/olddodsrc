@@ -3,7 +3,7 @@
 #include "ooptile.h"
 
 //const float FARM_OFFSET = ((FARM_WIDTH-1)*FARM_TILE_WIDTH*0.5f);
-World::World( size_t width, size_t height ) : mc_Width( width ), mc_Height( height ) {
+World::World( size_t width, size_t height ) : mc_Width( width ), mc_Height( height ), m_IsShop(0) {
 	m_Tiles = new Tile[mc_Width * mc_Height];
 }
 
@@ -77,11 +77,14 @@ bool World::CanAttack( const Vec2 &p ) {
 	return false;
 }
 
-void World::SetEntry( int x, int y ) {
-	m_Entry = Vec2( x, y );
+void World::SetEntry( int x, int y, int from ) {
+	m_Entry[from] = Vec2( x, y );
 }
-Vec2 World::GetEntry() {
-	return m_Entry;
+Vec2 World::GetEntry( int from ) {
+	return m_Entry[from];
+}
+void World::SetAsShop() {
+	m_IsShop = true;
 }
 
 float World::XOff() const { return ((mc_Width-1)*FARM_TILE_WIDTH*0.5f); }

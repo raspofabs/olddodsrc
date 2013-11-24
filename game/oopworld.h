@@ -22,14 +22,16 @@ class World {
 		Vec3 GetWorldPos( const Vec2 &p );
 		bool CanVisit( const Vec2 &p );
 		bool CanAttack( const Vec2 &p );
-		void SetEntry( int x, int y );
-		Vec2 GetEntry();
+		void SetEntry( int x, int y, int from );
+		Vec2 GetEntry( int from );
+		void SetAsShop();
 
 	private:
 		const int mc_Width, mc_Height;
 		Tile *m_Tiles;
 		TileMap m_ExtraTiles;
-		Vec2 m_Entry;
+		std::map<int,Vec2> m_Entry;
+		bool m_IsShop;
 		float XOff() const;
 		float YOff() const;
 };
