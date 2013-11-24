@@ -37,8 +37,8 @@ Vec2 gDudeDest = gDudePos;
 bool inWoods;
 bool inShop;
 float gPloughing;
-int haveOwls = 5;
-int haveGold = 0;
+int haveOwls = 0;
+int haveGold = 10;
 
 // update/init/shutdown
 void GameUpdate() {
@@ -82,6 +82,8 @@ void GameInit() {
 	gUnique[ITEM_SPADE] = true;
 	gItemCost[ITEM_MONEYSEED] = MONEY_COST;
 	gItemName[ITEM_MONEYSEED] = "money-change";
+
+	gItemHave[ITEM_OWLSEED] = 5;
 }
 void GameShutdown() {
 }
@@ -167,7 +169,7 @@ void UpdateLogic( double delta ) {
 						gDudeFacing = Vec2(-1.0f,0.0f);
 						gDudeDest = gDudePos + gDudeFacing;
 					}
-				} if( inWoods ) {
+				} else if( inWoods ) {
 					cell = (int)x + WOODS_WIDTH * (int)y;
 					if( x == -1 && y == 0 ) {
 						inWoods = false;
@@ -264,32 +266,47 @@ void UpdateLogic( double delta ) {
 						gPloughing = TIME_TO_PLOUGH;
 						Log( 1, "Started to plough the land at %i (%.2f,%.2f)\n", cell, x, y );
 					}
-				} else if( gTileState[cell] == TI_PLOUGHED && gItemHave[ITEM_OWLSEED] ) {
-					gTileState[cell] = TI_SEEDED_OWL;
-					gGrowingList.push_back( Growing( cell, 0.0f ) );
-					gItemHave[ITEM_OWLSEED] -= 1;
-					Log( 1, "planted an owl at %i (%.2f,%.2f)\n", cell, x, y );
-				} else if( gTileState[cell] == TI_GROWN_OWL ) {
-					if( (rand()&4095)/4096.0 > RETURN_TO_UNPLOUGHED_PROBABILITY ) {
+				} else if( gTileState[cell] == TI_PLOUGHED ) {
+					bool haveSeeds = gItemHave[ITEM_OWLSEED] || gItemHave[ITEM_MONEYSEED];
+					if( haveSeeds ) {
+						Log( 1, "have seeds\n" );
+						if( gItemHave[ITEM_OWLSEED] ) {
+							gTileState[cell] = TI_SEEDED_OWL;
+							gItemHave[ITEM_OWLSEED] -= 1;
+							Log( 1, "planted an owl at %i (%.2f,%.2f)\n", cell, x, y );
+						} else {
+							gTileState[cell] = TI_SEEDED_MONEY;
+							gItemHave[ITEM_MONEYSEED] -= 1;
+							Log( 1, "planted a pocketchangeplant at %i (%.2f,%.2f)\n", cell, x, y );
+						}
+						gGrowingList.push_back( Growing( cell, 0.0f ) );
+					} else {
+						Log( 1, "have no seeds\n" );
+					}
+				} else if( gTileState[cell] == TI_GROWN_OWL || gTileState[cell] == TI_GROWN_MONEY ) {
+					if( gTileState[cell] == TI_GROWN_OWL ) {
+						haveOwls += 1;
+						Log( 1, "harvested an owl to get an owl.\n" );
+					} else {
+						haveGold += 15;
+						Log( 1, "harvested some pocket change.\n" );
+					}
+					if( (rand()&4095)/4096.0 < RETURN_TO_UNPLOUGHED_PROBABILITY ) {
 						gTileState[cell] = TI_RAW;
 					} else {
 						gTileState[cell] = TI_PLOUGHED;
 					}
-					haveOwls += 1;
-					Log( 1, "harvested an owl to get an owl.\n" );
 				}
 			}
 		} else {
 			if( inShop ) {
 				size_t x = gDudePos.x + 0.5f;
 				size_t cost = gItemCost[ x ];
-				if( (int)cost < haveGold ) {
+				bool alreadyHaveAndUnique = gUnique[x] && gItemHave[x];
+				if( (int)cost <= haveGold && !alreadyHaveAndUnique ) {
 					haveGold -= cost;
 					gItemHave[x] += 1;
-					if( gUnique[ x ] ) {
-						gItemCost[ x ] = 0;
-						gItemHave[x] = 1;
-					}
+					Log( 3, "Gained a %s giving me %i\n", gItemName[x].c_str(), gItemHave[x] );
 				}
 			}
 		}
@@ -298,7 +315,7 @@ void UpdateLogic( double delta ) {
 	for( GrowingList::iterator i = gGrowingList.begin(); i != gGrowingList.end(); ) {
 		i->second += GROWTH_RATE * delta;
 		if( i->second >= 1.0f ) {
-			gTileState[i->first] = TI_GROWN_OWL;
+			gTileState[i->first] += 1;
 			i = gGrowingList.erase( i );
 		} else {
 			++i;
@@ -366,17 +383,23 @@ void DrawWorld() {
 					case TI_RAW: SetTexture( "earth", 0 ); break;
 					case TI_PLOUGHED:
 					case TI_SEEDED_OWL:
-					case TI_GROWN_OWL: SetTexture( "wall", 0 ); break;
+					case TI_GROWN_OWL:
+					case TI_SEEDED_MONEY:
+					case TI_GROWN_MONEY: SetTexture( "wall", 0 ); break;
 					case TI_CHEST: SetTexture( "chest", 0 ); break;
 					case TI_CHEST_OPEN: SetTexture( "chest-open", 0 ); break;
 				}
 				smallertile->DrawTriangles();
-				if(gTileState[tile]==TI_GROWN_OWL) {
+				if(gTileState[tile]==TI_GROWN_OWL || gTileState[tile]==TI_GROWN_MONEY) {
 					modelMat = Translation(Vec3( tx, 0.0, tz ));
 					modelMat.Scale( 0.5f );
 					AddBreeze( modelMat );
 					SetModel( modelMat );
-					SetTexture( "owl", 0 );
+					if( gTileState[tile]==TI_GROWN_OWL ) {
+						SetTexture( "owl", 0 );
+					} else {
+						SetTexture( "money-change", 0 );
+					}
 					dude->DrawTriangles();
 				}
 				tile += 1;
@@ -392,7 +415,12 @@ void DrawWorld() {
 			modelMat.Scale( i->second * 0.5f );
 			AddBreeze( modelMat );
 			SetModel( modelMat );
-			SetTexture( "owl", 0 );
+			int tile = i->first;
+			if( gTileState[tile]==TI_SEEDED_OWL ) {
+				SetTexture( "owl", 0 );
+			} else {
+				SetTexture( "money-change", 0 );
+			}
 			dude->DrawTriangles();
 		}
 
