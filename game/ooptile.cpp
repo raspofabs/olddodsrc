@@ -88,7 +88,7 @@ void Tile::Render( const Mat44 &modelMat ) {
 			case TI_RAW: SetTexture( "earth", 0 ); break;
 			case TI_PLOUGHED:
 			case TI_SEEDED_OWL:
-			case TI_GROWN_OWL: SetTexture( "pick", 0 ); break;
+			case TI_GROWN_OWL: SetTexture( "wall", 0 ); break;
 			case TI_CHEST: SetTexture( "chest", 0 ); break;
 			case TI_CHEST_OPEN: SetTexture( "chest-open", 0 ); break;
 		}

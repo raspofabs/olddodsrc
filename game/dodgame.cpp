@@ -24,6 +24,10 @@ void DrawWorld();
 // game state
 int gTileState[FARM_WIDTH*FARM_WIDTH];
 int gWoodsTile[WOODS_WIDTH*1];
+size_t gItemCost[SHOP_WIDTH];
+bool gUnique[SHOP_WIDTH];
+size_t gItemHave[SHOP_WIDTH];
+std::string gItemName[SHOP_WIDTH];
 typedef std::pair<int,float> Growing;
 typedef std::list<Growing> GrowingList;
 GrowingList gGrowingList;
@@ -31,9 +35,9 @@ Vec2 gDudePos( floorf( FARM_WIDTH * 0.5f ) );
 Vec2 gDudeFacing(0,-1);
 Vec2 gDudeDest = gDudePos;
 bool inWoods;
+bool inShop;
 float gPloughing;
-int haveSeeds = 5;
-int haveOwls = 0;
+int haveOwls = 5;
 int haveGold = 0;
 
 // update/init/shutdown
@@ -70,6 +74,14 @@ void GameInit() {
 	for( int i = 1; i < WOODS_WIDTH-1; ++i )
 		gWoodsTile[i] = TI_BEAR;
 	gWoodsTile[WOODS_WIDTH-1] = TI_CHEST;
+
+	gItemCost[ITEM_OWLSEED] = OWL_COST;
+	gItemName[ITEM_OWLSEED] = "owl";
+	gItemCost[ITEM_SPADE] = SPADE_COST;
+	gItemName[ITEM_SPADE] = "spade";
+	gUnique[ITEM_SPADE] = true;
+	gItemCost[ITEM_MONEYSEED] = MONEY_COST;
+	gItemName[ITEM_MONEYSEED] = "money-change";
 }
 void GameShutdown() {
 }
@@ -82,9 +94,18 @@ bool CanMoveTo( const Vec2 &p ) {
 			return false;
 		if( p.y != 0 )
 			return false;
+	} else if( inShop ) {
+		if( p.x < 0 )
+			return false;
+		if( p.y != 0 )
+			return false;
 	} else {
-		if( p.x == FARM_WIDTH && p.y == 2 )
-			return true;
+		if( p.y == 2 ) {
+			if( p.x == FARM_WIDTH )
+				return true;
+			if( p.x == -1 )
+				return true;
+		}
 		if( p.x >= FARM_WIDTH || p.x < 0 )
 			return false;
 		if( p.y >= FARM_WIDTH || p.y < 0 )
@@ -132,7 +153,7 @@ void UpdateLogic( double delta ) {
 				float y = floorf( gDudePos.y + 0.5f );
 				Log( 3, "Arrive at %0.1f,%0.1f\n", x, y );
 				int cell = 0;
-				if( !inWoods ) {
+				if( !inWoods && !inShop ) {
 					cell = (int)x + FARM_WIDTH * (int)y;
 					if( x == FARM_WIDTH && y == 2 ) {
 						inWoods = true;
@@ -140,12 +161,13 @@ void UpdateLogic( double delta ) {
 						gDudeFacing = Vec2(1.0f,0.0f);
 						gDudeDest = gDudePos + gDudeFacing;
 					}
-					Log( 3, "Farm Cell %i\n", cell );
-					if( gTileState[cell] == TI_CHEST ) {
-						gTileState[cell] = TI_CHEST_OPEN;
-						haveGold += 10;
+					if( x == -1 && y == 2 ) {
+						inShop = true;
+						gDudePos = Vec2(SHOP_WIDTH,0.0f);
+						gDudeFacing = Vec2(-1.0f,0.0f);
+						gDudeDest = gDudePos + gDudeFacing;
 					}
-				} else {
+				} if( inWoods ) {
 					cell = (int)x + WOODS_WIDTH * (int)y;
 					if( x == -1 && y == 0 ) {
 						inWoods = false;
@@ -157,6 +179,14 @@ void UpdateLogic( double delta ) {
 					if( gWoodsTile[cell] == TI_CHEST ) {
 						gWoodsTile[cell] = TI_CHEST_OPEN;
 						haveGold += 10;
+					}
+				} else {
+					cell = (int)x + SHOP_WIDTH * (int)y;
+					if( x == SHOP_WIDTH && y == 0 ) {
+						inShop = false;
+						gDudePos = Vec2(-1.0,2.0f);
+						gDudeFacing = Vec2(1.0f,0.0f);
+						gDudeDest = gDudePos + gDudeFacing;
 					}
 				}
 			}
@@ -226,26 +256,41 @@ void UpdateLogic( double delta ) {
 	if( actionStart ) {
 		float x = floorf( gDudePos.x + 0.5f );
 		float y = floorf( gDudePos.y + 0.5f );
-		if( x >= 0 && x < FARM_WIDTH && y >= 0 && y < FARM_WIDTH ) {
-			int cell = (int)x + FARM_WIDTH * (int)y;
-			if( gTileState[cell] == TI_RAW ) {
-				if( !moving ) {
-					gPloughing = TIME_TO_PLOUGH;
-					Log( 1, "Started to plough the land at %i (%.2f,%.2f)\n", cell, x, y );
+		if( !inWoods && !inShop ) {
+			if( x >= 0 && x < FARM_WIDTH && y >= 0 && y < FARM_WIDTH ) {
+				int cell = (int)x + FARM_WIDTH * (int)y;
+				if( gTileState[cell] == TI_RAW ) {
+					if( !moving ) {
+						gPloughing = TIME_TO_PLOUGH;
+						Log( 1, "Started to plough the land at %i (%.2f,%.2f)\n", cell, x, y );
+					}
+				} else if( gTileState[cell] == TI_PLOUGHED && gItemHave[ITEM_OWLSEED] ) {
+					gTileState[cell] = TI_SEEDED_OWL;
+					gGrowingList.push_back( Growing( cell, 0.0f ) );
+					gItemHave[ITEM_OWLSEED] -= 1;
+					Log( 1, "planted an owl at %i (%.2f,%.2f)\n", cell, x, y );
+				} else if( gTileState[cell] == TI_GROWN_OWL ) {
+					if( (rand()&4095)/4096.0 > RETURN_TO_UNPLOUGHED_PROBABILITY ) {
+						gTileState[cell] = TI_RAW;
+					} else {
+						gTileState[cell] = TI_PLOUGHED;
+					}
+					haveOwls += 1;
+					Log( 1, "harvested an owl to get an owl.\n" );
 				}
-			} else if( gTileState[cell] == TI_PLOUGHED && haveSeeds ) {
-				gTileState[cell] = TI_SEEDED_OWL;
-				gGrowingList.push_back( Growing( cell, 0.0f ) );
-				haveSeeds -= 1;
-				Log( 1, "planted an owl at %i (%.2f,%.2f)\n", cell, x, y );
-			} else if( gTileState[cell] == TI_GROWN_OWL ) {
-				if( (rand()&4095)/4096.0 > RETURN_TO_UNPLOUGHED_PROBABILITY ) {
-					gTileState[cell] = TI_RAW;
-				} else {
-					gTileState[cell] = TI_PLOUGHED;
+			}
+		} else {
+			if( inShop ) {
+				size_t x = gDudePos.x + 0.5f;
+				size_t cost = gItemCost[ x ];
+				if( (int)cost < haveGold ) {
+					haveGold -= cost;
+					gItemHave[x] += 1;
+					if( gUnique[ x ] ) {
+						gItemCost[ x ] = 0;
+						gItemHave[x] = 1;
+					}
 				}
-				haveOwls += 1;
-				Log( 1, "harvested an owl to get an owl.\n" );
 			}
 		}
 	}
@@ -281,12 +326,11 @@ void DrawHUD() {
 	modelMat.Scale(1.0f);
 	char buffer[128];
 	FontPrint( modelMat, "Your Farm .." ); modelMat.w.y += 16.0f;
-	sprintf( buffer, "Seeds: %i", haveSeeds );
-	FontPrint( modelMat, buffer); modelMat.w.y += 8.0f;
-	sprintf( buffer, "Owls: %i", haveOwls );
-	FontPrint( modelMat, buffer); modelMat.w.y += 8.0f;
-	sprintf( buffer, "Gold: %i", haveGold );
-	FontPrint( modelMat, buffer); modelMat.w.y += 8.0f;
+	sprintf( buffer, "Owl Seeds: %lu", gItemHave[ITEM_OWLSEED] ); FontPrint( modelMat, buffer); modelMat.w.y += 8.0f;
+	sprintf( buffer, "Money Seeds: %lu", gItemHave[ITEM_MONEYSEED] ); FontPrint( modelMat, buffer); modelMat.w.y += 8.0f;
+	sprintf( buffer, "Spade: %lu", gItemHave[ITEM_SPADE] ); FontPrint( modelMat, buffer); modelMat.w.y += 8.0f;
+	sprintf( buffer, "Owls: %i", haveOwls ); FontPrint( modelMat, buffer); modelMat.w.y += 8.0f;
+	sprintf( buffer, "Gold: %i", haveGold ); FontPrint( modelMat, buffer); modelMat.w.y += 8.0f;
 }
 void AddBreeze( Mat44 &m ) {
 	const float offset = m.w.x * 1.3f + m.w.z * 0.6f;
@@ -308,7 +352,7 @@ void DrawWorld() {
 	Mat44 look = Mat44LookAt( from, to, gYVec4 );
 	SetCamera(look);
 
-	if( !inWoods ) {
+	if( !inWoods && !inShop ) {
 		const float FARM_OFFSET = ((FARM_WIDTH-1)*FARM_TILE_WIDTH*0.5f);
 		int tile = 0;
 		for( int y = 0; y < FARM_WIDTH; ++y ) {
@@ -322,7 +366,7 @@ void DrawWorld() {
 					case TI_RAW: SetTexture( "earth", 0 ); break;
 					case TI_PLOUGHED:
 					case TI_SEEDED_OWL:
-					case TI_GROWN_OWL: SetTexture( "pick", 0 ); break;
+					case TI_GROWN_OWL: SetTexture( "wall", 0 ); break;
 					case TI_CHEST: SetTexture( "chest", 0 ); break;
 					case TI_CHEST_OPEN: SetTexture( "chest-open", 0 ); break;
 				}
@@ -353,16 +397,20 @@ void DrawWorld() {
 		}
 
 		if( 1 ) {
+			SetTexture( "earth", 0 );
 			float tx = FARM_WIDTH * FARM_TILE_WIDTH - FARM_OFFSET;
-			float tz = (FARM_WIDTH/2) * FARM_TILE_WIDTH - FARM_OFFSET;
+			float tz = 2 * FARM_TILE_WIDTH - FARM_OFFSET;
 			modelMat = Translation(Vec3( tx, 0.0, tz ));
 			SetModel( modelMat );
-			SetTexture( "earth", 0 );
+			smallertile->DrawTriangles();
+			tx = (-1) * FARM_TILE_WIDTH - FARM_OFFSET;
+			modelMat = Translation(Vec3( tx, 0.0, tz ));
+			SetModel( modelMat );
 			smallertile->DrawTriangles();
 		}
 
 		modelMat = Translation( Vec3( gDudePos.x * FARM_TILE_WIDTH - FARM_OFFSET, 0.0f, gDudePos.y * FARM_TILE_WIDTH - FARM_OFFSET ) );
-	} else {
+	} else if( inWoods ) {
 		const float WOODS_OFFSET = ((WOODS_WIDTH-1)*FARM_TILE_WIDTH*0.5f);
 		int tile = 0;
 		for( int y = 0; y < 1; ++y ) {
@@ -388,7 +436,35 @@ void DrawWorld() {
 				tile += 1;
 			}
 		}
+		if( 1 ) {
+			SetTexture( "earth", 0 );
+			float tx = (-1) * FARM_TILE_WIDTH - WOODS_OFFSET;
+			modelMat = Translation(Vec3( tx, 0.0, 0.0f ));
+			SetModel( modelMat );
+			smallertile->DrawTriangles();
+		}
 		modelMat = Translation( Vec3( gDudePos.x * FARM_TILE_WIDTH - WOODS_OFFSET, 0.0f, gDudePos.y * FARM_TILE_WIDTH ) );
+	} else {
+		const float SHOP_OFFSET = ((SHOP_WIDTH-1)*FARM_TILE_WIDTH*0.5f);
+		for( int x = 0; x < SHOP_WIDTH; ++x ) {
+			float tx = x * FARM_TILE_WIDTH - SHOP_OFFSET;
+			modelMat = Translation(Vec3( tx, 0.0f, 0.0f ));
+			SetModel( modelMat );
+			SetTexture( "wall", 0 );
+			smallertile->DrawTriangles();
+			modelMat = Translation(Vec3( tx, 0.0f, -FARM_TILE_WIDTH ));
+			SetModel( modelMat );
+			SetTexture( gItemName[x].c_str(), 0 );
+			smallertile->DrawTriangles();
+		}
+		if( 1 ) {
+			SetTexture( "earth", 0 );
+			float tx = SHOP_WIDTH * FARM_TILE_WIDTH - SHOP_OFFSET;
+			modelMat = Translation(Vec3( tx, 0.0, 0.0f ));
+			SetModel( modelMat );
+			smallertile->DrawTriangles();
+		}
+		modelMat = Translation( Vec3( gDudePos.x * FARM_TILE_WIDTH - SHOP_OFFSET, 0.0f, gDudePos.y * FARM_TILE_WIDTH ) );
 	}
 
 	SetTexture( "guy", 0 );
