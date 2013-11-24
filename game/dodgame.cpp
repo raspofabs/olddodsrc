@@ -123,7 +123,7 @@ void UpdateLogic( double delta ) {
 				gDudeFacing = newFace;
 			}
 		} else {
-			const float dudeSpeed = 1.5f * delta;
+			const float dudeSpeed = MOVE_RATE * delta;
 			d.x = clamp( d.x, -dudeSpeed, dudeSpeed );
 			d.y = clamp( d.y, -dudeSpeed, dudeSpeed );
 			gDudePos += d;
@@ -293,7 +293,7 @@ void AddBreeze( Mat44 &m ) {
 	const float swaySpeed = 1.6f;
 	const float swayAmount = 0.1f;
 	extern float g_fGameTime;
-	m.y.x = m.y.y * sin( g_fGameTime * swaySpeed + offset ) * swayAmount;
+	m.y.x = m.y.y * sinf( g_fGameTime * swaySpeed + offset ) * swayAmount;
 }
 
 void DrawWorld() {
@@ -397,7 +397,7 @@ void DrawWorld() {
 	modelMat.x.z = aim.y;
 	modelMat.z.x = -aim.y;
 	modelMat.z.z = aim.x;
-	modelMat.w.y += sinf( 6.0f * gPloughing ) * 0.2f;
+	modelMat.w.y += sinf( 6.0f / TIME_TO_PLOUGH  * gPloughing ) * 0.2f;
 	SetModel( modelMat );
 	dude->DrawTriangles();
 }

@@ -101,7 +101,7 @@ void Tile::Render( const Mat44 &modelMat ) {
 			const float swaySpeed = 1.6f;
 			const float swayAmount = 0.1f;
 			extern float g_fGameTime;
-			owlMat.y.x = owlMat.y.y * sin( g_fGameTime * swaySpeed + offset ) * swayAmount;
+			owlMat.y.x = owlMat.y.y * sinf( g_fGameTime * swaySpeed + offset ) * swayAmount;
 			SetModel( owlMat );
 			m_OwlMesh->DrawTriangles();
 		}

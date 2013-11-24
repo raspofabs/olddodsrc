@@ -102,7 +102,7 @@ class Dude {
 						m_Facing = newFace;
 					}
 				} else {
-					const float dudeSpeed = 1.5f * delta;
+					const float dudeSpeed = MOVE_RATE * delta;
 					Vec2 d = m_Dest - m_Pos;
 					d.x = clamp( d.x, -dudeSpeed, dudeSpeed );
 					d.y = clamp( d.y, -dudeSpeed, dudeSpeed );
@@ -201,7 +201,7 @@ class Dude {
 			modelMat.z.x = -aim.y;
 			modelMat.z.z = aim.x;
 			if( m_Ploughing )
-				modelMat.w.y += sinf( 6.0f * m_PloughTime ) * 0.2f;
+				modelMat.w.y += sinf( 6.0f / TIME_TO_PLOUGH  * m_PloughTime ) * 0.2f;
 			SetModel( modelMat );
 			m_Mesh->DrawTriangles();
 		}
