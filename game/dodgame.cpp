@@ -343,9 +343,9 @@ void DrawHUD() {
 	modelMat.Scale(1.0f);
 	char buffer[128];
 	FontPrint( modelMat, "Your Farm .." ); modelMat.w.y += 16.0f;
-	sprintf( buffer, "Owl Seeds: %lu", gItemHave[ITEM_OWLSEED] ); FontPrint( modelMat, buffer); modelMat.w.y += 8.0f;
-	sprintf( buffer, "Money Seeds: %lu", gItemHave[ITEM_MONEYSEED] ); FontPrint( modelMat, buffer); modelMat.w.y += 8.0f;
-	sprintf( buffer, "Spade: %lu", gItemHave[ITEM_SPADE] ); FontPrint( modelMat, buffer); modelMat.w.y += 8.0f;
+	sprintf( buffer, "Owl Seeds: %lu", (long unsigned int) gItemHave[ITEM_OWLSEED] ); FontPrint( modelMat, buffer); modelMat.w.y += 8.0f;
+	sprintf( buffer, "Money Seeds: %lu", (long unsigned int) gItemHave[ITEM_MONEYSEED] ); FontPrint( modelMat, buffer); modelMat.w.y += 8.0f;
+	sprintf( buffer, "Spade: %lu", (long unsigned int) gItemHave[ITEM_SPADE] ); FontPrint( modelMat, buffer); modelMat.w.y += 8.0f;
 	sprintf( buffer, "Owls: %i", haveOwls ); FontPrint( modelMat, buffer); modelMat.w.y += 8.0f;
 	sprintf( buffer, "Gold: %i", haveGold ); FontPrint( modelMat, buffer); modelMat.w.y += 8.0f;
 }
