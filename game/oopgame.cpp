@@ -18,9 +18,11 @@ void DrawWorld();
 
 #include "ooptile.h"
 #include "oopworld.h"
+#include "oopitem.h"
 
 World *gpWorld;
 World *gpFarm, *gpWoods, *gpShop;
+Item *gpItems[3];
 int currentWorld = 0;
 
 //const float FARM_OFFSET = ((FARM_WIDTH-1)*FARM_TILE_WIDTH*0.5f);
@@ -63,9 +65,10 @@ class Dude {
 		Dude() :
 			m_Pos( floorf( FARM_WIDTH * 0.5f ) ), m_Dest( m_Pos ), m_Facing(0,-1), m_Control(0),
 			m_LastDo(0), m_StartDoing(0), m_StopDoing(0),
-			m_SeedCount(5), m_OwlCount(0), m_GoldCount(0),
+			m_GoldCount(0),
 			m_PloughTime(0.0f) {
 			m_Mesh = GameMeshes::Get("quadpeep");
+			m_Items[ITEM_OWLSEED] = 5;
 		}
 
 		void UpdateInput( const Vec2 &input ) {
@@ -115,7 +118,7 @@ class Dude {
 						if( tile ) {
 							if( tile->IsChest() ) {
 								tile->OpenChest();
-								m_GoldCount += CHEST_REWARD;
+								m_Items[ITEM_OWL] += CHEST_REWARD;
 							}
 							int newWorld = -2;
 							if( tile->IsPortal( newWorld ) ) {
@@ -142,8 +145,8 @@ class Dude {
 						if( gpWorld->CanVisit( attempt ) ) {
 							m_Dest = attempt;
 						}
-						if( gpWorld->CanAttack( attempt ) && m_OwlCount > 0 ) {
-							m_OwlCount -= 1;
+						if( gpWorld->CanAttack( attempt ) && m_Items[ITEM_OWL] > 0 ) {
+							m_Items[ITEM_OWL] -= 1;
 							gpWorld->GetTile( attempt.x, attempt.y )->DefeatBear();
 						}
 					}
@@ -177,22 +180,47 @@ class Dude {
 							m_PloughTime = TIME_TO_PLOUGH;
 							Log( 1, "Started to plough the land at %i (%.2f,%.2f)\n", cell, x, y );
 						}
-					} else if( m_SeedCount && tile->CanBePlanted() ) {
-						tile->Plant();
-						m_SeedCount -= 1;
-						Log( 1, "planted an owl at %i (%.2f,%.2f)\n", cell, x, y );
+					} else if( tile->CanBePlanted() ) {
+						if( m_Items[ITEM_OWLSEED] ) {
+							tile->Plant(ITEM_OWLSEED);
+							m_Items[ITEM_OWLSEED] -= 1;
+							Log( 1, "planted an owl(%i) at %i (%.2f,%.2f)\n", ITEM_OWLSEED, cell, x, y );
+						} else if( m_Items[ITEM_MONEYSEED] ) {
+							tile->Plant(ITEM_MONEYSEED);
+							m_Items[ITEM_MONEYSEED] -= 1;
+							Log( 1, "planted a moneyplant(%i) at %i (%.2f,%.2f)\n", ITEM_MONEYSEED, cell, x, y );
+						}
 					} else if( tile->CanBeHarvested() ) {
-						tile->Harvest();
-						m_OwlCount += 1;
-						Log( 1, "harvested an owl to get three owl seeds.\n" );
+						int item = tile->Harvest();
+						if( item == ITEM_OWLSEED ) {
+							m_Items[ITEM_OWL] += 1;
+							Log( 1, "harvested an owl to get an owl.\n" );
+						} else if( item == ITEM_MONEYSEED ) {
+							m_GoldCount += MONEY_PLANT_CASH;
+							Log( 1, "harvested a moneyplant to get some spare change.\n" );
+						} else {
+							Log( 1, "harvested something (%i)\n", item );
+						}
+					} else if( tile->CanBePurchased() ) {
+						Item *item = tile->GetItem();
+						int type = item->GetType();
+						int cost = item->GetCost();
+						bool unique = item->IsUnique();
+						if( item && m_GoldCount >= cost ) {
+							if( !unique || m_Items.count( type ) ) {
+								m_GoldCount -= cost;
+								m_Items[type] += 1;
+								Log( 3, "Gained a %i giving me %i\n", type, m_Items[type] );
+							}
+						}
 					}
 				}
 			}
 			m_StartDoing = false;
 			m_StopDoing = false;
 		}
-		int GetNumSeeds() { return m_SeedCount; }
-		int GetNumOwls() { return m_OwlCount; }
+		int GetNumSeeds() { return m_Items[ITEM_OWLSEED]; }
+		int GetNumOwls() { return m_Items[ITEM_OWL]; }
 		int GetNumGold() { return m_GoldCount; }
 
 		Vec3 GetWorldPos() { return gpWorld->GetWorldPos( m_Pos ); }
@@ -214,7 +242,8 @@ class Dude {
 		Vec2 m_Control;
 		bool m_LastDo;
 		bool m_StartDoing, m_StopDoing;
-		int m_SeedCount, m_OwlCount, m_GoldCount;
+		int m_GoldCount;
+		std::map<int, int> m_Items;
 		bool m_Ploughing;
 		float m_PloughTime;
 		BadMesh *m_Mesh;
@@ -254,10 +283,15 @@ void CreateEntities() {
 		"spade",
 		"owl",
 	};
+	const int itemtype[] = { ITEM_MONEYSEED, ITEM_SPADE, ITEM_OWLSEED };
+	const int itemcost[] = { MONEY_COST, SPADE_COST, OWL_COST };
+	const bool isunique[] = { false, true, false };
 	for( int i = 0; i < 3; ++i ) {
+		gpItems[i] = new Item( itemtype[i], itemcost[i], isunique[i] );
 		gpShop->AddTile( i, -1 );
 		gpShop->GetTile( i, -1 )->SetSpecialTexture( itemNames[i] );
 		gpShop->GetTile( i, -1 )->SetAsBlocking();
+		gpShop->GetTile( i, 0 )->SetAsShopItem( gpItems[i] );
 	}
 
 	gpWorld = gpFarm;

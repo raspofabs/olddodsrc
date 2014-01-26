@@ -8,7 +8,13 @@
 #include <stdlib.h>
 #include "GameConsts.h"
 
-Tile::Tile() : m_State(TI_RAW), m_Growth(0), m_Portal(0), m_World(-1), m_SpecialTexture(0), m_Blocking(false) {
+Tile::Tile() :
+	m_State(TI_RAW), m_Growth(0),
+	m_Portal(0), m_World(-1),
+	m_SpecialTexture(0),
+	m_Blocking(false),
+	m_Item(0)
+{
 	m_GroundMesh = GameMeshes::Get("smallertile");
 	m_OwlMesh = GameMeshes::Get("quadpeep");
 }
@@ -34,15 +40,21 @@ bool Tile::CanBeHarvested() {
 void Tile::Plough() {
 	m_State = TI_PLOUGHED;
 }
-void Tile::Plant() {
-	m_State = TI_SEEDED_OWL; m_Growth = 0.0f;
+void Tile::Plant( int type ) {
+	switch( type ) {
+		case ITEM_OWLSEED: m_State = TI_SEEDED_OWL; break;
+		case ITEM_MONEYSEED: m_State = TI_SEEDED_MONEY; break;
+	}
+	m_Growth = 0.0f;
 }
-void Tile::Harvest() { 
+int Tile::Harvest() { 
+	int type = m_State;
 	if( (rand()&4095)/4096.0 > RETURN_TO_UNPLOUGHED_PROBABILITY ) {
 		m_State = TI_RAW;
 	} else {
 		m_State = TI_PLOUGHED;
 	}
+	return type;
 }
 
 void Tile::SetAsPortal( int world ) {
@@ -75,6 +87,18 @@ void Tile::SetAsBlocking() {
 }
 bool Tile::IsBlocking() {
 	return m_Blocking;
+}
+
+void Tile::SetAsShopItem( Item *item ) {
+	m_Item = item;
+}
+
+bool Tile::CanBePurchased() {
+	return m_Item != 0;
+}
+
+Item *Tile::GetItem() {
+	return m_Item;
 }
 
 void Tile::Render( const Mat44 &modelMat ) {

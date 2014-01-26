@@ -289,7 +289,7 @@ void UpdateLogic( double delta ) {
 						Log( 1, "harvested an owl to get an owl.\n" );
 					}
 					if( gTileState[cell] == TI_GROWN_MONEY ) {
-						haveGold += 15;
+						haveGold += MONEY_PLANT_CASH;
 						Log( 1, "harvested some pocket change.\n" );
 					}
 					if( (rand()&4095)/4096.0 < RETURN_TO_UNPLOUGHED_PROBABILITY ) {

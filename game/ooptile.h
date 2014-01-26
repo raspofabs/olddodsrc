@@ -3,6 +3,7 @@
 
 struct BadMesh;
 struct Mat44;
+class Item;
 
 class Tile {
 	public:
@@ -18,8 +19,8 @@ class Tile {
 		bool CanBePlanted();
 		bool CanBeHarvested();
 		void Plough();
-		void Plant();
-		void Harvest();
+		void Plant( int type );
+		int Harvest();
 
 		// portal
 		void SetAsPortal( int world );
@@ -34,6 +35,9 @@ class Tile {
 		void SetSpecialTexture( const char *name );
 		void SetAsBlocking();
 		bool IsBlocking();
+		void SetAsShopItem( Item *item );
+		bool CanBePurchased();
+		Item *GetItem();
 
 		void Render( const Mat44 &modelMat );
 		void Update( double delta );
@@ -46,6 +50,7 @@ class Tile {
 		int m_World;
 		const char *m_SpecialTexture;
 		bool m_Blocking;
+		Item *m_Item;
 };
 
 #endif
