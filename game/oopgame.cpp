@@ -114,7 +114,7 @@ class Dude {
 						if( tile ) {
 							if( tile->IsChest() ) {
 								tile->OpenChest();
-								m_GoldCount += 10;
+								m_GoldCount += CHEST_REWARD;
 							}
 							int newWorld = -2;
 							if( tile->IsPortal( newWorld ) ) {
