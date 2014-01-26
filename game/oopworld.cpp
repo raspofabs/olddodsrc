@@ -65,6 +65,8 @@ bool World::CanVisit( const Vec2 &p ) {
 	if( Tile *t = GetTile( p.x, p.y ) ) {
 		if( t->IsBear() )
 			return false;
+		if( t->IsBlocking() )
+			return false;
 	}
 
 	if( p.x >= 0 && p.x < mc_Width && p.y >= 0 && p.y < mc_Height ) {

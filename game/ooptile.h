@@ -32,6 +32,8 @@ class Tile {
 
 		// special
 		void SetSpecialTexture( const char *name );
+		void SetAsBlocking();
+		bool IsBlocking();
 
 		void Render( const Mat44 &modelMat );
 		void Update( double delta );
@@ -43,6 +45,7 @@ class Tile {
 		bool m_Portal;
 		int m_World;
 		const char *m_SpecialTexture;
+		bool m_Blocking;
 };
 
 #endif

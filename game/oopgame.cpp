@@ -257,6 +257,7 @@ void CreateEntities() {
 	for( int i = 0; i < 3; ++i ) {
 		gpShop->AddTile( i, -1 );
 		gpShop->GetTile( i, -1 )->SetSpecialTexture( itemNames[i] );
+		gpShop->GetTile( i, -1 )->SetAsBlocking();
 	}
 
 	gpWorld = gpFarm;

@@ -8,7 +8,7 @@
 #include <stdlib.h>
 #include "GameConsts.h"
 
-Tile::Tile() : m_State(TI_RAW), m_Growth(0), m_Portal(0), m_World(-1), m_SpecialTexture(0) {
+Tile::Tile() : m_State(TI_RAW), m_Growth(0), m_Portal(0), m_World(-1), m_SpecialTexture(0), m_Blocking(false) {
 	m_GroundMesh = GameMeshes::Get("smallertile");
 	m_OwlMesh = GameMeshes::Get("quadpeep");
 }
@@ -69,6 +69,12 @@ void Tile::DefeatBear() {
 
 void Tile::SetSpecialTexture( const char *name ) {
 	m_SpecialTexture = name;
+}
+void Tile::SetAsBlocking() {
+	m_Blocking = true;
+}
+bool Tile::IsBlocking() {
+	return m_Blocking;
 }
 
 void Tile::Render( const Mat44 &modelMat ) {
