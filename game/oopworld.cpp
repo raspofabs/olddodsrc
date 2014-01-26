@@ -47,6 +47,12 @@ Tile *World::GetTile( int x, int y ) {
 void World::AddTile( int x, int y ) {
 	m_ExtraTiles[TilePos(x,y)] = new Tile();
 }
+void World::SetAllTilesSpecial( const char *texture ) {
+	const int tileMax = mc_Height * mc_Width;
+	for( int tile = 0; tile < tileMax; ++tile ) {
+		m_Tiles[tile].SetSpecialTexture( texture );
+	}
+}
 Vec3 World::GetWorldPos( const Vec2 &p ) {
 	return
 		Vec3(

@@ -243,10 +243,21 @@ void CreateEntities() {
 
 	gpShop = new World( SHOP_WIDTH, 1 );
 	gpShop->SetAsShop();
+	gpShop->SetAllTilesSpecial( "wall" );
 	// back to farm
 	gpShop->AddTile( SHOP_WIDTH, 0 );
 	gpShop->GetTile( SHOP_WIDTH, 0 )->SetAsPortal( 0 );
 	gpShop->SetEntry( SHOP_WIDTH, 0, 0 );
+	// add shop items
+	const char *itemNames[] = {
+		"money-change",
+		"spade",
+		"owl",
+	};
+	for( int i = 0; i < 3; ++i ) {
+		gpShop->AddTile( i, -1 );
+		gpShop->GetTile( i, -1 )->SetSpecialTexture( itemNames[i] );
+	}
 
 	gpWorld = gpFarm;
 	for( int i = 0; i < WOODS_WIDTH-1; ++i ) {

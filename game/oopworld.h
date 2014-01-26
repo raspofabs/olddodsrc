@@ -19,6 +19,8 @@ class World {
 
 		Tile *GetTile( int x, int y );
 		void AddTile( int x, int y );
+		void SetAllTilesSpecial( const char *texture );
+
 		Vec3 GetWorldPos( const Vec2 &p );
 		bool CanVisit( const Vec2 &p );
 		bool CanAttack( const Vec2 &p );
