@@ -12,6 +12,7 @@ enum ITEM_IDS {
 	ITEM_SPADE,
 	ITEM_OWLSEED,
 };
+#define CHEST_REWARD 12
 #define OWL_COST 30
 #define MONEY_COST 10
 #define SPADE_COST 15

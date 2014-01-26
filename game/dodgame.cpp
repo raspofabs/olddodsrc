@@ -38,7 +38,7 @@ bool inWoods;
 bool inShop;
 float gPloughing;
 int haveOwls = 0;
-int haveGold = 10;
+int haveGold = 0;
 
 // update/init/shutdown
 void GameUpdate() {
@@ -180,7 +180,7 @@ void UpdateLogic( double delta ) {
 					Log( 3, "Wood Cell %i\n", cell );
 					if( gWoodsTile[cell] == TI_CHEST ) {
 						gWoodsTile[cell] = TI_CHEST_OPEN;
-						haveGold += 10;
+						haveGold += CHEST_REWARD;
 					}
 				} else {
 					cell = (int)x + SHOP_WIDTH * (int)y;
@@ -287,7 +287,8 @@ void UpdateLogic( double delta ) {
 					if( gTileState[cell] == TI_GROWN_OWL ) {
 						haveOwls += 1;
 						Log( 1, "harvested an owl to get an owl.\n" );
-					} else {
+					}
+					if( gTileState[cell] == TI_GROWN_MONEY ) {
 						haveGold += 15;
 						Log( 1, "harvested some pocket change.\n" );
 					}
