@@ -44,6 +44,7 @@ class Tile {
 
 	private:
 		int m_State;
+		int m_PlantedType;
 		float m_Growth;
 		BadMesh *m_GroundMesh, *m_OwlMesh;
 		bool m_Portal;

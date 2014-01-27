@@ -65,10 +65,12 @@ class Dude {
 		Dude() :
 			m_Pos( floorf( FARM_WIDTH * 0.5f ) ), m_Dest( m_Pos ), m_Facing(0,-1), m_Control(0),
 			m_LastDo(0), m_StartDoing(0), m_StopDoing(0),
-			m_GoldCount(0),
-			m_PloughTime(0.0f) {
+			m_GoldCount(140),
+			m_PloughTime(0.0f)
+		{
 			m_Mesh = GameMeshes::Get("quadpeep");
-			m_Items[ITEM_OWLSEED] = 5;
+			//m_Items[ITEM_OWLSEED] = 5;
+			m_Items[ITEM_MONEYSEED] = 5;
 		}
 
 		void UpdateInput( const Vec2 &input ) {
@@ -118,7 +120,7 @@ class Dude {
 						if( tile ) {
 							if( tile->IsChest() ) {
 								tile->OpenChest();
-								m_Items[ITEM_OWL] += CHEST_REWARD;
+								m_GoldCount += CHEST_REWARD;
 							}
 							int newWorld = -2;
 							if( tile->IsPortal( newWorld ) ) {
@@ -206,11 +208,12 @@ class Dude {
 						int type = item->GetType();
 						int cost = item->GetCost();
 						bool unique = item->IsUnique();
-						if( item && m_GoldCount >= cost ) {
-							if( !unique || m_Items.count( type ) ) {
+								Log( 3, "Trying %i,%i,%i\n", type, cost, unique );
+						if( item && ( m_GoldCount >= cost ) ) {
+							if( !unique || 0 == m_Items.count( type ) ) {
 								m_GoldCount -= cost;
 								m_Items[type] += 1;
-								Log( 3, "Gained a %i giving me %i\n", type, m_Items[type] );
+								Log( 3, "Gained a %i for %i giving me %i\n", type, cost, m_Items[type] );
 							}
 						}
 					}
@@ -298,7 +301,6 @@ void CreateEntities() {
 	for( int i = 0; i < WOODS_WIDTH-1; ++i ) {
 		gpWoods->GetTile( i, 0 )->SetSpecialTexture( "tree" );
 	}
-	gpWoods->GetTile( WOODS_WIDTH-1, 0 )->SetAsChest();
 	for( int i = 1; i < WOODS_WIDTH-1; ++i )
 		gpWoods->GetTile( i, 0 )->SetAsBear();
 	gpWoods->GetTile( WOODS_WIDTH-1, 0 )->SetAsChest();
