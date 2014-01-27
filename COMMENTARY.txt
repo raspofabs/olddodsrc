@@ -44,10 +44,29 @@ simple was that it lacked context, which means adding the owl fight might not
 be that simple. - actually, it wasn't all that hard, but did need to add bears
 to the tiles. This is a problem brewing though, there's more and more external
 object type specific stuff going on and the responsibility is becoming muddied
-as to what is meant to be in the tiles, and what it in the world, and what the
+as to what is meant to be in the tiles, and what is in the world, and what the
 player interacts with (is it the state of the tile, or the world?) This is
-known as the boundary problem, the same problem faced when the developer of
+known as the boundary problem, the same problem faced when the developer or
 designer cannot make the call for when the collection of grains of sand turns
 into a pile. This core issue with OO manifests as ambiguous ownership of state
 and manipulators of that data.
+
+during update 5 (shop, money plants)
+
+Adding different crops was not simple. The OO way of hiding data makes the
+interrogation of what has gone into a tile less simple than it could have been.
+The Shop was really awkward to add in the OO version. To make it possible for
+the shop to exist in the shop world, I've had to add the ability for any world
+to be a shop. This generic approach can be the cause of condition bloat in the
+runtime. The problem with this is simply cost and making the code more brittle
+/ resistant to change. On the other hand, adding more shops should be easy at this point, as would moving the shop into a different part of the world.
+
+A bug that had me stumped for a bit was the inability to buy owls. It turned
+out that it was because the return type for the GetType function was wrong (was
+a bool forcing the return value to 0 or 1) which is a general problem with
+breaking down a problem too much, and a problem with too many layers between
+the code using a value and the value itself. These silly bugs aren't seen as
+often with DO dev because there is usually only a very thin layer between the
+data and the code using it, and also if there is a layer, it's close at hand,
+potentially in only the one compilation unit using it.
 
