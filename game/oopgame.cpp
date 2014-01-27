@@ -69,8 +69,7 @@ class Dude {
 			m_Ploughing(0), m_PloughTime(0.0f)
 		{
 			m_Mesh = GameMeshes::Get("quadpeep");
-			//m_Items[ITEM_OWLSEED] = 5;
-			m_Items[ITEM_MONEYSEED] = 5;
+			m_Items[ITEM_OWLSEED] = 5;
 		}
 
 		void UpdateInput( const Vec2 &input ) {
@@ -210,7 +209,7 @@ class Dude {
 						int type = item->GetType();
 						int cost = item->GetCost();
 						bool unique = item->IsUnique();
-								Log( 3, "Trying %i,%i,%i\n", type, cost, unique );
+						Log( 3, "Trying %i,%i,%i\n", type, cost, unique );
 						if( item && ( m_GoldCount >= cost ) ) {
 							if( !unique || 0 == m_Items.count( type ) ) {
 								m_GoldCount -= cost;
@@ -224,7 +223,7 @@ class Dude {
 			m_StartDoing = false;
 			m_StopDoing = false;
 		}
-		int GetNumSeeds() { return m_Items[ITEM_OWLSEED]; }
+		int GetInventoryCount( int itemID ) { return m_Items[itemID]; }
 		int GetNumOwls() { return m_Items[ITEM_OWL]; }
 		int GetNumGold() { return m_GoldCount; }
 
@@ -351,7 +350,9 @@ void DrawHUD() {
 	char buffer[128];
 
 	FontPrint( modelMat, "Your Farm .." ); modelMat.w.y += 16.0f;
-	sprintf( buffer, "Seeds: %i", gpDude->GetNumSeeds() );
+	sprintf( buffer, "Owl Seeds: %i", gpDude->GetInventoryCount(ITEM_OWLSEED) );
+	FontPrint( modelMat, buffer); modelMat.w.y += 8.0f;
+	sprintf( buffer, "Money Seeds: %i", gpDude->GetInventoryCount(ITEM_MONEYSEED) );
 	FontPrint( modelMat, buffer); modelMat.w.y += 8.0f;
 	sprintf( buffer, "Owls: %i", gpDude->GetNumOwls() );
 	FontPrint( modelMat, buffer); modelMat.w.y += 8.0f;
