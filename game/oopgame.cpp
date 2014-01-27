@@ -66,7 +66,7 @@ class Dude {
 			m_Pos( floorf( FARM_WIDTH * 0.5f ) ), m_Dest( m_Pos ), m_Facing(0,-1), m_Control(0),
 			m_LastDo(0), m_StartDoing(0), m_StopDoing(0),
 			m_GoldCount(140),
-			m_PloughTime(0.0f)
+			m_Ploughing(0), m_PloughTime(0.0f)
 		{
 			m_Mesh = GameMeshes::Get("quadpeep");
 			//m_Items[ITEM_OWLSEED] = 5;
@@ -161,6 +161,7 @@ class Dude {
 				} else {
 					m_PloughTime -= delta;
 					if( m_PloughTime <= 0.0f ) {
+						m_Ploughing = false;
 						m_PloughTime = 0.0f;
 						float x = floorf( m_Pos.x + 0.5f );
 						float y = floorf( m_Pos.y + 0.5f );
@@ -180,6 +181,7 @@ class Dude {
 					if( tile->CanBePloughed() ) {
 						if( !moving ) {
 							m_PloughTime = TIME_TO_PLOUGH;
+							m_Ploughing = true;
 							Log( 1, "Started to plough the land at %i (%.2f,%.2f)\n", cell, x, y );
 						}
 					} else if( tile->CanBePlanted() ) {
@@ -234,8 +236,9 @@ class Dude {
 			modelMat.x.z = aim.y;
 			modelMat.z.x = -aim.y;
 			modelMat.z.z = aim.x;
-			if( m_Ploughing )
+			if( m_Ploughing ) {
 				modelMat.w.y += sinf( 6.0f / TIME_TO_PLOUGH  * m_PloughTime ) * 0.2f;
+			}
 			SetModel( modelMat );
 			m_Mesh->DrawTriangles();
 		}
