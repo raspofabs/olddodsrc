@@ -181,6 +181,7 @@ class Dude {
 						if( !moving ) {
 							m_PloughTime = TIME_TO_PLOUGH;
 							m_Ploughing = true;
+							m_StartDoing = false;
 							Log( 1, "Started to plough the land at %i (%.2f,%.2f)\n", cell, x, y );
 						}
 					} else if( tile->CanBePlanted() ) {
@@ -188,10 +189,12 @@ class Dude {
 							tile->Plant(ITEM_OWLSEED);
 							m_Items[ITEM_OWLSEED] -= 1;
 							Log( 1, "planted an owl(%i) at %i (%.2f,%.2f)\n", ITEM_OWLSEED, cell, x, y );
+							m_StartDoing = false;
 						} else if( m_Items[ITEM_MONEYSEED] ) {
 							tile->Plant(ITEM_MONEYSEED);
 							m_Items[ITEM_MONEYSEED] -= 1;
 							Log( 1, "planted a moneyplant(%i) at %i (%.2f,%.2f)\n", ITEM_MONEYSEED, cell, x, y );
+							m_StartDoing = false;
 						}
 					} else if( tile->CanBeHarvested() ) {
 						int item = tile->Harvest();
@@ -204,6 +207,7 @@ class Dude {
 						} else {
 							Log( 1, "harvested something (%i)\n", item );
 						}
+						m_StartDoing = false;
 					} else if( tile->CanBePurchased() ) {
 						Item *item = tile->GetItem();
 						int type = item->GetType();
@@ -217,10 +221,10 @@ class Dude {
 								Log( 3, "Gained a %i for %i giving me %i\n", type, cost, m_Items[type] );
 							}
 						}
+						m_StartDoing = false;
 					}
 				}
 			}
-			m_StartDoing = false;
 			m_StopDoing = false;
 		}
 		int GetInventoryCount( int itemID ) { return m_Items[itemID]; }
