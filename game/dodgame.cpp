@@ -227,13 +227,14 @@ void UpdateLogic( double delta ) {
 	if ( glfwGetKey( GLFW_KEY_SPACE ) == GLFW_PRESS ) action = true;
 
 	static bool actionLast = false;
-	bool actionStart = false;
+	static bool actionStart = false;
 	bool actionEnd = false;
 	if( actionLast != action ) {
 		if( action ) {
 			actionStart = true;
 		} else {
 			actionEnd = true;
+			actionStart = false;
 		}
 	}
 	actionLast = action;
@@ -265,6 +266,7 @@ void UpdateLogic( double delta ) {
 					if( !moving ) {
 						gPloughing = TIME_TO_PLOUGH;
 						Log( 1, "Started to plough the land at %i (%.2f,%.2f)\n", cell, x, y );
+						actionStart = false;
 					}
 				} else if( gTileState[cell] == TI_PLOUGHED ) {
 					bool haveSeeds = gItemHave[ITEM_OWLSEED] || gItemHave[ITEM_MONEYSEED];
@@ -280,6 +282,7 @@ void UpdateLogic( double delta ) {
 							Log( 1, "planted a pocketchangeplant at %i (%.2f,%.2f)\n", cell, x, y );
 						}
 						gGrowingList.push_back( Growing( cell, 0.0f ) );
+						actionStart = false;
 					} else {
 						Log( 1, "have no seeds\n" );
 					}
@@ -297,6 +300,7 @@ void UpdateLogic( double delta ) {
 					} else {
 						gTileState[cell] = TI_PLOUGHED;
 					}
+					actionStart = false;
 				}
 			}
 		} else {
@@ -309,6 +313,7 @@ void UpdateLogic( double delta ) {
 					gItemHave[x] += 1;
 					Log( 3, "Gained a %s giving me %i\n", gItemName[x].c_str(), gItemHave[x] );
 				}
+				actionStart = false;
 			}
 		}
 	}
