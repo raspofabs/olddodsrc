@@ -295,7 +295,8 @@ void UpdateLogic( double delta ) {
 						haveGold += MONEY_PLANT_CASH;
 						Log( 1, "harvested some pocket change.\n" );
 					}
-					if( (rand()&4095)/4096.0 < RETURN_TO_UNPLOUGHED_PROBABILITY ) {
+					const float unPloughProb = gItemHave[ITEM_SPADE] ? SPADE_RETURN_TO_UNPLOUGHED_PROBABILITY : RETURN_TO_UNPLOUGHED_PROBABILITY;
+					if( (rand()&4095)/4096.0 < unPloughProb ) {
 						gTileState[cell] = TI_RAW;
 					} else {
 						gTileState[cell] = TI_PLOUGHED;
