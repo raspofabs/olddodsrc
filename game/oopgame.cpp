@@ -81,6 +81,7 @@ class Dude {
 					m_StartDoing = true;
 				} else {
 					m_StopDoing = true;
+					m_StartDoing = false;
 				}
 			}
 			m_LastDo = doSomething;
