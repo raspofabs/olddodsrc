@@ -198,7 +198,8 @@ class Dude {
 							m_StartDoing = false;
 						}
 					} else if( tile->CanBeHarvested() ) {
-						int item = tile->Harvest();
+						float unPloughProb = m_Items[ITEM_SPADE] ? SPADE_RETURN_TO_UNPLOUGHED_PROBABILITY : RETURN_TO_UNPLOUGHED_PROBABILITY;
+						int item = tile->Harvest( unPloughProb );
 						if( item == ITEM_OWLSEED ) {
 							m_Items[ITEM_OWL] += 1;
 							Log( 1, "harvested an owl to get an owl.\n" );
@@ -216,10 +217,13 @@ class Dude {
 						bool unique = item->IsUnique();
 						Log( 3, "Trying %i,%i,%i\n", type, cost, unique );
 						if( item && ( m_GoldCount >= cost ) ) {
-							if( !unique || 0 == m_Items.count( type ) ) {
+							if( !unique || 0 == m_Items[ type ] ) {
 								m_GoldCount -= cost;
 								m_Items[type] += 1;
 								Log( 3, "Gained a %i for %i giving me %i\n", type, cost, m_Items[type] );
+							} else {
+								Log( 3, "Unique [%i] and have [%i] of them\n", unique, m_Items[type] );
+
 							}
 						}
 						m_StartDoing = false;
@@ -358,6 +362,8 @@ void DrawHUD() {
 	sprintf( buffer, "Owl Seeds: %i", gpDude->GetInventoryCount(ITEM_OWLSEED) );
 	FontPrint( modelMat, buffer); modelMat.w.y += 8.0f;
 	sprintf( buffer, "Money Seeds: %i", gpDude->GetInventoryCount(ITEM_MONEYSEED) );
+	FontPrint( modelMat, buffer); modelMat.w.y += 8.0f;
+	sprintf( buffer, "Spade: %i", gpDude->GetInventoryCount(ITEM_SPADE) );
 	FontPrint( modelMat, buffer); modelMat.w.y += 8.0f;
 	sprintf( buffer, "Owls: %i", gpDude->GetNumOwls() );
 	FontPrint( modelMat, buffer); modelMat.w.y += 8.0f;

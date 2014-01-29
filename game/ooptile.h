@@ -20,7 +20,7 @@ class Tile {
 		bool CanBeHarvested();
 		void Plough();
 		void Plant( int type );
-		int Harvest();
+		int Harvest( float unPloughProbability );
 
 		// portal
 		void SetAsPortal( int world );

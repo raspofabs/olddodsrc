@@ -58,8 +58,8 @@ void Tile::Plant( int type ) {
 	m_Growth = 0.0f;
 	Log( 3, "Tile -> %i (%i)\n", m_State, m_PlantedType );
 }
-int Tile::Harvest() { 
-	if( (rand()&4095)/4096.0 > RETURN_TO_UNPLOUGHED_PROBABILITY ) {
+int Tile::Harvest( float unPloughProbability ) { 
+	if( (rand()&4095)/4096.0 < unPloughProbability ) {
 		m_State = TI_RAW;
 	} else {
 		m_State = TI_PLOUGHED;
