@@ -1,8 +1,6 @@
 TARGETS=lua.a
 
-CC=g++
-#CC=clang++
-#OPTIMISE=-O2
+CC=gcc
 OPTIMISE=-O0
 DEBUG=-ggdb3
 CFLAGS= -fno-strict-aliasing -DUNIV_LINUX \

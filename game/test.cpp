@@ -147,6 +147,16 @@ void GameUpdate() {
 	modelMat.Scale(1.0f);
 	FontPrint( modelMat, "Testing No VAR Water Kerning MMennwwWW" );
 }
+static int l_log( lua_State *L ) {
+	const char *str = lua_tostring( L, 1 );
+	Log( 1, "LUA: %s\n", str );
+	return 0;
+}
+static int l_myfunc( lua_State *L ) {
+	double d = lua_tonumber( L, 1 );
+	lua_pushnumber( L, d * 3 );
+	return 1;
+}
 void GameInit() {
 	GameTextures::Init();
 	GameMeshes::Init();
@@ -166,6 +176,19 @@ void GameInit() {
 
 	// now test running some lua
 	lua_State *lua = luaL_newstate();
+	lua_pushcfunction( lua, l_log );
+	lua_setglobal( lua, "log" );
+	lua_pushcfunction( lua, l_myfunc );
+	lua_setglobal( lua, "myfunc" );
+	// now call it
+	{
+		const char *luaSrc = "log( myfunc( 2 ) )";
+		luaL_loadstring( lua, luaSrc );
+		int r = lua_pcall(lua,0, LUA_MULTRET, 0);
+		if( r ) {
+			Log(3,"Lua error\n" );
+		}
+	}
 	lua_close( lua );
 }
 void GameShutdown() {
