@@ -1,3 +1,44 @@
+Update 6: OOPVDOD, the game Design document. New direction.
+Game was canned.
+We know you haven't worked on the project for some months, but we're sure you coded it clean enough to be able to make some minor changes.
+New publisher is interested, but has a few ideas. These shouldn't take you more than a week.
+
+0. strip out the javascript stuff, we might want to release on uFruit devices.
+1. The player is in control of a character in the world.
+1.1 they have starting gold and other things, need to be able to specify.
+2. The world is continuous.
+2.1. There is a farm that you start in, need to be able to specify how by.
+2.2. There is a path to the woods guarded by bears, but the woods is a random encounter area.
+2.3. There is a path to the shop, the shop sells seeds.
+2.3. There is a locked path to the cliffs, where rare herbs can be picked.
+2.4. There are no gaps in the world tiles. The edge needs filling in too.
+3. The earth can be ploughed. (holding space digs)
+3.1 ploughing isn't instant, it takes time, have to hold space until ploughed.
+3.2 the player can let go early to move, and not have to wait until stopped to start the plough.
+4. The ploughed earth can have seeds planted in it.
+4.1 you start with 4 owl seeds, you can get mor from the shop.
+4.2 number and type of seeds/cuttings must be shown on screen. Use an icon.
+4.3 you can harvest fully grown plants, or fully grown and fruiting plants.
+4.3.1 harvest owls to get owls
+4.3.2 harvest chests to get gold. They don't go away, but they must fruit again...
+4.3.3 harvest locked doors to get keys. They also don't go away.
+4.4 harvesting owls has a 100% change of unploughing the field.
+4.4.1 Unless the player has bought the improved spade (then specified amount).
+5. The plants grow over time (specified). Once fully grown, you can cut them down.
+5.1 must take a few seconds, and animate them growing.
+5.2 some seeds take ages to grow (config)
+5.3 some plants grow fruit.
+5.3.1 If they do, they only give fruit after they are fully grown.
+5.3.2 Initially half the normal fruit griwing time.
+5.3 the plants should always blow gently in the wind. Unless they are trees.
+5.4 Owls, Money, Doors, Broadleaf, Raspberry, Peach tree, Arrowroot, make it so we can add new ones from script.
+6. If you get to the chest at the end of the path to the woods, you get some gold.
+6.1 Which is cool. You should show this on screen. Animate the coins going into your gold counter.
+6.2 you can spend it in the shop, you can afford chest plant seeds, but not the spade or more owl seeds.
+6.3 We need to be able to add new stuff to the shop.
+7. That's it, the whole game.
+8. use a scripting language that's allowed on uFruit fones, like lua.
+
 Update 5: OOPVDOD, the game Design document. Publisher demands.
 // completed in 1851b1740518cdbfa12b66e5c9f698945791b02d adding the planting, rendering, harvesting of doors.
 
