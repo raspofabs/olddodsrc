@@ -38,6 +38,7 @@ bool inWoods;
 bool inShop;
 float gPloughing;
 int haveOwls = 0;
+int haveKeys = 0;
 int haveGold = 0;
 
 // update/init/shutdown
@@ -271,24 +272,28 @@ void UpdateLogic( double delta ) {
 						actionStart = false;
 					}
 				} else if( gTileState[cell] == TI_PLOUGHED ) {
-					bool haveSeeds = gItemHave[ITEM_OWLSEED] || gItemHave[ITEM_MONEYSEED];
+					bool haveSeeds = gItemHave[ITEM_OWLSEED] || gItemHave[ITEM_MONEYSEED] || gItemHave[ITEM_DOOR];
 					if( haveSeeds ) {
 						Log( 1, "have seeds\n" );
 						if( gItemHave[ITEM_OWLSEED] ) {
 							gTileState[cell] = TI_SEEDED_OWL;
 							gItemHave[ITEM_OWLSEED] -= 1;
 							Log( 1, "planted an owl at %i (%.2f,%.2f)\n", cell, x, y );
-						} else {
+						} else if( gItemHave[ITEM_MONEYSEED] ) {
 							gTileState[cell] = TI_SEEDED_MONEY;
 							gItemHave[ITEM_MONEYSEED] -= 1;
 							Log( 1, "planted a pocketchangeplant at %i (%.2f,%.2f)\n", cell, x, y );
+						} else if( gItemHave[ITEM_DOOR] ) {
+							gTileState[cell] = TI_SEEDED_DOOR;
+							gItemHave[ITEM_DOOR] -= 1;
+							Log( 1, "planted a door at %i (%.2f,%.2f)\n", cell, x, y );
 						}
 						gGrowingList.push_back( Growing( cell, 0.0f ) );
 						actionStart = false;
 					} else {
 						Log( 1, "have no seeds\n" );
 					}
-				} else if( gTileState[cell] == TI_GROWN_OWL || gTileState[cell] == TI_GROWN_MONEY ) {
+				} else if( gTileState[cell] == TI_GROWN_OWL || gTileState[cell] == TI_GROWN_MONEY || gTileState[cell] == TI_GROWN_DOOR ) {
 					if( gTileState[cell] == TI_GROWN_OWL ) {
 						haveOwls += 1;
 						Log( 1, "harvested an owl to get an owl.\n" );
@@ -296,6 +301,10 @@ void UpdateLogic( double delta ) {
 					if( gTileState[cell] == TI_GROWN_MONEY ) {
 						haveGold += MONEY_PLANT_CASH;
 						Log( 1, "harvested some pocket change.\n" );
+					}
+					if( gTileState[cell] == TI_GROWN_DOOR ) {
+						haveKeys += 1;
+						Log( 1, "harvested a door to get a key.\n" );
 					}
 					const float unPloughProb = gItemHave[ITEM_SPADE] ? SPADE_RETURN_TO_UNPLOUGHED_PROBABILITY : RETURN_TO_UNPLOUGHED_PROBABILITY;
 					if( (rand()&4095)/4096.0 < unPloughProb ) {
@@ -356,6 +365,7 @@ void DrawHUD() {
 	sprintf( buffer, "Money Seeds: %lu", (long unsigned int) gItemHave[ITEM_MONEYSEED] ); FontPrint( modelMat, buffer); modelMat.w.y += 8.0f;
 	sprintf( buffer, "Spade: %lu", (long unsigned int) gItemHave[ITEM_SPADE] ); FontPrint( modelMat, buffer); modelMat.w.y += 8.0f;
 	sprintf( buffer, "Owls: %i", haveOwls ); FontPrint( modelMat, buffer); modelMat.w.y += 8.0f;
+	sprintf( buffer, "Keys: %i", haveKeys ); FontPrint( modelMat, buffer); modelMat.w.y += 8.0f;
 	sprintf( buffer, "Gold: %i", haveGold ); FontPrint( modelMat, buffer); modelMat.w.y += 8.0f;
 }
 void AddBreeze( Mat44 &m ) {
@@ -394,20 +404,24 @@ void DrawWorld() {
 					case TI_SEEDED_OWL:
 					case TI_GROWN_OWL:
 					case TI_SEEDED_MONEY:
-					case TI_GROWN_MONEY: SetTexture( "wall", 0 ); break;
+					case TI_GROWN_MONEY:
+					case TI_SEEDED_DOOR:
+					case TI_GROWN_DOOR: SetTexture( "wall", 0 ); break;
 					case TI_CHEST: SetTexture( "chest", 0 ); break;
 					case TI_CHEST_OPEN: SetTexture( "chest-open", 0 ); break;
 				}
 				smallertile->DrawTriangles();
-				if(gTileState[tile]==TI_GROWN_OWL || gTileState[tile]==TI_GROWN_MONEY) {
+				if(gTileState[tile]==TI_GROWN_OWL || gTileState[tile]==TI_GROWN_MONEY || gTileState[tile]==TI_GROWN_DOOR) {
 					modelMat = Translation(Vec3( tx, 0.0, tz ));
 					modelMat.Scale( 0.5f );
 					AddBreeze( modelMat );
 					SetModel( modelMat );
 					if( gTileState[tile]==TI_GROWN_OWL ) {
 						SetTexture( "owl", 0 );
-					} else {
+					} else if( gTileState[tile]==TI_GROWN_MONEY ) {
 						SetTexture( "money-change", 0 );
+					} else if( gTileState[tile]==TI_GROWN_DOOR ) {
+						SetTexture( "door-locked", 0 );
 					}
 					dude->DrawTriangles();
 				}
@@ -427,8 +441,10 @@ void DrawWorld() {
 			int tile = i->first;
 			if( gTileState[tile]==TI_SEEDED_OWL ) {
 				SetTexture( "owl", 0 );
-			} else {
+			} else if( gTileState[tile]==TI_SEEDED_MONEY ) {
 				SetTexture( "money-change", 0 );
+			} else if( gTileState[tile]==TI_SEEDED_DOOR ) {
+				SetTexture( "door-locked", 0 );
 			}
 			dude->DrawTriangles();
 		}

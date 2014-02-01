@@ -197,6 +197,11 @@ class Dude {
 							m_Items[ITEM_MONEYSEED] -= 1;
 							Log( 1, "planted a moneyplant(%i) at %i (%.2f,%.2f)\n", ITEM_MONEYSEED, cell, x, y );
 							m_StartDoing = false;
+						} else if( m_Items[ITEM_DOOR] ) {
+							tile->Plant(ITEM_DOOR);
+							m_Items[ITEM_DOOR] -= 1;
+							Log( 1, "planted a door(%i) at %i (%.2f,%.2f)\n", ITEM_DOOR, cell, x, y );
+							m_StartDoing = false;
 						}
 					} else if( tile->CanBeHarvested() ) {
 						float unPloughProb = m_Items[ITEM_SPADE] ? SPADE_RETURN_TO_UNPLOUGHED_PROBABILITY : RETURN_TO_UNPLOUGHED_PROBABILITY;
@@ -207,6 +212,9 @@ class Dude {
 						} else if( item == ITEM_MONEYSEED ) {
 							m_GoldCount += MONEY_PLANT_CASH;
 							Log( 1, "harvested a moneyplant to get some spare change.\n" );
+						} else if( item == ITEM_DOOR ) {
+							m_Items[ITEM_KEY] += 1;
+							Log( 1, "harvested a door to get a key.\n" );
 						} else {
 							Log( 1, "harvested something (%i)\n", item );
 						}
@@ -235,6 +243,7 @@ class Dude {
 		}
 		int GetInventoryCount( int itemID ) { return m_Items[itemID]; }
 		int GetNumOwls() { return m_Items[ITEM_OWL]; }
+		int GetNumKeys() { return m_Items[ITEM_KEY]; }
 		int GetNumGold() { return m_GoldCount; }
 
 		Vec3 GetWorldPos() { return gpWorld->GetWorldPos( m_Pos ); }
@@ -365,9 +374,13 @@ void DrawHUD() {
 	FontPrint( modelMat, buffer); modelMat.w.y += 8.0f;
 	sprintf( buffer, "Money Seeds: %i", gpDude->GetInventoryCount(ITEM_MONEYSEED) );
 	FontPrint( modelMat, buffer); modelMat.w.y += 8.0f;
+	sprintf( buffer, "Door Seeds: %i", gpDude->GetInventoryCount(ITEM_DOOR) );
+	FontPrint( modelMat, buffer); modelMat.w.y += 8.0f;
 	sprintf( buffer, "Spade: %i", gpDude->GetInventoryCount(ITEM_SPADE) );
 	FontPrint( modelMat, buffer); modelMat.w.y += 8.0f;
 	sprintf( buffer, "Owls: %i", gpDude->GetNumOwls() );
+	FontPrint( modelMat, buffer); modelMat.w.y += 8.0f;
+	sprintf( buffer, "Keys: %i", gpDude->GetNumKeys() );
 	FontPrint( modelMat, buffer); modelMat.w.y += 8.0f;
 	sprintf( buffer, "Gold: %i", gpDude->GetNumGold() );
 	FontPrint( modelMat, buffer); modelMat.w.y += 8.0f;

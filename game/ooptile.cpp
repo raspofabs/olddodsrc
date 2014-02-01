@@ -44,6 +44,8 @@ bool Tile::CanBeHarvested() {
 		return true;
 	if( m_State == TI_GROWN_MONEY )
 		return true;
+	if( m_State == TI_GROWN_DOOR )
+		return true;
 	return false;
 }
 void Tile::Plough() {
@@ -53,6 +55,7 @@ void Tile::Plant( int type ) {
 	switch( type ) {
 		case ITEM_OWLSEED: m_State = TI_SEEDED_OWL; break;
 		case ITEM_MONEYSEED: m_State = TI_SEEDED_MONEY; break;
+		case ITEM_DOOR: m_State = TI_SEEDED_DOOR; break;
 	}
 	m_PlantedType = type;
 	m_Growth = 0.0f;
@@ -131,6 +134,8 @@ void Tile::Render( const Mat44 &modelMat ) {
 			case TI_GROWN_OWL: SetTexture( "wall", 0 ); break;
 			case TI_SEEDED_MONEY:
 			case TI_GROWN_MONEY: SetTexture( "wall", 0 ); break;
+			case TI_SEEDED_DOOR:
+			case TI_GROWN_DOOR: SetTexture( "wall", 0 ); break;
 			case TI_CHEST: SetTexture( "chest", 0 ); break;
 			case TI_CHEST_OPEN: SetTexture( "chest-open", 0 ); break;
 		}
@@ -159,16 +164,29 @@ void Tile::Render( const Mat44 &modelMat ) {
 			SetModel( moneyMat );
 			m_OwlMesh->DrawTriangles();
 		}
+		if( m_State <= TI_GROWN_DOOR && m_State >= TI_SEEDED_MONEY ) {
+			SetTexture( "door-locked", 0 );
+			Mat44 doorMat = modelMat;
+			doorMat.Scale( 0.5f * m_Growth );
+			const float offset = doorMat.w.x * 1.3f + doorMat.w.z * 0.6f;
+			const float swaySpeed = 1.6f;
+			const float swayAmount = 0.1f;
+			extern float g_fGameTime;
+			doorMat.y.x = doorMat.y.y * sinf( g_fGameTime * swaySpeed + offset ) * swayAmount;
+			SetModel( doorMat );
+			m_OwlMesh->DrawTriangles();
+		}
 	}
 }
 void Tile::Update( double delta ) {
-	if( m_State == TI_SEEDED_OWL || m_State == TI_SEEDED_MONEY ) {
+	if( m_State == TI_SEEDED_OWL || m_State == TI_SEEDED_MONEY || m_State == TI_SEEDED_DOOR ) {
 		m_Growth += GROWTH_RATE * delta;
 		if( m_Growth >= 1.0f ) {
 			m_Growth = 1.0f;
 			switch( m_State ) {
 			case TI_SEEDED_OWL: m_State = TI_GROWN_OWL; break;
 			case TI_SEEDED_MONEY: m_State = TI_GROWN_MONEY; break;
+			case TI_SEEDED_DOOR: m_State = TI_GROWN_DOOR; break;
 			}
 		}
 	}
