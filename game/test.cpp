@@ -4,14 +4,9 @@
 #include "core/BadMesh.h"
 #include "core/FontRender.h"
 
-#include "TinyJS/TinyJS.h"
-#include "TinyJS/TinyJS_Functions.h"
-
 #include "GameTextures.h"
 #include "GameMeshes.h"
 
-void js_print(CScriptVar *v, void *) { Log( 1, "> %s\n", v->getParameter("text")->getString().c_str()); }
-CTinyJS *js;
 char * fileread( const char *filename ) {
 	char *buf;
 	if( FILE *fp = fopen( filename, "r" ) ) {
@@ -166,18 +161,6 @@ void GameInit() {
 	cube = new BadMesh();
 	cube->SetAsCube();
 	cube->UVsFromBB();
-
-	// now test running some javascript
-	js = new CTinyJS();
-	registerFunctions(js);
-	js->addNative("function print(text)", &js_print, 0);
-	try {
-		char *buf = fileread("test.js");
-		js->execute(buf);
-		free( buf );
-	} catch (CScriptException *e) {
-		printf("ERROR: %s\n", e->text.c_str());
-  }
 }
 void GameShutdown() {
 }
