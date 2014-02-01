@@ -1,4 +1,5 @@
 Update 5: OOPVDOD, the game Design document. Publisher demands.
+// completed in 1851b1740518cdbfa12b66e5c9f698945791b02d adding the planting, rendering, harvesting of doors.
 
 1. The player is in control of a character in the world.
 2. The world is a farm, a woods, and a shop.
