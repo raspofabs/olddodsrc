@@ -22,7 +22,7 @@ void DrawWorld();
 
 World *gpWorld;
 World *gpFarm, *gpWoods, *gpShop;
-Item *gpItems[3];
+Item *gpItems[SHOP_WIDTH];
 int currentWorld = 0;
 
 //const float FARM_OFFSET = ((FARM_WIDTH-1)*FARM_TILE_WIDTH*0.5f);
@@ -131,8 +131,9 @@ class Dude {
 									default: eprintf( "Where the hell are we? [%i]\n", newWorld );
 								}
 								m_Pos = gpWorld->GetEntry( currentWorld );
-								currentWorld = newWorld;
 								m_Dest = m_Pos + m_Facing;
+								Log( 3, "Entry (%i -> %i) ( %.1f,%.1f => %.1f,%.1f )\n", currentWorld, newWorld, m_Pos.x, m_Pos.y, m_Dest.x, m_Dest.y );
+								currentWorld = newWorld;
 							}
 						} else {
 							eprintf( "On an invalid tile\n" );
@@ -296,11 +297,12 @@ void CreateEntities() {
 		"money-change",
 		"spade",
 		"owl",
+		"door-locked",
 	};
-	const int itemtype[] = { ITEM_MONEYSEED, ITEM_SPADE, ITEM_OWLSEED };
-	const int itemcost[] = { MONEY_COST, SPADE_COST, OWL_COST };
-	const bool isunique[] = { false, true, false };
-	for( int i = 0; i < 3; ++i ) {
+	const int itemtype[] = { ITEM_MONEYSEED, ITEM_SPADE, ITEM_OWLSEED, ITEM_DOOR };
+	const int itemcost[] = { MONEY_COST, SPADE_COST, OWL_COST, DOOR_COST };
+	const bool isunique[] = { false, true, false, false };
+	for( int i = 0; i < SHOP_WIDTH; ++i ) {
 		gpItems[i] = new Item( itemtype[i], itemcost[i], isunique[i] );
 		gpShop->AddTile( i, -1 );
 		gpShop->GetTile( i, -1 )->SetSpecialTexture( itemNames[i] );

@@ -1,6 +1,7 @@
 #include "oopworld.h"
 #include "GameConsts.h"
 #include "ooptile.h"
+#include "core/util.h"
 
 //const float FARM_OFFSET = ((FARM_WIDTH-1)*FARM_TILE_WIDTH*0.5f);
 World::World( size_t width, size_t height ) : mc_Width( width ), mc_Height( height ), m_IsShop(0) {
@@ -89,7 +90,12 @@ void World::SetEntry( int x, int y, int from ) {
 	m_Entry[from] = Vec2( x, y );
 }
 Vec2 World::GetEntry( int from ) {
-	return m_Entry[from];
+	if( m_Entry.count( from ) ) {
+		return m_Entry[from];
+	} else {
+		Log( 3, "No Entrance from %i\n", from );
+	}
+	return Vec2(0,0);
 }
 void World::SetAsShop() {
 	m_IsShop = true;

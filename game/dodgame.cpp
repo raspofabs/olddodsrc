@@ -82,6 +82,8 @@ void GameInit() {
 	gUnique[ITEM_SPADE] = true;
 	gItemCost[ITEM_MONEYSEED] = MONEY_COST;
 	gItemName[ITEM_MONEYSEED] = "money-change";
+	gItemCost[ITEM_DOOR] = DOOR_COST;
+	gItemName[ITEM_DOOR] = "door-locked";
 
 	gItemHave[ITEM_OWLSEED] = 5;
 }
