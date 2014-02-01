@@ -4,6 +4,8 @@
 #include "core/BadMesh.h"
 #include "core/FontRender.h"
 
+#include "lua/lua.hpp"
+
 #include "GameTextures.h"
 #include "GameMeshes.h"
 
@@ -161,6 +163,10 @@ void GameInit() {
 	cube = new BadMesh();
 	cube->SetAsCube();
 	cube->UVsFromBB();
+
+	// now test running some lua
+	lua_State *lua = luaL_newstate();
+	lua_close( lua );
 }
 void GameShutdown() {
 }

@@ -1,4 +1,6 @@
 build
+lua/*.o
+lua/lua.a
 game
 tags
 test

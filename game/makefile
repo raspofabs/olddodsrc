@@ -19,9 +19,12 @@ OOPOBJECTS=$(RAW_OOPOBJECTS:%=build/%)
 TARGETOBJECTS=$(RAW_TARGETOBJECTS:%=build/%)
 ALLOBJECTS=$(COMMONOBJECTS) $(TARGETOBJECTS) $(OOPOBJECTS)
 CORE=core/core.a
+LUA=lua/lua.a
+LOCAL_LIBS=$(CORE) $(LUA)
 
 recurse:
 	@make -j$(shell getconf _NPROCESSORS_ONLN) -C core all
+	@make -j$(shell getconf _NPROCESSORS_ONLN) -C lua all
 	@make -j$(shell getconf _NPROCESSORS_ONLN) all
 
 all: $(TARGETS)
@@ -29,10 +32,12 @@ all: $(TARGETS)
 build:
 	mkdir -p build
 
+
 -include $(ALLOBJECTS:.o=.d)
 
 clean:
 	@make -C core clean
+	@make -C lua clean
 	rm -f $(TARGETS)
 	rm -f build/*
 
@@ -42,12 +47,12 @@ build/%.o: %.cpp | build
 	sed -i '1s/^/build\//' build/$*.d
 
 # testing
-test: build/test.o $(COMMONOBJECTS) $(CORE)
-	$(CC) build/test.o $(COMMONOBJECTS) $(CORE) -o test $(LIBS)
-oopgame: build/oopgame.o $(COMMONOBJECTS) $(CORE) $(OOPOBJECTS)
-	$(CC) build/oopgame.o $(COMMONOBJECTS) $(CORE) $(OOPOBJECTS) -o oopgame $(LIBS)
-dodgame: build/dodgame.o $(COMMONOBJECTS) $(CORE) 
-	$(CC) build/dodgame.o $(COMMONOBJECTS) $(CORE) -o dodgame $(LIBS)
+test: build/test.o $(COMMONOBJECTS) $(LOCAL_LIBS)
+	$(CC) build/test.o $(COMMONOBJECTS) $(LOCAL_LIBS) -o test $(LIBS)
+oopgame: build/oopgame.o $(COMMONOBJECTS) $(LOCAL_LIBS) $(OOPOBJECTS)
+	$(CC) build/oopgame.o $(COMMONOBJECTS) $(LOCAL_LIBS) $(OOPOBJECTS) -o oopgame $(LIBS)
+dodgame: build/dodgame.o $(COMMONOBJECTS) $(LOCAL_LIBS) 
+	$(CC) build/dodgame.o $(COMMONOBJECTS) $(LOCAL_LIBS) -o dodgame $(LIBS)
 
 compilers: basepackages
 
