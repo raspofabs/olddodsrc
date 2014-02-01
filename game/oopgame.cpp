@@ -65,7 +65,7 @@ class Dude {
 		Dude() :
 			m_Pos( floorf( FARM_WIDTH * 0.5f ) ), m_Dest( m_Pos ), m_Facing(0,-1), m_Control(0),
 			m_LastDo(0), m_StartDoing(0), m_StopDoing(0),
-			m_GoldCount(140),
+			m_GoldCount(0),
 			m_Ploughing(0), m_PloughTime(0.0f)
 		{
 			m_Mesh = GameMeshes::Get("quadpeep");
