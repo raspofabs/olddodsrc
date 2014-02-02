@@ -12,7 +12,7 @@ LIBS=-Wl,-Bsymbolic-functions \
 	-lGL -lglfw
 
 RAW_COMMONOBJECTS=GameTextures.o GameMeshes.o
-RAW_OOPOBJECTS=ooptile.o oopworld.o
+RAW_OOPOBJECTS=ooptile.o oopworld.o ooplua.o
 RAW_TARGETOBJECTS=$(TARGETS:%=%.o)
 COMMONOBJECTS=$(RAW_COMMONOBJECTS:%=build/%)
 OOPOBJECTS=$(RAW_OOPOBJECTS:%=build/%)
@@ -20,7 +20,6 @@ TARGETOBJECTS=$(RAW_TARGETOBJECTS:%=build/%)
 ALLOBJECTS=$(COMMONOBJECTS) $(TARGETOBJECTS) $(OOPOBJECTS)
 CORE=core/core.a
 LUA=lua/lua.a
-LOCAL_LIBS=$(CORE) $(LUA)
 
 recurse:
 	@make -j$(shell getconf _NPROCESSORS_ONLN) -C core all
@@ -47,12 +46,12 @@ build/%.o: %.cpp | build
 	sed -i '1s/^/build\//' build/$*.d
 
 # testing
-test: build/test.o $(COMMONOBJECTS) $(LOCAL_LIBS)
-	$(CC) build/test.o $(COMMONOBJECTS) $(LOCAL_LIBS) -o test $(LIBS)
-oopgame: build/oopgame.o $(COMMONOBJECTS) $(LOCAL_LIBS) $(OOPOBJECTS)
-	$(CC) build/oopgame.o $(COMMONOBJECTS) $(LOCAL_LIBS) $(OOPOBJECTS) -o oopgame $(LIBS)
-dodgame: build/dodgame.o $(COMMONOBJECTS) $(LOCAL_LIBS) 
-	$(CC) build/dodgame.o $(COMMONOBJECTS) $(LOCAL_LIBS) -o dodgame $(LIBS)
+test: build/test.o $(COMMONOBJECTS) $(CORE) $(LUA)
+	$(CC) build/test.o $(COMMONOBJECTS) $(CORE) $(LUA) -o test $(LIBS)
+oopgame: build/oopgame.o $(COMMONOBJECTS) $(OOPOBJECTS) $(CORE) $(LUA)
+	$(CC) build/oopgame.o $(COMMONOBJECTS) $(OOPOBJECTS) $(CORE) $(LUA) -o oopgame $(LIBS)
+dodgame: build/dodgame.o $(COMMONOBJECTS) $(CORE) $(LUA) 
+	$(CC) build/dodgame.o $(COMMONOBJECTS) $(CORE) $(LUA) -o dodgame $(LIBS)
 
 compilers: basepackages
 
@@ -62,6 +61,6 @@ basepackages:
 	sudo apt-get -y install g++ libglfw-dev xorg-dev libglu1-mesa-dev
 
 run:
-	./test
+	#./test
 	./oopgame
-	./dodgame
+	#./dodgame

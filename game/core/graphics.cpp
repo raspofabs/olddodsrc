@@ -483,7 +483,7 @@ void AddAsset( const std::string &name, Image *source ) {
 void AddSubAsset( const std::string &name, Image source, int x, int y ) {
 	TextureAsset &asset = icons[ name ];
 	asset.im = new Image;
-	Log( 3, "Sub Asset %s\n", name.c_str() );
+	//Log( 3, "Sub Asset %s\n", name.c_str() );
 	*(asset.im) = get_sub_icon( source, x,y, 16, 16 );
 	asset.glTextureID = -1;
 	gTextures.insert( TextureDic::value_type(name, &asset ) );

@@ -203,6 +203,9 @@ void TestCallingLuaFromC() {
 	}
 	lua_close( lua );
 }
+
+#include "ooplua.h"
+
 void TestGettingConfigFromLua() {
 	// now test loading a lua function
 	lua_State *lua = luaL_newstate();

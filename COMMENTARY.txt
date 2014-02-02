@@ -1,4 +1,4 @@
-during change 1 (when splitting into DOD and OOP):
+## during change 1 (when splitting into DOD and OOP):
 
 notice how we had to move to pointers as constructors caused us to lose control
 of when the dude and tiles were initialised, and if we let them own what they
@@ -6,21 +6,21 @@ need to render, then they are trying to grab assets before they are ready to be
 grabbed.
 
 
-during change 2 (adding growing to the owls):
+## during change 2 (adding growing to the owls):
 
 the DOD approach is to have a list of owls that are growing, and only increment
 the growing timer of owls that might be growing. This means that the
 non-growing owls don't get an update tick, and also that the non-growing owls
 don't have a growing time field. This saves both time and space.
 
-during update 4 (owls harvested, chest of gold, bears, woods):
+## during update 4 (owls harvested, chest of gold, bears, woods):
 
 having the seed count in the dude didn't seem bad earlier, but now with the owl
 count and the gold count too, it's startig to look innappropriate from a DOD
 perspective. But this is how games traditionally handle per character
 attributes, so the OOP version is starting to need more accessors.
 
-In the object-oriented project, wer're going to be using a "world" object as
+In the object-oriented project, wer're going to be using a *world* object as
 the tendency to name things often leads to early structuring in OO C++
 development. The data-oriented approach is teetering on that decision because
 of the rule of thumb that is personal to me, which is if you have two things,
@@ -30,43 +30,71 @@ in the woods" check, as at this stage it's the simplest thing to do.
 
 I notice during this change, the encapsulation of state really worked against
 the OO project as I suddenly had data that couldn't answer simple questions
-because they lacked context. This situation is common in OO development, but
-not normally noticed, as it is the norm. The DO approach doesn't force any data
-to lack context, on the contrary, it enforces flexibility of it by allowing you
-to define your schema ad hoc, we haven't seen it properly yet, but once the
-game grows the advantages should start to become more apparent.
+because they lacked *context*. This situation is common in OO development, but
+normally goes unnoticed, as it is the norm. The DO approach doesn't force any
+data to lack context, on the contrary, it enforces flexibility of it by
+allowing you to define your schema ad hoc, we haven't seen it properly yet, but
+once the game grows the advantages should start to become more apparent.
 
-Interestingly, the OO approach won out (in coding time) in adding bear blocking
+Interestingly, **the OO approach won out** (in coding time) in adding bear blocking
 code. Adding the bears themselves were about the same complexity as DO, but the
 task of making them block was very straight forward in OO dev. The only thing
 is, that it was a very short victory as it turns out the reason why it was
 simple was that it lacked context, which means adding the owl fight might not
-be that simple. - actually, it wasn't all that hard, but did need to add bears
-to the tiles. This is a problem brewing though, there's more and more external
-object type specific stuff going on and the responsibility is becoming muddied
-as to what is meant to be in the tiles, and what is in the world, and what the
-player interacts with (is it the state of the tile, or the world?) This is
-known as the boundary problem, the same problem faced when the developer or
-designer cannot make the call for when the collection of grains of sand turns
-into a pile. This core issue with OO manifests as ambiguous ownership of state
-and manipulators of that data.
+be that simple.
 
-during update 5 (shop, money plants)
+#### later
 
-Adding different crops was not simple. The OO way of hiding data makes the
+actually, it wasn't all that hard, but did need to add bears to the tiles. This
+is a problem brewing though, there's more and more external object type
+specific stuff going on and the responsibility is becoming muddied as to what
+is meant to be in the tiles, and what is in the world, and what the player
+interacts with (is it the state of the tile, or the world?) This is known as
+the boundary problem, the same problem faced when the developer or designer
+cannot make the call for when the collection of grains of sand turns into a
+pile. This core issue with OO manifests as ambiguous ownership of state and
+manipulators of that data. OO isn't really having any problems yet, but is
+looking like it will soon.
+
+## during update 5 (shop, money plants)
+
+Adding different crops was not simple. The OO way of *hiding* data makes the
 interrogation of what has gone into a tile less simple than it could have been.
-The Shop was really awkward to add in the OO version. To make it possible for
-the shop to exist in the shop world, I've had to add the ability for any world
-to be a shop. This generic approach can be the cause of condition bloat in the
-runtime. The problem with this is simply cost and making the code more brittle
-/ resistant to change. On the other hand, adding more shops should be easy at this point, as would moving the shop into a different part of the world.
+The Shop was **really awkward** to add in the OO version. To make it possible
+for the shop to exist in the shop world, I've had to add the ability for any
+world to be a shop. This is something that happens a lot in OO coding. You
+add a needed feature, but you end up adding it to a lot more than just the
+one place you need it. To start with that might not be seen as a problem,
+but generally, it slows down development a little as it pollutes the verb
+space of the objects.  This generic approach can be the cause of condition
+bloat in the runtime. The problem with this is simply cost and making the
+code more brittle / resistant to change. On the other hand, adding more
+shops should be easy at this point, as would moving the shop into a
+different part of the world.
 
 A bug that had me stumped for a bit was the inability to buy owls. It turned
 out that it was because the return type for the GetType function was wrong (was
-a bool forcing the return value to 0 or 1) which is a general problem with
-breaking down a problem too much, and a problem with too many layers between
-the code using a value and the value itself. These silly bugs aren't seen as
-often with DO dev because there is usually only a very thin layer between the
-data and the code using it, and also if there is a layer, it's close at hand,
-potentially in only the one compilation unit using it.
+a bool forcing the return value to 0 or 1). I've got warnings as errors, but
+never got a complaint about returning the int through the bool hole. Oddly,
+this kind of bug doesn't turn up much in production for me, but I guess that
+might be because I don't tend to break down a problem too much. A problem with
+too many layers between the code using a value and the value itself, can be
+that as the design and iplementation change, there can be loss of information,
+and inefficiencies introduced without there being any good reason other than
+legacy situations. These silly bugs aren't seen as often with DO dev because
+there is usually only a very thin layer between the data and the code using it,
+and also if there is a layer, it's close at hand, potentially in only the one
+compilation unit using it.
+
+## during update 6 (continuous world, config files)
+
+Firstly, stripping out the javascript was a non-issue. Nothing but the test
+harness used it. Adding Lua in its place was simple enough (though I forgot
+that lua was C not C++, so had a linking error for a moment).
+
+The first thing to do was to get the starting values into a config file. Lua
+was the way to go, so first things first, bring up a script loading system.
+Both DOD and OOP were easy enough after writing out the test case in test.cpp.
+The only issue was that I didn't know that libraries had to be linked last
+(dependencies in gcc linking are a bit special). Not a DOD or OOP problem.
 

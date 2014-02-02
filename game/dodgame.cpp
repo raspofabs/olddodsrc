@@ -53,7 +53,51 @@ void GameUpdate() {
 	DrawHUD();
 	DrawWorld();
 }
+
+#include "lua/lua.hpp"
+lua_State *lua;
+
+float GetConfigValue( const char *identifier, float default_value ) {
+	double val1 = default_value;
+	lua_getglobal(lua,identifier);
+	if( !lua_isnil(lua,1) ) {
+		val1 = lua_tonumber(lua, 1);
+	} else {
+		Log(3,"Can't find [%s]\n", identifier );
+	}
+	lua_pop(lua,1);
+	return val1;
+}
 void GameInit() {
+	if( FILE *fp = fopen( "data/config.lua", "r" ) ) {
+		fseek( fp, 0, SEEK_END );
+		size_t length = ftell( fp );
+		rewind( fp );
+		char *buffer = (char*)malloc( length + 1 );
+		size_t charcount = fread( buffer, 1, length, fp );
+		fclose( fp );
+		if( length != charcount ) {
+			Log(1, "Error loading string. Only %i bytes read.\n", charcount );
+		}
+
+		buffer[length] = 0;
+		Log(3, "Script:\n<<START>>\n%s\n<<END>>\n", buffer );
+
+		lua = luaL_newstate();
+
+		Log(3,"Lua initialised with script %i bytes long\n", length );
+		luaL_loadstring( lua, buffer );
+		int r = lua_pcall(lua,0, LUA_MULTRET, 0);
+		if( r ) {
+			Log(3,"Lua error [%s]\n", lua_tostring(lua,-1) );
+			exit(1);
+		}
+		free( buffer );
+	} else {
+		Log(1,"No config file.\n" );
+		exit(1);
+	}
+
 	GameTextures::Init();
 	GameMeshes::Init();
 
@@ -86,7 +130,8 @@ void GameInit() {
 	gItemCost[ITEM_DOOR] = DOOR_COST;
 	gItemName[ITEM_DOOR] = "door-locked";
 
-	gItemHave[ITEM_OWLSEED] = 5;
+	gItemHave[ITEM_OWLSEED] = GetConfigValue( "InitialOwlSeeds", 0);
+	haveGold = GetConfigValue( "InitialGold", 0 );
 }
 void GameShutdown() {
 }

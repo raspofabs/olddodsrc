@@ -20,10 +20,13 @@ void DrawWorld();
 #include "oopworld.h"
 #include "oopitem.h"
 
+#include "ooplua.h"
+
 World *gpWorld;
 World *gpFarm, *gpWoods, *gpShop;
 Item *gpItems[SHOP_WIDTH];
 int currentWorld = 0;
+LuaScript *gpLuaScript;
 
 //const float FARM_OFFSET = ((FARM_WIDTH-1)*FARM_TILE_WIDTH*0.5f);
 
@@ -69,7 +72,8 @@ class Dude {
 			m_Ploughing(0), m_PloughTime(0.0f)
 		{
 			m_Mesh = GameMeshes::Get("quadpeep");
-			m_Items[ITEM_OWLSEED] = 5;
+			m_Items[ITEM_OWLSEED] = gpLuaScript->GetGlobalNumber( "InitialOwlSeeds", 0 );
+			m_GoldCount = gpLuaScript->GetGlobalNumber( "InitialGold", 0 );
 		}
 
 		void UpdateInput( const Vec2 &input ) {
@@ -276,6 +280,9 @@ class Dude {
 Dude *gpDude;
 
 void CreateEntities() {
+	gpLuaScript = new LuaScript();
+	gpLuaScript->LoadScript( "data/config.lua" );
+
 	gpDude = new Dude();
 
 	gpFarm = new World( FARM_WIDTH, FARM_WIDTH );
