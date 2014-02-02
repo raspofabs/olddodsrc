@@ -171,7 +171,7 @@ void TestCallingCFromLua() {
 		luaL_loadstring( lua, luaSrc );
 		int r = lua_pcall(lua,0, LUA_MULTRET, 0);
 		if( r ) {
-			Log(3,"Lua error\n" );
+			Log(3,"Lua error [%s]\n", lua_tostring(lua,-1) );
 		}
 	}
 	lua_close( lua );
@@ -185,7 +185,7 @@ void TestCallingLuaFromC() {
 		luaL_loadstring( lua, luaSrc );
 		int r = lua_pcall(lua,0, LUA_MULTRET, 0);
 		if( r ) {
-			Log(3,"Lua error\n" );
+			Log(3,"Lua error [%s]\n", lua_tostring(lua,-1) );
 		}
 	}
 
@@ -200,6 +200,31 @@ void TestCallingLuaFromC() {
 			double gotBack = lua_tonumber(lua, 1);
 			Log(3,"Lua double_it(2) => %i\n", (int)gotBack );
 		}
+	}
+	lua_close( lua );
+}
+void TestGettingConfigFromLua() {
+	// now test loading a lua function
+	lua_State *lua = luaL_newstate();
+	// now call it
+	{
+		const char *luaSrc = "val1 = 100 val2 = 200";
+		luaL_loadstring( lua, luaSrc );
+		int r = lua_pcall(lua,0, LUA_MULTRET, 0);
+		if( r ) {
+			Log(3,"Lua error [%s]\n", lua_tostring(lua,-1) );
+		}
+	}
+
+	// now call lua from C
+	{
+		lua_getglobal(lua, "val1");
+		double val1 = lua_tonumber(lua, 1);
+		lua_pop(lua,1);
+		lua_getglobal(lua, "val2");
+		double val2 = lua_tonumber(lua, 1);
+		lua_pop(lua,1);
+		Log(3,"Lua values %i %i\n", (int)val1, (int)val2 );
 	}
 	lua_close( lua );
 }
@@ -222,6 +247,7 @@ void GameInit() {
 
 	TestCallingCFromLua();
 	TestCallingLuaFromC();
+	TestGettingConfigFromLua();
 }
 void GameShutdown() {
 }
