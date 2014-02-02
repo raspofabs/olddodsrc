@@ -157,6 +157,52 @@ static int l_myfunc( lua_State *L ) {
 	lua_pushnumber( L, d * 3 );
 	return 1;
 }
+
+void TestCallingCFromLua() {
+	// now test running some lua
+	lua_State *lua = luaL_newstate();
+	lua_pushcfunction( lua, l_log );
+	lua_setglobal( lua, "log" );
+	lua_pushcfunction( lua, l_myfunc );
+	lua_setglobal( lua, "myfunc" );
+	// now call it
+	{
+		const char *luaSrc = "log( myfunc( 2 ) )";
+		luaL_loadstring( lua, luaSrc );
+		int r = lua_pcall(lua,0, LUA_MULTRET, 0);
+		if( r ) {
+			Log(3,"Lua error\n" );
+		}
+	}
+	lua_close( lua );
+}
+void TestCallingLuaFromC() {
+	// now test loading a lua function
+	lua_State *lua = luaL_newstate();
+	// now call it
+	{
+		const char *luaSrc = "function double_it( a ) return a * 2 end";
+		luaL_loadstring( lua, luaSrc );
+		int r = lua_pcall(lua,0, LUA_MULTRET, 0);
+		if( r ) {
+			Log(3,"Lua error\n" );
+		}
+	}
+
+	// now call lua from C
+	{
+		lua_getglobal(lua, "double_it");
+		lua_pushnumber(lua, 2);
+		int r = lua_pcall(lua, 1, LUA_MULTRET, 0);
+		if( r ) {
+			Log(3,"Lua error [%s]\n", lua_tostring(lua,-1) );
+		} else {
+			double gotBack = lua_tonumber(lua, 1);
+			Log(3,"Lua double_it(2) => %i\n", (int)gotBack );
+		}
+	}
+	lua_close( lua );
+}
 void GameInit() {
 	GameTextures::Init();
 	GameMeshes::Init();
@@ -174,22 +220,8 @@ void GameInit() {
 	cube->SetAsCube();
 	cube->UVsFromBB();
 
-	// now test running some lua
-	lua_State *lua = luaL_newstate();
-	lua_pushcfunction( lua, l_log );
-	lua_setglobal( lua, "log" );
-	lua_pushcfunction( lua, l_myfunc );
-	lua_setglobal( lua, "myfunc" );
-	// now call it
-	{
-		const char *luaSrc = "log( myfunc( 2 ) )";
-		luaL_loadstring( lua, luaSrc );
-		int r = lua_pcall(lua,0, LUA_MULTRET, 0);
-		if( r ) {
-			Log(3,"Lua error\n" );
-		}
-	}
-	lua_close( lua );
+	TestCallingCFromLua();
+	TestCallingLuaFromC();
 }
 void GameShutdown() {
 }
