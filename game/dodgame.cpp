@@ -81,7 +81,7 @@ void GameInit() {
 		}
 
 		buffer[length] = 0;
-		Log(3, "Script:\n<<START>>\n%s\n<<END>>\n", buffer );
+		Log(4, "Script:\n<<START>>\n%s\n<<END>>\n", buffer );
 
 		lua = luaL_newstate();
 

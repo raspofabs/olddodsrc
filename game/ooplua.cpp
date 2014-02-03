@@ -25,7 +25,7 @@ int LuaScript::LoadScript( const char *filename ) {
 		}
 
 		buffer[length] = 0;
-		Log(3, "Script:\n<<START>>\n%s\n<<END>>\n", buffer );
+		Log(4, "Script:\n<<START>>\n%s\n<<END>>\n", buffer );
 
 		Log(3,"Lua initialised with script %i bytes long\n", length );
 		luaL_loadstring( lua, buffer );
