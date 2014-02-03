@@ -1,6 +1,8 @@
 #define GROWTH_RATE 0.15f
 #define TURN_SPEED 8.0f
 #define MOVE_RATE 2.0f
+#define WORLD_WIDTH 20
+#define WORLD_DEPTH 8
 #define FARM_WIDTH 4
 #define WOODS_WIDTH 6
 #define FARM_TILE_WIDTH 2.0f

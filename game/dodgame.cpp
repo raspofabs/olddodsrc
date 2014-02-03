@@ -24,6 +24,7 @@ void DrawWorld();
 // game state
 int gTileState[FARM_WIDTH*FARM_WIDTH];
 int gWoodsTile[WOODS_WIDTH*1];
+int gWorldTile[WORLD_WIDTH*WORLD_DEPTH];
 size_t gItemCost[SHOP_WIDTH];
 bool gUnique[SHOP_WIDTH];
 size_t gItemHave[SHOP_WIDTH];
