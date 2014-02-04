@@ -436,7 +436,10 @@ void DrawWorld() {
 
 	if( !inWoods && !inShop ) {
 		const float FARM_OFFSET = ((FARM_WIDTH-1)*FARM_TILE_WIDTH*0.5f);
-		Vec3 worldOffset( gDudePos.x * FARM_TILE_WIDTH - FARM_OFFSET, 0.0f, gDudePos.y * FARM_TILE_WIDTH - FARM_OFFSET );
+		Vec3 worldOffset(
+				gDudePos.x * FARM_TILE_WIDTH - FARM_OFFSET,
+				0.0f,
+				gDudePos.y * FARM_TILE_WIDTH - FARM_OFFSET );
 		int tile = 0;
 		for( int y = 0; y < FARM_WIDTH; ++y ) {
 			for( int x = 0; x < FARM_WIDTH; ++x ) {
@@ -508,11 +511,12 @@ void DrawWorld() {
 			SetModel( modelMat );
 			smallertile->DrawTriangles();
 		}
-
-		modelMat = Translation( Vec3( gDudePos.x * FARM_TILE_WIDTH - FARM_OFFSET, 0.0f, gDudePos.y * FARM_TILE_WIDTH - FARM_OFFSET ) );
 	} else if( inWoods ) {
 		const float WOODS_OFFSET = ((WOODS_WIDTH-1)*FARM_TILE_WIDTH*0.5f);
-		Vec3 worldOffset( gDudePos.x * FARM_TILE_WIDTH - WOODS_OFFSET, 0.0f, gDudePos.y * FARM_TILE_WIDTH );
+		Vec3 worldOffset(
+				gDudePos.x * FARM_TILE_WIDTH - WOODS_OFFSET,
+				0.0f,
+				gDudePos.y * FARM_TILE_WIDTH );
 		int tile = 0;
 		for( int y = 0; y < 1; ++y ) {
 			for( int x = 0; x < WOODS_WIDTH; ++x ) {
@@ -544,7 +548,6 @@ void DrawWorld() {
 			SetModel( modelMat );
 			smallertile->DrawTriangles();
 		}
-		modelMat = Translation( Vec3( gDudePos.x * FARM_TILE_WIDTH - WOODS_OFFSET, 0.0f, gDudePos.y * FARM_TILE_WIDTH ) );
 	} else {
 		const float SHOP_OFFSET = ((SHOP_WIDTH-1)*FARM_TILE_WIDTH*0.5f);
 		Vec3 worldOffset(
@@ -569,7 +572,6 @@ void DrawWorld() {
 			SetModel( modelMat );
 			smallertile->DrawTriangles();
 		}
-		modelMat = Translation( Vec3( gDudePos.x * FARM_TILE_WIDTH - SHOP_OFFSET, 0.0f, gDudePos.y * FARM_TILE_WIDTH ) );
 	}
 
 	modelMat = Translation(gZeroVec3);
