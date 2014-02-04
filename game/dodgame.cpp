@@ -436,13 +436,14 @@ void DrawWorld() {
 
 	if( !inWoods && !inShop ) {
 		const float FARM_OFFSET = ((FARM_WIDTH-1)*FARM_TILE_WIDTH*0.5f);
+		Vec3 worldOffset( gDudePos.x * FARM_TILE_WIDTH - FARM_OFFSET, 0.0f, gDudePos.y * FARM_TILE_WIDTH - FARM_OFFSET );
 		int tile = 0;
 		for( int y = 0; y < FARM_WIDTH; ++y ) {
 			for( int x = 0; x < FARM_WIDTH; ++x ) {
 				// ignoring innefficiency of doing int to float here
 				float tx = x * FARM_TILE_WIDTH - FARM_OFFSET;
 				float tz = y * FARM_TILE_WIDTH - FARM_OFFSET;
-				modelMat = Translation(Vec3( tx, 0.0, tz ));
+				modelMat = Translation(Vec3( tx, 0.0, tz ) - worldOffset);
 				SetModel( modelMat );
 				switch(gTileState[tile]) {
 					case TI_RAW: SetTexture( "earth", 0 ); break;
@@ -458,7 +459,7 @@ void DrawWorld() {
 				}
 				smallertile->DrawTriangles();
 				if(gTileState[tile]==TI_GROWN_OWL || gTileState[tile]==TI_GROWN_MONEY || gTileState[tile]==TI_GROWN_DOOR) {
-					modelMat = Translation(Vec3( tx, 0.0, tz ));
+					modelMat = Translation(Vec3( tx, 0.0, tz ) - worldOffset);
 					modelMat.Scale( 0.5f );
 					AddBreeze( modelMat );
 					SetModel( modelMat );
@@ -480,7 +481,7 @@ void DrawWorld() {
 			int z = i->first/FARM_WIDTH;
 			float tx = x * FARM_TILE_WIDTH - FARM_OFFSET;
 			float tz = z * FARM_TILE_WIDTH - FARM_OFFSET;
-			modelMat = Translation(Vec3( tx, 0.0, tz ));
+			modelMat = Translation(Vec3( tx, 0.0, tz ) - worldOffset);
 			modelMat.Scale( i->second * 0.5f );
 			AddBreeze( modelMat );
 			SetModel( modelMat );
@@ -499,11 +500,11 @@ void DrawWorld() {
 			SetTexture( "earth", 0 );
 			float tx = FARM_WIDTH * FARM_TILE_WIDTH - FARM_OFFSET;
 			float tz = 2 * FARM_TILE_WIDTH - FARM_OFFSET;
-			modelMat = Translation(Vec3( tx, 0.0, tz ));
+			modelMat = Translation(Vec3( tx, 0.0, tz ) - worldOffset);
 			SetModel( modelMat );
 			smallertile->DrawTriangles();
 			tx = (-1) * FARM_TILE_WIDTH - FARM_OFFSET;
-			modelMat = Translation(Vec3( tx, 0.0, tz ));
+			modelMat = Translation(Vec3( tx, 0.0, tz ) - worldOffset);
 			SetModel( modelMat );
 			smallertile->DrawTriangles();
 		}
@@ -511,13 +512,14 @@ void DrawWorld() {
 		modelMat = Translation( Vec3( gDudePos.x * FARM_TILE_WIDTH - FARM_OFFSET, 0.0f, gDudePos.y * FARM_TILE_WIDTH - FARM_OFFSET ) );
 	} else if( inWoods ) {
 		const float WOODS_OFFSET = ((WOODS_WIDTH-1)*FARM_TILE_WIDTH*0.5f);
+		Vec3 worldOffset( gDudePos.x * FARM_TILE_WIDTH - WOODS_OFFSET, 0.0f, gDudePos.y * FARM_TILE_WIDTH );
 		int tile = 0;
 		for( int y = 0; y < 1; ++y ) {
 			for( int x = 0; x < WOODS_WIDTH; ++x ) {
 				// ignoring innefficiency of doing int to float here
 				float tx = x * FARM_TILE_WIDTH - WOODS_OFFSET;
 				float tz = y * FARM_TILE_WIDTH;
-				modelMat = Translation(Vec3( tx, 0.0, tz ));
+				modelMat = Translation(Vec3( tx, 0.0, tz ) - worldOffset);
 				SetModel( modelMat );
 				switch(gWoodsTile[tile]) {
 					case TI_RAW:
@@ -538,20 +540,24 @@ void DrawWorld() {
 		if( 1 ) {
 			SetTexture( "earth", 0 );
 			float tx = (-1) * FARM_TILE_WIDTH - WOODS_OFFSET;
-			modelMat = Translation(Vec3( tx, 0.0, 0.0f ));
+			modelMat = Translation(Vec3( tx, 0.0, 0.0f ) - worldOffset);
 			SetModel( modelMat );
 			smallertile->DrawTriangles();
 		}
 		modelMat = Translation( Vec3( gDudePos.x * FARM_TILE_WIDTH - WOODS_OFFSET, 0.0f, gDudePos.y * FARM_TILE_WIDTH ) );
 	} else {
 		const float SHOP_OFFSET = ((SHOP_WIDTH-1)*FARM_TILE_WIDTH*0.5f);
+		Vec3 worldOffset(
+				gDudePos.x * FARM_TILE_WIDTH - SHOP_OFFSET,
+				0.0f,
+				gDudePos.y * FARM_TILE_WIDTH );
 		for( int x = 0; x < SHOP_WIDTH; ++x ) {
 			float tx = x * FARM_TILE_WIDTH - SHOP_OFFSET;
-			modelMat = Translation(Vec3( tx, 0.0f, 0.0f ));
+			modelMat = Translation(Vec3( tx, 0.0f, 0.0f ) - worldOffset);
 			SetModel( modelMat );
 			SetTexture( "wall", 0 );
 			smallertile->DrawTriangles();
-			modelMat = Translation(Vec3( tx, 0.0f, -FARM_TILE_WIDTH ));
+			modelMat = Translation(Vec3( tx, 0.0f, -FARM_TILE_WIDTH ) - worldOffset);
 			SetModel( modelMat );
 			SetTexture( gItemName[x].c_str(), 0 );
 			smallertile->DrawTriangles();
@@ -559,12 +565,14 @@ void DrawWorld() {
 		if( 1 ) {
 			SetTexture( "earth", 0 );
 			float tx = SHOP_WIDTH * FARM_TILE_WIDTH - SHOP_OFFSET;
-			modelMat = Translation(Vec3( tx, 0.0, 0.0f ));
+			modelMat = Translation(Vec3( tx, 0.0, 0.0f ) - worldOffset);
 			SetModel( modelMat );
 			smallertile->DrawTriangles();
 		}
 		modelMat = Translation( Vec3( gDudePos.x * FARM_TILE_WIDTH - SHOP_OFFSET, 0.0f, gDudePos.y * FARM_TILE_WIDTH ) );
 	}
+
+	modelMat = Translation(gZeroVec3);
 
 	SetTexture( "guy", 0 );
 	Vec2 aim( -gDudeFacing.y, gDudeFacing.x );

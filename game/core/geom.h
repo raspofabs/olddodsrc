@@ -239,10 +239,13 @@ inline Vec2 operator *( const Mat22 &lhs, const Vec2 &rhs )
 extern Vec3 gXVec3;
 extern Vec3 gYVec3;
 extern Vec3 gZVec3;
+extern Vec3 gZeroVec3;
 extern Vec4 gXVec4;
 extern Vec4 gYVec4;
 extern Vec4 gZVec4;
 extern Vec4 gWVec4;
+extern Vec4 gZeroVec4;
+extern Vec4 gOriginVec4;
 extern Mat44 gIdentityMat;
 
 inline float clamp( float val, float low, float high ) {
