@@ -14,7 +14,7 @@ class World {
 	public:
 		World( size_t width, size_t height );
 
-		void Render();
+		void Render( const Vec3 &offset );
 		void Update( float delta );
 
 		Tile *GetTile( int x, int y );

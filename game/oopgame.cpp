@@ -252,7 +252,7 @@ class Dude {
 
 		Vec3 GetWorldPos() { return gpWorld->GetWorldPos( m_Pos ); }
 		void Render() {
-			Mat44 modelMat = Translation( GetWorldPos() );
+			Mat44 modelMat = gIdentityMat;//Translation( GetWorldPos() );
 			Vec2 aim( -m_Facing.y, m_Facing.x );
 			modelMat.x.x = aim.x;
 			modelMat.x.z = aim.y;
@@ -405,7 +405,8 @@ void DrawWorld() {
 	Mat44 look = Mat44LookAt( from, to, gYVec4 );
 	SetCamera(look);
 
-	gpWorld->Render();
+Vec3 offset = -gpDude->GetWorldPos();
+	gpWorld->Render( offset );
 
 	SetTexture( "guy", 0 );
 	gpDude->Render();

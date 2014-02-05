@@ -14,13 +14,13 @@ void World::Update( float delta ) {
 		t.Update(delta);
 	}
 }
-void World::Render() {
+void World::Render( const Vec3 &offset ) {
 	int tile = 0;
 	for( int y = 0; y < mc_Height; ++y ) {
 		for( int x = 0; x < mc_Width; ++x ) {
 			float tx = x * FARM_TILE_WIDTH - XOff();
 			float tz = y * FARM_TILE_WIDTH - YOff();
-			Mat44 modelMat = Translation(Vec3( tx, 0.0, tz ));
+			Mat44 modelMat = Translation(Vec3( tx, 0.0, tz ) + offset );
 			m_Tiles[tile].Render( modelMat );
 			tile += 1;
 		}
@@ -31,7 +31,7 @@ void World::Render() {
 		Tile *tile = i->second;
 		float tx = x * FARM_TILE_WIDTH - XOff();
 		float tz = y * FARM_TILE_WIDTH - YOff();
-		Mat44 modelMat = Translation(Vec3( tx, 0.0, tz ));
+		Mat44 modelMat = Translation(Vec3( tx, 0.0, tz ) + offset );
 		tile->Render( modelMat );
 	}
 }
