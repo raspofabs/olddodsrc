@@ -1,0 +1,69 @@
+Open issues with OOP vs DOD
+
+1. The world is continuous.
+world is currently level based
+
+2. There is a farm that you start in, need to be able to specify how big.
+Not reading farm config from anywhere
+
+3. There is a path to the woods guarded by bears
+Currently, the path and the woods are the same thing. Need to make the woods
+and path separate.
+
+4. The woods is a random encounter area. BOTH
+Have to add random encounter code... wait, that means we have fighting in the woods... that means fighting?!
+
+5. There is a path to the shop
+Add a path to get to the shop from the farm. This should probably be configurable length too.
+
+6. There is a locked path to the cliffs
+There is a new world bit. The cliffs. Need a path to that too.
+
+7. where rare herbs can be picked.
+I guess we need to add some things to be picked, make it like farm, you can't sew, the tiles are already fully grown.
+
+8. There are no gaps in the world tiles.
+Make the floor tiles unit sized. Might need to fix the art to show the grid better.
+
+9. The edge needs filling in too.
+So, where we currently don't render a tile, render a tile that represents *stuff*
+
+10. The ploughed earth can have seeds/cuttings planted in it.
+have to add the cutting sewing. Should probably start it off half grown.
+
+11. number and type of seeds/cuttings must be shown on screen. Use an icon.
+Add an icon in the hud.
+
+12. you can harvest fully grown plants, or fully grown and fruiting plants.
+Need to have a way of harvesting that doesn't pull up the plant, just change it's state to not having fruit.
+
+13. harvest chests to get gold. > They don't go away, but take time to fruit again...
+Add fruiting as a thing that plants can do (and render)
+
+14. harvest locked doors to get keys. >  They also don't go away. Never fruit again?
+Need an attribute of the plantable things whether they are harvested, or have fruit.
+
+15. harvesting owls has a 100% change of unploughing the field. > Unless the player has bought the improved spade (then specified amount).
+Add to config
+
+16. The plants grow over time (specified).
+Add to config
+
+17. If they do, they only give fruit after they are fully grown. > Initially half the normal fruit griwing time.
+Some fruit growing logic required here.
+
+18. the plants should always blow gently in the wind. Unless they are trees.
+Unless they are trees... so, animate things that don't fruit.
+
+19. Owls, Money, Doors, Broadleaf, Raspberry, Peach tree, Arrowroot, make it so we can add new ones from script.
+Start making plants generic rather than via enum. Need to be able to change all these things via script.
+
+20. If you get to the chest at the end of the path to the woods, you get some gold.
+Gonna need to make the chest passable.
+
+21. Which is cool. You should show this on screen. Animate the coins going into your gold counter.
+Animated coins. Probably best to animate them from world space to screen space via some configurable stuff.
+
+22. We need to be able to add new stuff to the shop.
+Shop needs to be lua drive too.
+
