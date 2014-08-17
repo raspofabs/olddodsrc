@@ -3,6 +3,8 @@
 #include <stdio.h>
 
 #include "util.h"
+#include "gbuffer.h"
+#include "win32\glhack.h"
 
 static void error_callback(int error, const char* description)
 {
@@ -28,6 +30,8 @@ int main(void)
     }
     glfwMakeContextCurrent(window);
     glfwSetKeyCallback(window, key_callback);
+		GBuffer *gb = 0;
+
 		double lastTime = 0.0;
 		double frameTime = 0.1;
     while (!glfwWindowShouldClose(window))
@@ -43,6 +47,15 @@ int main(void)
         float ratio;
         int width, height;
         glfwGetFramebufferSize(window, &width, &height);
+				if( !gb ) {
+					gb = new GBuffer();
+					gb->Init(width,height);
+				}
+				gb->BindForWriting();
+				gb->BindForReading();
+
+				glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
         ratio = width / (float) height;
         glViewport(0, 0, width, height);
         glClear(GL_COLOR_BUFFER_BIT);

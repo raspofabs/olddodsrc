@@ -7,7 +7,12 @@ set(${PROJNAME}_MINOR_VERSION 1)
 #add_subdirectory(glfw)
 include_directories(glfw/include)
 include_directories(src)
-set(SOURCES src/test.cpp src/anim.cpp)
+
+set(SOURCES src/test.cpp src/anim.cpp src/gbuffer.cpp src/gbuffer.h)
+IF("${CMAKE_SYSTEM}" MATCHES "Windows")
+set(SOURCES ${SOURCES} src/win32/glhack.cpp src/win32/glhack.h)
+ENDIF()
+
 add_executable(${PROJNAME} ${SOURCES})
 IF("${CMAKE_SYSTEM}" MATCHES "Windows")
 	target_link_libraries(${PROJNAME} ../glfw/build/src/${CMAKE_CFG_INTDIR}/glfw3 ${GLFW_STATIC_LIBRARIES})
