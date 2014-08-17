@@ -93,6 +93,5 @@ void glFramebufferTexture2D (GLenum target, GLenum attachment, GLenum textarget,
 void glDrawBuffers (GLsizei n, const GLenum *bufs);
 GLenum glCheckFramebufferStatus (GLenum target);
 
-
 #endif // _WIN32
 #endif // _glhack_h_

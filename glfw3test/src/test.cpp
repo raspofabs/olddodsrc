@@ -1,10 +1,11 @@
+#define GL_GLEXT_PROTOTYPES
 #include <GLFW/glfw3.h>
 #include <stdlib.h>
 #include <stdio.h>
 
 #include "util.h"
 #include "gbuffer.h"
-#include "win32\glhack.h"
+#include "win32/glhack.h"
 
 static void error_callback(int error, const char* description)
 {

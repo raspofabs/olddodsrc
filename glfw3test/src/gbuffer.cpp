@@ -1,6 +1,6 @@
 #include "gbuffer.h"
 #include <stdio.h>
-#include "win32\glhack.h"
+#include "win32/glhack.h"
 
 #define ARRAY_SIZE_IN_ELEMENTS(X) (sizeof(X)/sizeof(X[0]))
 GBuffer::GBuffer() {

@@ -1,4 +1,5 @@
-#include <GLFW\glfw3.h>
+#define GL_GLEXT_PROTOTYPES
+#include <GLFW/glfw3.h>
 
 class GBuffer {
 public:
